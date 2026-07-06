@@ -1,0 +1,9 @@
+root = true
+
+# Team-Konvention: 2 Leerzeichen einruecken, keine Tabs.
+# Siehe .agents/global-conventions.md. VS Code braucht die Extension
+# "EditorConfig.EditorConfig"; unabhaengig davon erzwingt .vscode/settings.json
+# (insertSpaces/detectIndentation) dasselbe Verhalten.
+[*]
+indent_style = space
+indent_size = 2
