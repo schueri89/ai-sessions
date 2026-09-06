@@ -1,0 +1,5 @@
+{
+  // Ohne diese Extension greift die .editorconfig nicht — dann fehlen die
+  // 2-Leerzeichen-Einrückung und die Zeilenenden dieses Repos.
+  "recommendations": ["editorconfig.editorconfig"]
+}

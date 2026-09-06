@@ -1,9 +1,8 @@
 root = true
 
 # Team-Konvention: 2 Leerzeichen einrücken, keine Tabs.
-# Siehe ../.agents/global-core.md. VS Code braucht die Extension
-# "EditorConfig.EditorConfig"; unabhängig davon erzwingt .vscode/settings.json
-# (insertSpaces/detectIndentation) dasselbe Verhalten.
+# Siehe ../.agents/global-core.md. VS Code braucht dafür einmalig die
+# Extension "EditorConfig.EditorConfig".
 [*]
 indent_style = space
 indent_size = 2

@@ -1,0 +1,4 @@
+# Die Extension-Empfehlung gehört ins Repo — an ihr hängt die .editorconfig.
+# Alles andere unter .vscode/ ist persönliche Einstellung und bleibt draußen.
+.vscode/*
+!.vscode/extensions.json
