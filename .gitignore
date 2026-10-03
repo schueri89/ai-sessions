@@ -2,3 +2,7 @@
 # Alles andere unter .vscode/ ist persönliche Einstellung und bleibt draußen.
 .vscode/*
 !.vscode/extensions.json
+
+# Build-Ausgaben der VS-Code-Extensions (session-dashboard u. a.).
+node_modules/
+*.vsix

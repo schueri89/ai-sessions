@@ -1,0 +1,122 @@
+{
+  "name": "session-dashboard",
+  "displayName": "Claude Session Dashboard",
+  "description": "Zeigt alle laufenden Claude-Code-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
+  "version": "0.1.0",
+  "publisher": "schueri",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sessionDashboard",
+          "title": "Claude Sessions",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "sessionDashboard": [
+        {
+          "id": "sessionDashboard.sessions",
+          "name": "Sessions"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "sessionDashboard.open",
+        "title": "Chat öffnen",
+        "category": "Session Dashboard",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "sessionDashboard.markDone",
+        "title": "Als erledigt markieren",
+        "category": "Session Dashboard",
+        "icon": "$(check)"
+      },
+      {
+        "command": "sessionDashboard.unmarkDone",
+        "title": "Wieder aktiv",
+        "category": "Session Dashboard",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "sessionDashboard.showBoard",
+        "title": "Übersicht öffnen",
+        "category": "Session Dashboard",
+        "icon": "$(layout)"
+      },
+      {
+        "command": "sessionDashboard.refresh",
+        "title": "Aktualisieren",
+        "category": "Session Dashboard",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "sessionDashboard.showBoard",
+          "when": "view == sessionDashboard.sessions",
+          "group": "navigation@1"
+        },
+        {
+          "command": "sessionDashboard.refresh",
+          "when": "view == sessionDashboard.sessions",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "sessionDashboard.markDone",
+          "when": "view == sessionDashboard.sessions && viewItem == session",
+          "group": "inline"
+        },
+        {
+          "command": "sessionDashboard.unmarkDone",
+          "when": "view == sessionDashboard.sessions && viewItem == session-done",
+          "group": "inline"
+        },
+        {
+          "command": "sessionDashboard.open",
+          "when": "view == sessionDashboard.sessions && viewItem =~ /^session/",
+          "group": "1_open"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "sessionDashboard.open",
+          "when": "false"
+        },
+        {
+          "command": "sessionDashboard.markDone",
+          "when": "false"
+        },
+        {
+          "command": "sessionDashboard.unmarkDone",
+          "when": "false"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/transcripts.js && node --check lib/doneStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
+    "package": "vsce package --skip-license --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.6.0"
+  }
+}
