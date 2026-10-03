@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -46,6 +46,24 @@
         "title": "Chat öffnen",
         "category": "Session Dashboard",
         "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "sessionDashboard.bookmark",
+        "title": "Session merken",
+        "category": "Session Dashboard",
+        "icon": "$(pin)"
+      },
+      {
+        "command": "sessionDashboard.unbookmark",
+        "title": "Nicht mehr merken",
+        "category": "Session Dashboard",
+        "icon": "$(pinned)"
+      },
+      {
+        "command": "sessionDashboard.unbookmarkAll",
+        "title": "Alle gemerkten freigeben",
+        "category": "Session Dashboard",
+        "icon": "$(check-all)"
       },
       {
         "command": "sessionDashboard.markDone",
@@ -92,13 +110,28 @@
       ],
       "view/item/context": [
         {
+          "command": "sessionDashboard.bookmark",
+          "when": "view == sessionDashboard.sessions && (viewItem == session || viewItem == session-done)",
+          "group": "inline@1"
+        },
+        {
+          "command": "sessionDashboard.unbookmark",
+          "when": "view == sessionDashboard.sessions && (viewItem == session-bookmarked || viewItem == session-done-bookmarked)",
+          "group": "inline@1"
+        },
+        {
           "command": "sessionDashboard.markDone",
-          "when": "view == sessionDashboard.sessions && viewItem == session",
-          "group": "inline"
+          "when": "view == sessionDashboard.sessions && (viewItem == session || viewItem == session-bookmarked)",
+          "group": "inline@2"
         },
         {
           "command": "sessionDashboard.unmarkDone",
-          "when": "view == sessionDashboard.sessions && viewItem == session-done",
+          "when": "view == sessionDashboard.sessions && (viewItem == session-done || viewItem == session-done-bookmarked)",
+          "group": "inline@2"
+        },
+        {
+          "command": "sessionDashboard.unbookmarkAll",
+          "when": "view == sessionDashboard.sessions && viewItem == group-bookmarked",
           "group": "inline"
         },
         {
@@ -113,6 +146,18 @@
           "when": "false"
         },
         {
+          "command": "sessionDashboard.bookmark",
+          "when": "false"
+        },
+        {
+          "command": "sessionDashboard.unbookmark",
+          "when": "false"
+        },
+        {
+          "command": "sessionDashboard.unbookmarkAll",
+          "when": "false"
+        },
+        {
           "command": "sessionDashboard.markDone",
           "when": "false"
         },
@@ -124,7 +169,7 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/doneStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
+    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
     "package": "vsce package --skip-license --allow-missing-repository"
   },
   "devDependencies": {

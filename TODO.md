@@ -3,9 +3,9 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] Sessions markieren können (um sie ggf später nochmal anzuschauen).. wenn sie fertig sind, sollen sie in eine Extra Spalte wandern
 - [ ] aktuell gibt es 2 Sessions mit "You've hit your session limit" -> lässt sich das erkennen, sodass diese Sessions dann nicht als fertig markiert werden?
 
 ## Erledigt
+- [x] Sessions pinnen/merken ("Gemerkt"-Spalte und 📌-Icon in Sidebar & Dashboard) (Plan: `.agents/plans/2026-10-03_session-dashboard-gemerkt-spalte.md`)
 - [x] Provider-Filter (Claude Code / Antigravity / Alle) in Sidebar und Dashboard (Plan: `.agents/plans/2026-10-03_session-dashboard-provider-filter.md`)
 - [x] Antigravity-Sessions im Session-Dashboard unterstützen (Plan: `.agents/plans/2026-10-03_session-dashboard-antigravity.md`)

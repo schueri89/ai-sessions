@@ -7,6 +7,7 @@ function tooltipFor(s) {
   const md = new vscode.MarkdownString(undefined, true);
   const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
   md.appendMarkdown(`**[${providerLabel}] ${escapeMd(s.title)}**\n\n`);
+  if (s.isBookmarked) md.appendMarkdown(`$(pinned) **Gemerkt** · `);
   md.appendMarkdown(`$(${STATES[s.displayState].icon}) ${STATES[s.displayState].label}`);
   const detail = describe(s);
   if (detail) md.appendMarkdown(` · ${escapeMd(detail)}`);
@@ -70,7 +71,8 @@ class SessionTreeProvider {
   }
 
   sessionItem(s) {
-    const item = new vscode.TreeItem(s.title, vscode.TreeItemCollapsibleState.None);
+    const title = s.isBookmarked && s.displayState !== 'bookmarked' ? `📌 ${s.title}` : s.title;
+    const item = new vscode.TreeItem(title, vscode.TreeItemCollapsibleState.None);
     item.id = `session:${s.sessionId}`;
     const providerPrefix = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
     const detail = describe(s);
@@ -78,7 +80,11 @@ class SessionTreeProvider {
     item.tooltip = tooltipFor(s);
     const state = STATES[s.displayState];
     item.iconPath = new vscode.ThemeIcon(state.icon, new vscode.ThemeColor(state.color));
-    item.contextValue = s.displayState === 'done' ? 'session-done' : 'session';
+    
+    let ctx = s.displayState === 'done' ? 'session-done' : 'session';
+    if (s.isBookmarked) ctx += '-bookmarked';
+    item.contextValue = ctx;
+
     item.command = {
       command: 'sessionDashboard.open',
       title: 'Chat öffnen',

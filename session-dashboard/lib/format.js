@@ -5,12 +5,13 @@
 const STATES = {
   waiting: { label: 'Wartet auf dich', icon: 'bell-dot', color: 'charts.orange' },
   busy: { label: 'Arbeitet', icon: 'loading~spin', color: 'charts.blue' },
+  bookmarked: { label: 'Gemerkt', icon: 'pinned', color: 'charts.yellow' },
   idle: { label: 'Fertig', icon: 'pass', color: 'charts.green' },
   closed: { label: 'Geschlossen, nicht erledigt', icon: 'circle-large-outline', color: 'descriptionForeground' },
   done: { label: 'Erledigt', icon: 'check-all', color: 'disabledForeground' }
 };
 
-const STATE_ORDER = ['waiting', 'busy', 'idle', 'closed', 'done'];
+const STATE_ORDER = ['waiting', 'busy', 'bookmarked', 'idle', 'closed', 'done'];
 
 // Known values of the registry field "waitingFor"; unknown ones are shown verbatim.
 const WAITING_REASONS = {

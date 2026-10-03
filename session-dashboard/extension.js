@@ -4,6 +4,7 @@ const vscode = require('vscode');
 const fs = require('fs');
 const { readSessions, watchTargets } = require('./lib/registry');
 const { DoneStore } = require('./lib/doneStore');
+const { BookmarkStore } = require('./lib/bookmarkStore');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { describe } = require('./lib/format');
@@ -22,6 +23,7 @@ class SessionModel {
     this.context = context;
     this.extensionUri = context.extensionUri;
     this.done = new DoneStore(context.globalState);
+    this.bookmarks = new BookmarkStore(context.globalState);
     this.providerFilter = context.globalState.get('sessionDashboard.providerFilter', 'all');
     this.sessions = [];
     this.signature = '';
@@ -54,15 +56,27 @@ class SessionModel {
     const live = await readSessions();
     const knownIds = new Set(live.map((s) => s.sessionId));
     await this.done.reconcile(live, knownIds);
+    await this.bookmarks.reconcile(live, knownIds);
     this.sessions = live
-      .map((s) => ({
-        ...s,
-        displayState: this.done.isDone(s.sessionId) ? 'done' : s.state
-      }))
+      .map((s) => {
+        const isDone = this.done.isDone(s.sessionId);
+        const isBookmarked = this.bookmarks.isBookmarked(s.sessionId);
+        let displayState = s.state;
+        if (isDone) {
+          displayState = 'done';
+        } else if (isBookmarked && (s.state === 'idle' || s.state === 'closed')) {
+          displayState = 'bookmarked';
+        }
+        return {
+          ...s,
+          isBookmarked,
+          displayState
+        };
+      })
       .sort(compareSessions);
     const signature = JSON.stringify([
       this.providerFilter,
-      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.title, describe(s), s.lastPrompt])
+      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.isBookmarked, s.title, describe(s), s.lastPrompt])
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;
@@ -222,6 +236,7 @@ function activate(context) {
       const id = sessionIdOf(arg);
       if (!id) return;
       await model.done.mark(id);
+      await model.bookmarks.unmark(id);
       await update(true);
     }),
     vscode.commands.registerCommand('sessionDashboard.unmarkDone', async (arg) => {
@@ -229,6 +244,31 @@ function activate(context) {
       if (!id) return;
       await model.done.unmark(id);
       await update(true);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.bookmark', async (arg) => {
+      const id = sessionIdOf(arg);
+      if (!id) return;
+      await model.bookmarks.mark(id);
+      await update(true);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.unbookmark', async (arg) => {
+      const id = sessionIdOf(arg);
+      if (!id) return;
+      await model.bookmarks.unmark(id);
+      await update(true);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.toggleBookmark', async (arg) => {
+      const id = sessionIdOf(arg);
+      if (!id) return;
+      await model.bookmarks.toggle(id);
+      await update(true);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.unbookmarkAll', async () => {
+      const bookmarkedIds = model.sessions.filter((s) => s.isBookmarked).map((s) => s.sessionId);
+      if (bookmarkedIds.length > 0) {
+        await model.bookmarks.unmarkMany(bookmarkedIds);
+        await update(true);
+      }
     }),
     vscode.commands.registerCommand('sessionDashboard.markAllClosedDone', async () => {
       const closedIds = model.sessions.filter((s) => s.displayState === 'closed').map((s) => s.sessionId);

@@ -6,14 +6,15 @@ auf einen Blick zeigt:
 | Gruppe | Bedeutung |
 |---|---|
 | **Wartet auf dich** | Rückfrage, Freigabe oder Dialog offen. Zähler als Badge am Icon. Längste Wartezeit oben. |
-| **Arbeitet** | KI ist mitten in einem Turn. |
+| **Arbeitet** | KI ist mitten in einem Turn. (Wird eine arbeitende Session gemerkt, bleibt sie hier mit 📌-Icon bis zum Abschluss.) |
+| **Gemerkt** | Pinnen zum späteren Anschauen. Fertige/inaktive Sessions landen automatisch hier statt in „Fertig“. |
 | **Fertig** | Turn beendet, die Session wartet auf die nächste Nachricht. |
 | **Erledigt** | Von Hand weggelegt. Wird die Session wieder aktiv, fällt die Markierung von selbst weg. |
 
 - **Seitenleiste:** Icon „AI Sessions" in der Aktivitätsleiste. Klick auf eine Session öffnet
-  ihren Chat (in Claude Code oder Antigravity), das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.
+  ihren Chat (in Claude Code oder Antigravity), das Pinnadel-Icon merkt bzw. entmerkt die Session, das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.
 - **Provider-Filter:** Schnelle Filterung nach *Alle*, *Claude Code* oder *Antigravity* über das Filter-Icon in der Sidebar (`Filter nach Provider...`) sowie über die Toolbar-Buttons im Board.
-- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Icons und Filterleiste.
+- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Icons, Filterleiste und Pin-Schaltflächen auf den Karten sowie Massenfreigabe („Alle geprüft“).
 
 Steuern lässt sich über die Extension nichts — das geschieht weiter im jeweiligen Chat.
 
