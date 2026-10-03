@@ -13,10 +13,10 @@ function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 }
 
-const INTERESTING = ['"custom-title"', '"ai-title"', '"agent-name"', '"last-prompt"', '"rate_limit"', '"quotaLimits"', '"type":"assistant"'];
+const INTERESTING = ['"custom-title"', '"ai-title"', '"agent-name"', '"last-prompt"', '"rate_limit"', '"quotaLimits"', '"type":"assistant"', '"timestamp"'];
 const NEWLINE = 0x0a;
 
-const cache = new Map(); // sessionId -> { file, offset, rest, customTitle, aiTitle, agentName, lastPrompt, rateLimit }
+const cache = new Map(); // sessionId -> { file, offset, rest, customTitle, aiTitle, agentName, lastPrompt, rateLimit, startedAt, lastActivity }
 
 function findTranscript(sessionId) {
   const root = path.join(claudeDir(), 'projects');
@@ -34,14 +34,14 @@ function findTranscript(sessionId) {
 }
 
 function emptyInfo() {
-  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null };
+  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0 };
 }
 
 function titleOf(info) {
   return info.customTitle || info.aiTitle || info.agentName;
 }
 
-// Picks title, last prompt and rate-limit info out of one transcript line; later lines win.
+// Picks title, last prompt, rate-limit info and timestamps out of transcript lines; later lines win for last-*.
 function applyLine(info, line) {
   if (!INTERESTING.some((marker) => line.includes(marker))) return;
   let rec;
@@ -49,6 +49,15 @@ function applyLine(info, line) {
     rec = JSON.parse(line);
   } catch {
     return;
+  }
+  if (rec.timestamp) {
+    const ts = Date.parse(rec.timestamp);
+    if (!Number.isNaN(ts)) {
+      if (!info.startedAt) info.startedAt = ts;
+      if (rec.type === 'user' || rec.type === 'assistant' || rec.type === 'last-prompt') {
+        info.lastActivity = ts;
+      }
+    }
   }
   switch (rec.type) {
     case 'custom-title':
@@ -112,17 +121,23 @@ function readAppended(info) {
   }
 }
 
-// Returns { title, lastPrompt, rateLimit }; empty strings if the transcript does not exist (yet).
+// Returns { title, lastPrompt, rateLimit, startedAt, lastActivity }; empty strings/0 if the transcript does not exist (yet).
 function readTranscriptInfo(sessionId) {
   let info = cache.get(sessionId);
   if (!info) {
     const file = findTranscript(sessionId);
-    if (!file) return { title: '', lastPrompt: '', rateLimit: null };
+    if (!file) return { title: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0 };
     info = { file, offset: 0, rest: Buffer.alloc(0), ...emptyInfo() };
     cache.set(sessionId, info);
   }
   readAppended(info);
-  return { title: titleOf(info), lastPrompt: info.lastPrompt, rateLimit: info.rateLimit || null };
+  return {
+    title: titleOf(info),
+    lastPrompt: info.lastPrompt,
+    rateLimit: info.rateLimit || null,
+    startedAt: info.startedAt || 0,
+    lastActivity: info.lastActivity || info.startedAt || 0
+  };
 }
 
 // Drops cache entries of sessions that are no longer running.

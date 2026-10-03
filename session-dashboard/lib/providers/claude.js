@@ -86,8 +86,10 @@ function readLiveSessions() {
       rawStatus: s.rawStatus,
       waitingFor: s.waitingFor,
       state: s.state,
-      startedAt: s.startedAt,
-      statusUpdatedAt: s.statusUpdatedAt,
+      startedAt: info.startedAt || s.startedAt,
+      statusUpdatedAt: s.state === 'busy' || s.state === 'waiting'
+        ? s.statusUpdatedAt
+        : (info.lastActivity || s.statusUpdatedAt),
       title: info.title || s.registryName || s.sessionId.slice(0, 8),
       lastPrompt: info.lastPrompt,
       rateLimit: info.rateLimit || null
@@ -117,7 +119,7 @@ async function readSessions() {
       rawStatus: 'closed',
       waitingFor: '',
       state: 'closed',
-      startedAt: 0,
+      startedAt: h.startedAt || 0,
       statusUpdatedAt: h.lastActivity,
       title: h.title,
       lastPrompt: h.lastPrompt,
