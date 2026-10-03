@@ -7,6 +7,7 @@ const { DoneStore } = require('./lib/doneStore');
 const { BookmarkStore } = require('./lib/bookmarkStore');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
+const { StatusBarWidget } = require('./lib/statusBar');
 const { STATES, describe } = require('./lib/format');
 
 const POLL_MS = 5000;
@@ -154,8 +155,10 @@ function activate(context) {
   const model = new SessionModel(context);
   const tree = new SessionTreeProvider(model);
   const board = new BoardPanel(model);
+  const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
-  context.subscriptions.push(view);
+  context.subscriptions.push(view, statusBar);
+  statusBar.show();
 
   let running = false;
   let pending = false;
@@ -172,6 +175,7 @@ function activate(context) {
       if (changed || force === true) {
         tree.refresh();
         board.update();
+        statusBar.update();
         const visible = model.visibleSessions();
         const waiting = visible.filter((s) => s.displayState === 'waiting').length;
         view.badge = waiting > 0
@@ -349,6 +353,97 @@ function activate(context) {
 
       if (picked && picked.session) {
         await openSession(picked.session);
+      }
+    }),
+    vscode.commands.registerCommand('sessionDashboard.statusBarClick', async () => {
+      const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
+      if (action === 'quickpick') {
+        return vscode.commands.executeCommand('sessionDashboard.quickMenu');
+      }
+      if (action === 'firstWaiting') {
+        const visible = model.visibleSessions();
+        const waiting = visible.find((s) => s.displayState === 'waiting');
+        if (waiting) {
+          return openSession(waiting);
+        }
+      }
+      return vscode.commands.executeCommand('sessionDashboard.showBoard');
+    }),
+    vscode.commands.registerCommand('sessionDashboard.quickMenu', async () => {
+      const visible = model.visibleSessions();
+      const waitingSessions = visible.filter((s) => s.displayState === 'waiting');
+      const busySessions = visible.filter((s) => s.displayState === 'busy');
+
+      const items = [
+        {
+          label: '$(layout) AI Sessions Übersicht öffnen',
+          description: `${model.sessions.length} Sessions`,
+          action: 'board'
+        }
+      ];
+
+      if (waitingSessions.length > 0) {
+        items.push({ label: 'Wartet auf dich', kind: vscode.QuickPickItemKind.Separator });
+        for (const s of waitingSessions) {
+          const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+          const proj = s.project ? `[${s.project}] ` : '';
+          items.push({
+            label: `$(bell-dot) ${proj}${s.title}`,
+            description: providerLabel,
+            detail: s.lastPrompt || s.waitingFor || 'Wartet auf deine Eingabe',
+            session: s,
+            action: 'session'
+          });
+        }
+      }
+
+      if (busySessions.length > 0) {
+        items.push({ label: 'Arbeitet', kind: vscode.QuickPickItemKind.Separator });
+        for (const s of busySessions) {
+          const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+          const proj = s.project ? `[${s.project}] ` : '';
+          items.push({
+            label: `$(loading~spin) ${proj}${s.title}`,
+            description: s.activity || providerLabel,
+            detail: s.lastPrompt || 'Wird ausgeführt...',
+            session: s,
+            action: 'session'
+          });
+        }
+      }
+
+      items.push({ label: 'Aktionen', kind: vscode.QuickPickItemKind.Separator });
+      items.push({
+        label: '$(search) Session suchen...',
+        action: 'search'
+      });
+      items.push({
+        label: '$(folder) Nach Projekt filtern...',
+        description: model.projectFilter !== 'all' ? `Aktiv: ${model.projectFilter}` : 'Alle',
+        action: 'filterProject'
+      });
+      items.push({
+        label: '$(filter) Nach Provider filtern...',
+        description: model.providerFilter !== 'all' ? `Aktiv: ${model.providerFilter}` : 'Alle',
+        action: 'filter'
+      });
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Direktzugriff: Session öffnen oder Aktion wählen...'
+      });
+
+      if (picked) {
+        if (picked.action === 'session' && picked.session) {
+          await openSession(picked.session);
+        } else if (picked.action === 'board') {
+          await vscode.commands.executeCommand('sessionDashboard.showBoard');
+        } else if (picked.action === 'search') {
+          await vscode.commands.executeCommand('sessionDashboard.search');
+        } else if (picked.action === 'filterProject') {
+          await vscode.commands.executeCommand('sessionDashboard.filterProject');
+        } else if (picked.action === 'filter') {
+          await vscode.commands.executeCommand('sessionDashboard.filter');
+        }
       }
     }),
     vscode.commands.registerCommand('sessionDashboard.refresh', () => update(true))

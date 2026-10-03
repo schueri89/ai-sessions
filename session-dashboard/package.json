@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -94,6 +94,17 @@
         "title": "Session suchen...",
         "category": "Session Dashboard",
         "icon": "$(search)"
+      },
+      {
+        "command": "sessionDashboard.quickMenu",
+        "title": "Schnellmenü öffnen (Direktzugriff)",
+        "category": "Session Dashboard",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "sessionDashboard.statusBarClick",
+        "title": "Statusleiste: Aktion ausführen",
+        "category": "Session Dashboard"
       },
       {
         "command": "sessionDashboard.refresh",
@@ -188,10 +199,30 @@
           "when": "false"
         }
       ]
+    },
+    "configuration": {
+      "title": "Session Dashboard",
+      "properties": {
+        "sessionDashboard.statusBarClickAction": {
+          "type": "string",
+          "enum": [
+            "board",
+            "quickpick",
+            "firstWaiting"
+          ],
+          "enumDescriptions": [
+            "Öffnet die Dashboard-Übersicht (Standard)",
+            "Öffnet das Schnellmenü mit direktem Zugriff",
+            "Öffnet direkt die erste wartende Session"
+          ],
+          "default": "board",
+          "description": "Aktion beim Klick auf das Statusleisten-Widget."
+        }
+      }
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/project.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
+    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/project.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
     "package": "vsce package --skip-license --allow-missing-repository"
   },
   "devDependencies": {
