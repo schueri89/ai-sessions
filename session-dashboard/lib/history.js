@@ -7,9 +7,13 @@
 // Results are cached per file and reused while size and mtime are unchanged.
 
 const fsp = require('fs/promises');
+const os = require('os');
 const path = require('path');
-const { claudeDir } = require('./registry');
 const { emptyInfo, titleOf, applyLine } = require('./transcripts');
+
+function claudeDir() {
+  return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+}
 
 const SESSION_FILE = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$/i;
 const HEAD_BYTES = 64 * 1024;

@@ -5,7 +5,8 @@ const { STATES, STATE_ORDER, describe, formatDateTime } = require('./format');
 
 function tooltipFor(s) {
   const md = new vscode.MarkdownString(undefined, true);
-  md.appendMarkdown(`**${escapeMd(s.title)}**\n\n`);
+  const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+  md.appendMarkdown(`**[${providerLabel}] ${escapeMd(s.title)}**\n\n`);
   md.appendMarkdown(`$(${STATES[s.displayState].icon}) ${STATES[s.displayState].label}`);
   const detail = describe(s);
   if (detail) md.appendMarkdown(` · ${escapeMd(detail)}`);
@@ -71,12 +72,18 @@ class SessionTreeProvider {
   sessionItem(s) {
     const item = new vscode.TreeItem(s.title, vscode.TreeItemCollapsibleState.None);
     item.id = `session:${s.sessionId}`;
-    item.description = describe(s);
+    const providerPrefix = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+    const detail = describe(s);
+    item.description = detail ? `${providerPrefix} · ${detail}` : providerPrefix;
     item.tooltip = tooltipFor(s);
     const state = STATES[s.displayState];
     item.iconPath = new vscode.ThemeIcon(state.icon, new vscode.ThemeColor(state.color));
     item.contextValue = s.displayState === 'done' ? 'session-done' : 'session';
-    item.command = { command: 'sessionDashboard.open', title: 'Chat öffnen', arguments: [s.sessionId] };
+    item.command = {
+      command: 'sessionDashboard.open',
+      title: 'Chat öffnen',
+      arguments: [{ sessionId: s.sessionId, provider: s.provider }]
+    };
     return item;
   }
 }

@@ -58,7 +58,7 @@ function describe(session, now = Date.now()) {
   if (session.state === 'closed') return lastActive(session.statusUpdatedAt, now);
   const parts = [];
   if (session.state === 'waiting') parts.push(waitingReason(session.waitingFor));
-  if (session.rawStatus && !STATES[session.rawStatus]) {
+  if (session.rawStatus && !STATES[session.rawStatus] && !session.rawStatus.startsWith('CASCADE_RUN_STATUS')) {
     parts.push(`Status: ${session.rawStatus}`);
   }
   parts.push(relativeTime(session.statusUpdatedAt, now));

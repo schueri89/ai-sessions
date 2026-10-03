@@ -7,7 +7,11 @@
 
 const fs = require('fs');
 const path = require('path');
-const { claudeDir } = require('./registry');
+const os = require('os');
+
+function claudeDir() {
+  return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+}
 
 const INTERESTING = ['"custom-title"', '"ai-title"', '"agent-name"', '"last-prompt"'];
 const NEWLINE = 0x0a;

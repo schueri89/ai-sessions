@@ -1,36 +1,42 @@
-# Claude Session Dashboard
+# AI Session Dashboard (Claude Code & Antigravity)
 
-VS-Code-Extension, die alle laufenden Claude-Code-Sessions (Panel-Tabs der Claude-Code-Erweiterung)
+VS-Code-Extension, die alle laufenden Claude-Code- und Antigravity-Sessions
 auf einen Blick zeigt:
 
 | Gruppe | Bedeutung |
 |---|---|
 | **Wartet auf dich** | Rückfrage, Freigabe oder Dialog offen. Zähler als Badge am Icon. Längste Wartezeit oben. |
-| **Arbeitet** | Claude ist mitten in einem Turn. |
+| **Arbeitet** | KI ist mitten in einem Turn. |
 | **Fertig** | Turn beendet, die Session wartet auf die nächste Nachricht. |
 | **Erledigt** | Von Hand weggelegt. Wird die Session wieder aktiv, fällt die Markierung von selbst weg. |
 
-- **Seitenleiste:** Icon „Claude Sessions" in der Aktivitätsleiste. Klick auf eine Session öffnet
-  ihren Chat, das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.
-- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab.
+- **Seitenleiste:** Icon „AI Sessions" in der Aktivitätsleiste. Klick auf eine Session öffnet
+  ihren Chat (in Claude Code oder Antigravity), das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.
+- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Badges (`Claude` / `Antigravity`).
 
-Steuern lässt sich über die Extension nichts — das geschieht weiter im Chat.
+Steuern lässt sich über die Extension nichts — das geschieht weiter im jeweiligen Chat.
 
 ## Woher die Daten kommen
 
-Nur lesend, aus dem Konfigurationsordner von Claude Code (`~/.claude`, bzw. `CLAUDE_CONFIG_DIR`):
+Nur lesend, aus den lokalen Konfigurations- und Datenordnern:
 
+### Claude Code (`~/.claude`, bzw. `CLAUDE_CONFIG_DIR`):
 - `sessions/<pid>.json` — Register der laufenden Sessions mit `status` (`busy`, `waiting`, `idle`)
   und `waitingFor`. Beobachtet per Dateisystem-Watcher, dazu alle 5 Sekunden ein Abgleich.
 - `projects/<slug>/<sessionId>.jsonl` — Transkript; daraus Titel (`custom-title` vor `ai-title`)
   und letzter Prompt. Gelesen wird nur, was seit dem letzten Mal angehängt wurde.
+- Geöffnet wird der Chat über `claude-vscode.editor.open` bzw. URI-Handler `vscode://anthropic.claude-code/open?session=<id>`.
 
-Geöffnet wird ein Chat über den Befehl `claude-vscode.editor.open` der Claude-Erweiterung, als
-Ausweichweg über ihren URI-Handler `vscode://anthropic.claude-code/open?session=<id>`.
+### Google Antigravity (`~/.gemini/antigravity`, bzw. `ANTIGRAVITY_APP_DATA_DIR`):
+- `conversation_summaries.db` — SQLite-Datenbank der Unterhaltungen (gelesen über natives `node:sqlite`).
+  Ausgewertet werden `title`, `preview`, `status` (`CASCADE_RUN_STATUS_RUNNING` / `CASCADE_RUN_STATUS_IDLE`),
+  `not_fully_idle`, `last_modified_time` und `workspace_uris`.
+- `brain/<sessionId>/.system_generated/logs/transcript.jsonl` — Transkript-Tail für den letzten Prompt
+  und Erkennung offener Rückfragen (`ask_question`).
+- Geöffnet wird der Chat über den Befehl `antigravity.openConversation` der Antigravity-Erweiterung.
 
-Alle drei Schnittstellen sind **intern und undokumentiert** (Stand Claude Code 2.1.288). Bricht
-nach einem Update etwas, zuerst dort nachsehen. Hintergrund und Belege:
-`../.agents/plans/2026-10-03_session-dashboard.md`.
+Beide Schnittstellen nutzen interne, undokumentierte Wege. Hintergrund und Belege:
+`../.agents/plans/2026-10-03_session-dashboard.md` und `../.agents/plans/2026-10-03_session-dashboard-antigravity.md`.
 
 ## Bauen und installieren
 
@@ -49,5 +55,5 @@ paketieren und erneut installieren.
 
 - Mehrere VS-Code-Fenster: Die Liste zeigt die Sessions aller Fenster, ein Klick öffnet den Chat
   aber im aktuellen Fenster.
-- Eine Session ohne erste Nachricht hat noch kein Transkript und erscheint unter ihrem
-  Registernamen (z. B. `root-43`).
+- Antigravity-Sessions werden auf aktive sowie in den letzten 24 Stunden veränderte Sessions gefiltert,
+  um die Ansicht übersichtlich zu halten.

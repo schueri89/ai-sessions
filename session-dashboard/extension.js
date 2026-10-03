@@ -2,8 +2,7 @@
 
 const vscode = require('vscode');
 const fs = require('fs');
-const { readSessions, sessionsDir } = require('./lib/registry');
-const { readTranscriptInfo, prune } = require('./lib/transcripts');
+const { readSessions, watchTargets } = require('./lib/registry');
 const { DoneStore } = require('./lib/doneStore');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
@@ -26,41 +25,63 @@ class SessionModel {
     this.signature = '';
   }
 
-  // Re-reads registry and transcripts. Returns true if anything visible changed.
+  // Re-reads registry across all providers. Returns true if anything visible changed.
   async refresh() {
-    const live = readSessions();
-    await this.done.reconcile(live);
-    prune(new Set(live.map((s) => s.sessionId)));
+    const live = await readSessions();
+    const knownIds = new Set(live.map((s) => s.sessionId));
+    await this.done.reconcile(live, knownIds);
     this.sessions = live
-      .map((s) => {
-        const info = readTranscriptInfo(s.sessionId);
-        return {
-          ...s,
-          title: info.title || s.registryName || s.sessionId.slice(0, 8),
-          lastPrompt: info.lastPrompt,
-          displayState: this.done.isDone(s.sessionId) ? 'done' : s.state
-        };
-      })
+      .map((s) => ({
+        ...s,
+        displayState: this.done.isDone(s.sessionId) ? 'done' : s.state
+      }))
       .sort(compareSessions);
-    const signature = JSON.stringify(this.sessions.map((s) => [s.sessionId, s.displayState, s.title, describe(s), s.lastPrompt]));
+    const signature = JSON.stringify(this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.title, describe(s), s.lastPrompt]));
     const changed = signature !== this.signature;
     this.signature = signature;
     return changed;
   }
 }
 
-// Tree items pass their element, the board and the tree's click pass the id.
-function sessionIdOf(arg) {
-  if (typeof arg === 'string') return arg;
-  return arg && arg.session ? arg.session.sessionId : undefined;
+// Resolves sessionId and provider from various caller formats (string, tree item, card payload).
+function sessionInfoOf(arg, model) {
+  if (!arg) return null;
+  if (typeof arg === 'string') {
+    const found = model.sessions.find((s) => s.sessionId === arg);
+    return { sessionId: arg, provider: found ? found.provider : 'claude' };
+  }
+  if (arg.session) {
+    return { sessionId: arg.session.sessionId, provider: arg.session.provider };
+  }
+  if (arg.sessionId) {
+    return { sessionId: arg.sessionId, provider: arg.provider || 'claude' };
+  }
+  return null;
 }
 
-async function openSession(sessionId) {
+function sessionIdOf(arg) {
+  if (typeof arg === 'string') return arg;
+  if (arg && arg.sessionId) return arg.sessionId;
+  if (arg && arg.session) return arg.session.sessionId;
+  return undefined;
+}
+
+async function openSession(info) {
+  if (!info || !info.sessionId) return;
+  if (info.provider === 'antigravity') {
+    try {
+      await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId);
+    } catch (err) {
+      vscode.window.showErrorMessage(`Antigravity-Chat konnte nicht geöffnet werden: ${err.message || err}`);
+    }
+    return;
+  }
+  // Default: Claude Code
   try {
-    await vscode.commands.executeCommand('claude-vscode.editor.open', sessionId);
+    await vscode.commands.executeCommand('claude-vscode.editor.open', info.sessionId);
   } catch {
     // Command missing or renamed: fall back to the extension's URI handler.
-    const uri = vscode.Uri.parse(`${vscode.env.uriScheme}://anthropic.claude-code/open?session=${encodeURIComponent(sessionId)}`);
+    const uri = vscode.Uri.parse(`${vscode.env.uriScheme}://anthropic.claude-code/open?session=${encodeURIComponent(info.sessionId)}`);
     await vscode.env.openExternal(uri);
   }
 }
@@ -91,7 +112,7 @@ function activate(context) {
         view.badge = waiting > 0
           ? { value: waiting, tooltip: waiting === 1 ? '1 Session wartet auf dich' : `${waiting} Sessions warten auf dich` }
           : undefined;
-        view.message = model.sessions.length === 0 ? 'Keine laufende Claude-Code-Session gefunden.' : undefined;
+        view.message = model.sessions.length === 0 ? 'Keine laufenden KI-Sessions gefunden.' : undefined;
       }
     } catch (err) {
       console.error('[session-dashboard] refresh failed', err);
@@ -112,20 +133,25 @@ function activate(context) {
     debounce = setTimeout(update, DEBOUNCE_MS);
   }
 
-  try {
-    const watcher = fs.watch(sessionsDir(), scheduleUpdate);
-    context.subscriptions.push({ dispose: () => watcher.close() });
-  } catch {
-    // Directory missing (Claude Code never ran): polling alone picks it up later.
+  for (const target of watchTargets()) {
+    try {
+      if (fs.existsSync(target)) {
+        const watcher = fs.watch(target, scheduleUpdate);
+        context.subscriptions.push({ dispose: () => watcher.close() });
+      }
+    } catch {
+      // Directory/file missing: polling alone picks it up later.
+    }
   }
+
   const timer = setInterval(update, POLL_MS);
   context.subscriptions.push({ dispose: () => clearInterval(timer) });
   context.subscriptions.push({ dispose: () => clearTimeout(debounce) });
 
   context.subscriptions.push(
     vscode.commands.registerCommand('sessionDashboard.open', (arg) => {
-      const id = sessionIdOf(arg);
-      if (id) return openSession(id);
+      const info = sessionInfoOf(arg, model);
+      if (info) return openSession(info);
     }),
     vscode.commands.registerCommand('sessionDashboard.markDone', async (arg) => {
       const id = sessionIdOf(arg);
@@ -138,6 +164,13 @@ function activate(context) {
       if (!id) return;
       await model.done.unmark(id);
       await update(true);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.markAllClosedDone', async () => {
+      const closedIds = model.sessions.filter((s) => s.displayState === 'closed').map((s) => s.sessionId);
+      if (closedIds.length > 0) {
+        await model.done.markMany(closedIds);
+        await update(true);
+      }
     }),
     vscode.commands.registerCommand('sessionDashboard.showBoard', () => board.show()),
     vscode.commands.registerCommand('sessionDashboard.refresh', () => update(true))

@@ -19,7 +19,7 @@ class BoardPanel {
     }
     this.panel = vscode.window.createWebviewPanel(
       'sessionDashboard.board',
-      'Claude Sessions',
+      'AI Sessions',
       vscode.ViewColumn.Active,
       { enableScripts: true, retainContextWhenHidden: true }
     );
@@ -30,23 +30,23 @@ class BoardPanel {
         this.update();
         return;
       }
-      if (!msg || typeof msg.sessionId !== 'string') return;
-      const commands = {
-        open: 'sessionDashboard.open',
-        markDone: 'sessionDashboard.markDone',
-        unmarkDone: 'sessionDashboard.unmarkDone'
-      };
       if (msg && msg.action === 'markAllClosedDone') {
         vscode.commands.executeCommand('sessionDashboard.markAllClosedDone');
         return;
       }
       if (!msg || typeof msg.sessionId !== 'string') return;
-      const commands = {
-        open: 'sessionDashboard.open',
-        markDone: 'sessionDashboard.markDone',
-        unmarkDone: 'sessionDashboard.unmarkDone'
-      };
-      if (commands[msg.action]) vscode.commands.executeCommand(commands[msg.action], msg.sessionId);
+      if (msg.action === 'open') {
+        vscode.commands.executeCommand('sessionDashboard.open', { sessionId: msg.sessionId, provider: msg.provider });
+        return;
+      }
+      if (msg.action === 'markDone') {
+        vscode.commands.executeCommand('sessionDashboard.markDone', msg.sessionId);
+        return;
+      }
+      if (msg.action === 'unmarkDone') {
+        vscode.commands.executeCommand('sessionDashboard.unmarkDone', msg.sessionId);
+        return;
+      }
     });
     this.panel.onDidDispose(() => {
       this.panel = null;
@@ -63,6 +63,7 @@ class BoardPanel {
         .filter((s) => s.displayState === state)
         .map((s) => ({
           sessionId: s.sessionId,
+          provider: s.provider || 'claude',
           title: s.title,
           detail: describe(s, now),
           lastPrompt: s.lastPrompt
@@ -82,12 +83,13 @@ class BoardPanel {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style nonce="${nonce}">
   body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); padding: 12px; }
-  .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; align-items: start; }
+  .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; align-items: start; }
   .column h2 { font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px; opacity: 0.8; }
   .column h2 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
   .waiting .dot { background: var(--vscode-charts-orange); }
   .busy .dot { background: var(--vscode-charts-blue); }
   .idle .dot { background: var(--vscode-charts-green); }
+  .closed .dot { background: var(--vscode-descriptionForeground); }
   .done .dot { background: var(--vscode-disabledForeground); }
   .card { background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-widget-border, transparent);
     border-left: 3px solid transparent; border-radius: 4px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; }
@@ -95,7 +97,13 @@ class BoardPanel {
   .waiting .card { border-left-color: var(--vscode-charts-orange); }
   .busy .card { border-left-color: var(--vscode-charts-blue); }
   .idle .card { border-left-color: var(--vscode-charts-green); }
+  .closed .card { border-left-color: var(--vscode-descriptionForeground); opacity: 0.85; }
   .done .card { opacity: 0.6; }
+  .mark-all-btn { float: right; font-size: 0.75em; padding: 1px 6px; }
+  .provider-badge { display: inline-block; font-size: 0.72em; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 1px 5px; border-radius: 3px; margin-bottom: 4px; font-weight: 600; }
+  .provider-badge.claude { background: rgba(217, 119, 87, 0.2); color: var(--vscode-charts-orange, #e07a5f); }
+  .provider-badge.antigravity { background: rgba(66, 133, 244, 0.2); color: var(--vscode-charts-blue, #4285f4); }
   .title { font-weight: 600; margin-bottom: 2px; overflow-wrap: anywhere; }
   .detail { font-size: 0.85em; opacity: 0.75; }
   .prompt { font-size: 0.85em; opacity: 0.75; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2;
@@ -126,11 +134,21 @@ class BoardPanel {
       const column = el('section', 'column ' + col.state);
       const heading = el('h2');
       heading.append(el('span', 'dot'), col.label + ' (' + col.sessions.length + ')');
+      if (col.state === 'closed' && col.sessions.length > 0) {
+        const markAllBtn = el('button', 'mark-all-btn', 'Alle erledigt');
+        markAllBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          vscode.postMessage({ action: 'markAllClosedDone' });
+        });
+        heading.append(markAllBtn);
+      }
       column.append(heading);
       if (col.sessions.length === 0) column.append(el('div', 'empty', 'keine'));
       for (const s of col.sessions) {
         const card = el('div', 'card');
         card.title = 'Chat öffnen';
+        const badge = el('span', 'provider-badge ' + (s.provider || 'claude'), s.provider === 'antigravity' ? 'Antigravity' : 'Claude');
+        card.append(badge);
         card.append(el('div', 'title', s.title));
         if (s.detail) card.append(el('div', 'detail', s.detail));
         if (s.lastPrompt) card.append(el('div', 'prompt', s.lastPrompt));
@@ -144,7 +162,7 @@ class BoardPanel {
         });
         actions.append(toggle);
         card.append(actions);
-        card.addEventListener('click', () => vscode.postMessage({ action: 'open', sessionId: s.sessionId }));
+        card.addEventListener('click', () => vscode.postMessage({ action: 'open', sessionId: s.sessionId, provider: s.provider }));
         column.append(card);
       }
       board.append(column);
