@@ -9,7 +9,7 @@ auf einen Blick zeigt:
 | **Arbeitet** | KI ist mitten in einem Turn. (Wird eine arbeitende Session gemerkt, bleibt sie hier mit 📌-Icon bis zum Abschluss.) |
 | **Gemerkt** | Pinnen zum späteren Anschauen. Fertige/inaktive Sessions landen automatisch hier statt in „Fertig“. |
 | **Fertig** | Turn beendet, die Session wartet auf die nächste Nachricht. |
-| **Erledigt** | Von Hand weggelegt. Wird die Session wieder aktiv, fällt die Markierung von selbst weg. |
+| **Erledigt** | Beendete/geschlossene Sessions sowie von Hand weggelegte. Wird die Session wieder aktiv, fällt die Markierung von selbst weg. |
 
 - **Seitenleiste:** Icon „AI Sessions" in der Aktivitätsleiste. Klick auf eine Session öffnet
   ihren Chat (in Claude Code oder Antigravity), das Pinnadel-Icon merkt bzw. entmerkt die Session, das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.

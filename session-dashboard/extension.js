@@ -71,8 +71,10 @@ class SessionModel {
           if (isPastReset && !s.waitingFor) {
             s.waitingFor = 'Limit abgelaufen';
           }
-        } else if (isBookmarked && (s.state === 'idle' || s.state === 'closed')) {
+        } else if (isBookmarked) {
           displayState = 'bookmarked';
+        } else if (s.state === 'closed') {
+          displayState = 'done';
         }
         return {
           ...s,
@@ -274,13 +276,6 @@ function activate(context) {
       const bookmarkedIds = model.sessions.filter((s) => s.isBookmarked).map((s) => s.sessionId);
       if (bookmarkedIds.length > 0) {
         await model.bookmarks.unmarkMany(bookmarkedIds);
-        await update(true);
-      }
-    }),
-    vscode.commands.registerCommand('sessionDashboard.markAllClosedDone', async () => {
-      const closedIds = model.sessions.filter((s) => s.displayState === 'closed').map((s) => s.sessionId);
-      if (closedIds.length > 0) {
-        await model.done.markMany(closedIds);
         await update(true);
       }
     }),

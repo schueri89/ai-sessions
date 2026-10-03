@@ -54,10 +54,6 @@ class BoardPanel {
         vscode.commands.executeCommand('sessionDashboard.unbookmarkAll');
         return;
       }
-      if (msg && msg.action === 'markAllClosedDone') {
-        vscode.commands.executeCommand('sessionDashboard.markAllClosedDone');
-        return;
-      }
       if (!msg || typeof msg.sessionId !== 'string') return;
       if (msg.action === 'open') {
         vscode.commands.executeCommand('sessionDashboard.open', { sessionId: msg.sessionId, provider: msg.provider });
@@ -122,7 +118,6 @@ class BoardPanel {
   .busy .dot { background: var(--vscode-charts-blue); }
   .bookmarked .dot { background: var(--vscode-charts-yellow, #e5c07b); }
   .idle .dot { background: var(--vscode-charts-green); }
-  .closed .dot { background: var(--vscode-descriptionForeground); }
   .done .dot { background: var(--vscode-disabledForeground); }
   .card { background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-widget-border, transparent);
     border-left: 3px solid transparent; border-radius: 4px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; }
@@ -131,7 +126,6 @@ class BoardPanel {
   .busy .card { border-left-color: var(--vscode-charts-blue); }
   .bookmarked .card { border-left-color: var(--vscode-charts-yellow, #e5c07b); }
   .idle .card { border-left-color: var(--vscode-charts-green); }
-  .closed .card { border-left-color: var(--vscode-descriptionForeground); opacity: 0.85; }
   .done .card { opacity: 0.6; }
   .mark-all-btn { float: right; font-size: 0.75em; padding: 1px 6px; }
   .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 3px; }
@@ -236,14 +230,6 @@ class BoardPanel {
           vscode.postMessage({ action: 'unbookmarkAll' });
         });
         heading.append(unpinAllBtn);
-      }
-      if (col.state === 'closed' && col.sessions.length > 0) {
-        const markAllBtn = el('button', 'mark-all-btn', 'Alle erledigt');
-        markAllBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          vscode.postMessage({ action: 'markAllClosedDone' });
-        });
-        heading.append(markAllBtn);
       }
       column.append(heading);
       if (col.sessions.length === 0) column.append(el('div', 'empty', 'keine'));
