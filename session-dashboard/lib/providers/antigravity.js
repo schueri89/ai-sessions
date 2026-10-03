@@ -70,9 +70,58 @@ function cleanPrompt(text) {
   return text.replace(/<[^>]+>/g, '').trim();
 }
 
+function unquote(val) {
+  if (!val) return '';
+  if (typeof val === 'string') {
+    val = val.trim();
+    if (val.startsWith('"') && val.endsWith('"')) {
+      try {
+        return JSON.parse(val);
+      } catch {
+        return val.slice(1, -1);
+      }
+    }
+  }
+  return String(val);
+}
+
+function formatAntigravityTool(tc) {
+  if (!tc) return '';
+  const name = tc.name || '';
+  const args = tc.args || {};
+  const action = unquote(args.toolAction);
+  const summary = unquote(args.toolSummary);
+  if (action) return '⚡ ' + (action.length > 55 ? action.slice(0, 53) + '…' : action);
+  if (summary) return '⚡ ' + (summary.length > 55 ? summary.slice(0, 53) + '…' : summary);
+  switch (name) {
+    case 'run_command': {
+      const cmd = unquote(args.CommandLine).trim().replace(/\s+/g, ' ');
+      return '🛠️ ' + (cmd.length > 55 ? cmd.slice(0, 53) + '…' : cmd);
+    }
+    case 'view_file': {
+      const file = path.basename(unquote(args.AbsolutePath) || '');
+      return '📖 Liest ' + (file || 'Datei');
+    }
+    case 'replace_file_content': {
+      const file = path.basename(unquote(args.TargetFile) || '');
+      return '✏️ Bearbeitet ' + (file || 'Datei');
+    }
+    case 'write_to_file': {
+      const file = path.basename(unquote(args.TargetFile) || '');
+      return '📝 Erstellt ' + (file || 'Datei');
+    }
+    case 'search_web': {
+      const q = unquote(args.query);
+      return '🔍 Websuche: ' + (q.length > 35 ? q.slice(0, 33) + '…' : q);
+    }
+    default:
+      return '🔧 ' + name;
+  }
+}
+
 function readTranscriptTail(sessionId) {
   const file = path.join(antigravityDir(), 'brain', sessionId, '.system_generated', 'logs', 'transcript.jsonl');
-  if (!fs.existsSync(file)) return { lastPrompt: '', isWaiting: false };
+  if (!fs.existsSync(file)) return { lastPrompt: '', isWaiting: false, activity: '' };
 
   let fd = null;
   try {
@@ -98,15 +147,26 @@ function readTranscriptTail(sessionId) {
     }
 
     let isWaiting = false;
-    if (lastStep && lastStep.type === 'PLANNER_RESPONSE' && Array.isArray(lastStep.tool_calls)) {
-      if (lastStep.tool_calls.some((tc) => tc && tc.name === 'ask_question')) {
-        isWaiting = true;
+    let activity = '';
+    if (lastStep && lastStep.type === 'PLANNER_RESPONSE') {
+      if (Array.isArray(lastStep.tool_calls) && lastStep.tool_calls.length > 0) {
+        if (lastStep.tool_calls.some((tc) => tc && tc.name === 'ask_question')) {
+          isWaiting = true;
+          activity = '❓ Wartet auf Auswahl…';
+        } else {
+          const lastTc = lastStep.tool_calls[lastStep.tool_calls.length - 1];
+          activity = formatAntigravityTool(lastTc);
+        }
+      } else if (lastStep.thinking) {
+        activity = '🧠 Denkt nach…';
+      } else {
+        activity = '💬 Antwortet…';
       }
     }
 
-    return { lastPrompt, isWaiting };
+    return { lastPrompt, isWaiting, activity };
   } catch {
-    return { lastPrompt: '', isWaiting: false };
+    return { lastPrompt: '', isWaiting: false, activity: '' };
   } finally {
     if (fd !== null) {
       try { fs.closeSync(fd); } catch {}
@@ -148,6 +208,7 @@ async function readSessions() {
     let state = 'idle';
     let waitingFor = '';
     let lastPrompt = '';
+    let activity = '';
 
     if (notFullyIdle || isRunning) {
       const info = readTranscriptTail(sessionId);
@@ -158,6 +219,7 @@ async function readSessions() {
         state = 'busy';
       }
       lastPrompt = info.lastPrompt;
+      activity = state === 'busy' ? (info.activity || 'Arbeitet…') : '';
     } else {
       if ((now - statusUpdatedAt) > RECENT_IDLE_WINDOW_MS) {
         state = 'closed';
@@ -193,6 +255,7 @@ async function readSessions() {
       statusUpdatedAt,
       title: r.title || cleanPrompt(r.preview) || sessionId.slice(0, 8),
       lastPrompt: lastPrompt || '',
+      activity,
       workspaces,
       rateLimit: null
     });

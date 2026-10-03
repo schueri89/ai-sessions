@@ -34,7 +34,49 @@ function findTranscript(sessionId) {
 }
 
 function emptyInfo() {
-  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0 };
+  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '' };
+}
+
+function formatClaudeTool(c) {
+  if (!c) return '';
+  if (c.type === 'tool_use') {
+    const name = c.name || '';
+    const input = c.input || {};
+    switch (name) {
+      case 'Bash': {
+        const cmd = (input.description || input.command || '').trim().replace(/\s+/g, ' ');
+        return '🛠️ ' + (cmd.length > 55 ? cmd.slice(0, 53) + '…' : cmd);
+      }
+      case 'Read':
+      case 'View': {
+        const file = path.basename(input.file_path || input.path || '');
+        return '📖 Liest ' + (file || 'Datei');
+      }
+      case 'Edit':
+      case 'MultiEdit': {
+        const file = path.basename(input.file_path || input.path || '');
+        return '✏️ Bearbeitet ' + (file || 'Datei');
+      }
+      case 'Write': {
+        const file = path.basename(input.file_path || input.path || '');
+        return '📝 Erstellt ' + (file || 'Datei');
+      }
+      case 'Grep':
+      case 'Glob': {
+        const p = (input.pattern || '').trim();
+        return '🔍 Sucht ' + (p.length > 35 ? p.slice(0, 33) + '…' : p);
+      }
+      case 'Skill': {
+        return '⚡ Skill: ' + (input.skill || '');
+      }
+      default:
+        return '🔧 ' + name;
+    }
+  }
+  if (c.type === 'thinking') {
+    return '🧠 Denkt nach…';
+  }
+  return '';
 }
 
 function titleOf(info) {
@@ -71,6 +113,7 @@ function applyLine(info, line) {
       break;
     case 'last-prompt':
       if (typeof rec.lastPrompt === 'string') info.lastPrompt = rec.lastPrompt;
+      info.activity = '⏳ Startet…';
       break;
     case 'assistant':
       if (rec.error === 'rate_limit' || (rec.quotaLimits && rec.quotaLimits.status === 'rejected') || rec.apiErrorStatus === 429) {
@@ -80,8 +123,19 @@ function applyLine(info, line) {
         const humanText = (rec.message && Array.isArray(rec.message.content) && rec.message.content[0] && rec.message.content[0].text)
           || "You've hit your session limit";
         info.rateLimit = { resetsAt, humanText };
+        info.activity = '⏳ Limit erreicht';
       } else if (!rec.error && !rec.isApiErrorMessage) {
         info.rateLimit = null;
+        if (rec.message && Array.isArray(rec.message.content)) {
+          const lastTool = [...rec.message.content].reverse().find((c) => c.type === 'tool_use');
+          if (lastTool) {
+            info.activity = formatClaudeTool(lastTool);
+          } else if (rec.message.content.some((c) => c.type === 'thinking')) {
+            info.activity = '🧠 Denkt nach…';
+          } else if (rec.message.content.some((c) => c.type === 'text')) {
+            info.activity = '💬 Antwortet…';
+          }
+        }
       }
       break;
   }
@@ -121,12 +175,12 @@ function readAppended(info) {
   }
 }
 
-// Returns { title, lastPrompt, rateLimit, startedAt, lastActivity }; empty strings/0 if the transcript does not exist (yet).
+// Returns { title, lastPrompt, rateLimit, startedAt, lastActivity, activity }; empty strings/0 if the transcript does not exist (yet).
 function readTranscriptInfo(sessionId) {
   let info = cache.get(sessionId);
   if (!info) {
     const file = findTranscript(sessionId);
-    if (!file) return { title: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0 };
+    if (!file) return { title: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '' };
     info = { file, offset: 0, rest: Buffer.alloc(0), ...emptyInfo() };
     cache.set(sessionId, info);
   }
@@ -136,7 +190,8 @@ function readTranscriptInfo(sessionId) {
     lastPrompt: info.lastPrompt,
     rateLimit: info.rateLimit || null,
     startedAt: info.startedAt || 0,
-    lastActivity: info.lastActivity || info.startedAt || 0
+    lastActivity: info.lastActivity || info.startedAt || 0,
+    activity: info.activity || ''
   };
 }
 

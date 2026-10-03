@@ -92,7 +92,8 @@ function readLiveSessions() {
         : (info.lastActivity || s.statusUpdatedAt),
       title: info.title || s.registryName || s.sessionId.slice(0, 8),
       lastPrompt: info.lastPrompt,
-      rateLimit: info.rateLimit || null
+      rateLimit: info.rateLimit || null,
+      activity: s.state === 'busy' ? (info.activity || 'Arbeitet…') : ''
     };
   });
 }

@@ -99,7 +99,8 @@ class BoardPanel {
           title: s.title,
           detail: describe(s, now),
           lastPrompt: s.lastPrompt,
-          cwd: s.cwd || ''
+          cwd: s.cwd || '',
+          activity: s.activity || ''
         }))
     }));
     const initialSearch = this.pendingSearch;
@@ -204,6 +205,20 @@ class BoardPanel {
   .rate-limit-badge { display: inline-flex; align-items: center; font-size: 0.72em;
     padding: 1px 5px; border-radius: 3px; font-weight: 600; line-height: 1.2;
     background: rgba(229, 192, 123, 0.2); color: #e5c07b; border: 1px solid rgba(229, 192, 123, 0.4); }
+  .activity { display: flex; align-items: center; gap: 6px; font-size: 0.8em; margin-top: 6px;
+    padding: 3px 8px; border-radius: 4px; overflow: hidden; line-height: 1.35;
+    background: rgba(112, 169, 255, 0.1); color: var(--vscode-charts-blue, #70a9ff);
+    border: 1px solid rgba(112, 169, 255, 0.25); }
+  .activity-pulse { width: 6px; height: 6px; border-radius: 50%;
+    background: var(--vscode-charts-blue, #70a9ff); flex-shrink: 0;
+    box-shadow: 0 0 6px var(--vscode-charts-blue, #70a9ff);
+    animation: act-pulse 1.8s ease-in-out infinite; }
+  @keyframes act-pulse {
+    0% { opacity: 0.35; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0.35; transform: scale(0.85); }
+  }
+  .activity-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -337,6 +352,7 @@ class BoardPanel {
     const haystack = [
       s.title,
       s.lastPrompt,
+      s.activity,
       s.sessionId,
       s.detail,
       s.cwd,
@@ -450,6 +466,12 @@ class BoardPanel {
         cardHeader.append(badges);
         card.append(cardHeader);
         if (s.detail) card.append(el('div', 'detail', s.detail));
+        if (s.activity && (col.state === 'busy' || s.displayState === 'busy' || s.state === 'busy')) {
+          const actDiv = el('div', 'activity');
+          actDiv.title = 'Aktuelle Aktivität: ' + s.activity;
+          actDiv.append(el('span', 'activity-pulse'), el('span', 'activity-text', s.activity));
+          card.append(actDiv);
+        }
         if (s.lastPrompt) {
           const promptDiv = el('div', 'prompt');
           if (terms && terms.length > 0) {

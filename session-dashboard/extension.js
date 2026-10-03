@@ -85,7 +85,7 @@ class SessionModel {
       .sort(compareSessions);
     const signature = JSON.stringify([
       this.providerFilter,
-      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.title, describe(s, now), s.lastPrompt])
+      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;
@@ -287,11 +287,11 @@ function activate(context) {
         const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
         const state = STATES[s.displayState] || { label: s.displayState, icon: 'circle-outline' };
         const isBookmarked = s.isBookmarked ? '📌 ' : '';
-        const detail = describe(s, now);
+        const activityPrefix = s.displayState === 'busy' && s.activity ? `[${s.activity}] ` : '';
         return {
           label: `${isBookmarked}${s.title}`,
           description: `[${providerLabel}] ${state.label}${detail ? ' · ' + detail : ''}`,
-          detail: s.lastPrompt || (s.cwd ? `Ordner: ${s.cwd}` : s.sessionId),
+          detail: activityPrefix + (s.lastPrompt || (s.cwd ? `Ordner: ${s.cwd}` : s.sessionId)),
           session: s
         };
       });

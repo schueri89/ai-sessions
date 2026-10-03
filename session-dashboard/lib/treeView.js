@@ -17,6 +17,9 @@ function tooltipFor(s) {
   const detail = describe(s);
   if (detail) md.appendMarkdown(` · ${escapeMd(detail)}`);
   md.appendMarkdown('\n\n');
+  if (s.activity && (s.displayState === 'busy' || s.state === 'busy')) {
+    md.appendMarkdown(`$(zap) **Aktivität:** ${escapeMd(s.activity)}\n\n`);
+  }
   if (s.lastPrompt) {
     md.appendMarkdown('Letzter Prompt:\n');
     md.appendCodeblock(truncate(s.lastPrompt, 400), 'text');
@@ -81,7 +84,11 @@ class SessionTreeProvider {
     item.id = `session:${s.sessionId}`;
     const providerPrefix = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
     const detail = describe(s);
-    item.description = detail ? `${providerPrefix} · ${detail}` : providerPrefix;
+    if (s.displayState === 'busy' && s.activity) {
+      item.description = `${providerPrefix} · ${s.activity}`;
+    } else {
+      item.description = detail ? `${providerPrefix} · ${detail}` : providerPrefix;
+    }
     item.tooltip = tooltipFor(s);
     const state = STATES[s.displayState];
     if (s.rateLimit && s.displayState === 'busy') {
