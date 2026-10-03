@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",

@@ -179,18 +179,18 @@ class BoardPanel {
   .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 420px; min-width: 220px; justify-content: flex-end; }
   .search-box { position: relative; display: flex; align-items: center; width: 100%; }
   .search-icon { position: absolute; left: 8px; pointer-events: none; display: flex; align-items: center;
-    color: var(--vscode-input-placeholderForeground); opacity: 0.7; }
+    color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.7)); opacity: 0.8; z-index: 1; }
   .search-icon svg { width: 13px; height: 13px; display: block; }
-  .search-input { width: 100%; padding: 4px 26px 4px 26px; border-radius: 4px; font-size: 0.85em;
-    background: var(--vscode-input-background); color: var(--vscode-input-foreground);
-    border: 1px solid var(--vscode-input-border, rgba(128, 128, 128, 0.35)); outline: none;
-    box-sizing: border-box; font-family: inherit; transition: border-color 0.15s ease; }
-  .search-input:focus { border-color: var(--vscode-focusBorder); }
-  .search-input::placeholder { color: var(--vscode-input-placeholderForeground); opacity: 0.8; }
+  #search-input, .search-input { width: 100%; height: 26px; padding: 4px 26px 4px 28px; border-radius: 4px; font-size: 0.85em;
+    background: transparent !important; color: var(--vscode-foreground) !important;
+    border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.35)); outline: none;
+    box-sizing: border-box; font-family: inherit; transition: all 0.15s ease; }
+  #search-input:focus, .search-input:focus { border-color: var(--vscode-focusBorder, #007acc); background: rgba(128, 128, 128, 0.08) !important; }
+  #search-input::placeholder, .search-input::placeholder { color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.6)); opacity: 0.8; }
   .search-clear-btn { position: absolute; right: 5px; background: transparent; border: none;
-    color: var(--vscode-input-placeholderForeground); cursor: pointer; padding: 2px 4px; font-size: 0.8em;
-    line-height: 1; border-radius: 2px; }
-  .search-clear-btn:hover { color: var(--vscode-input-foreground); background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2)); }
+    color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.7)); cursor: pointer; padding: 2px 4px; font-size: 0.8em;
+    line-height: 1; border-radius: 2px; z-index: 1; }
+  .search-clear-btn:hover { color: var(--vscode-foreground); background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2)); }
   .search-status { font-size: 0.75em; opacity: 0.85; white-space: nowrap; padding: 2px 6px; border-radius: 3px;
     background: var(--vscode-badge-background, rgba(128, 128, 128, 0.2)); color: var(--vscode-badge-foreground); }
   .search-status.no-matches { background: rgba(229, 192, 123, 0.2); color: #e5c07b; }
@@ -222,7 +222,7 @@ class BoardPanel {
   <div class="search-group">
     <div class="search-box">
       <span class="search-icon">${ICONS.search}</span>
-      <input type="text" id="search-input" placeholder="Sessions suchen (Titel, Prompt, ID)... [/]" autocomplete="off" spellcheck="false">
+      <input type="text" class="search-input" id="search-input" placeholder="Sessions suchen (Titel, Prompt, ID)... [/]" autocomplete="off" spellcheck="false">
       <button class="search-clear-btn" id="search-clear" title="Suche leeren" style="display: none;">✕</button>
     </div>
     <span class="search-status" id="search-status" style="display: none;"></span>
