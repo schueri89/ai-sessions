@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -40,6 +40,12 @@
         "title": "Filter nach Provider...",
         "category": "Session Dashboard",
         "icon": "$(filter)"
+      },
+      {
+        "command": "sessionDashboard.filterProject",
+        "title": "Filter nach Projekt...",
+        "category": "Session Dashboard",
+        "icon": "$(folder)"
       },
       {
         "command": "sessionDashboard.open",
@@ -102,6 +108,11 @@
           "command": "sessionDashboard.filter",
           "when": "view == sessionDashboard.sessions",
           "group": "navigation@1"
+        },
+        {
+          "command": "sessionDashboard.filterProject",
+          "when": "view == sessionDashboard.sessions",
+          "group": "navigation@1.2"
         },
         {
           "command": "sessionDashboard.search",
@@ -180,7 +191,7 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
+    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/project.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
     "package": "vsce package --skip-license --allow-missing-repository"
   },
   "devDependencies": {

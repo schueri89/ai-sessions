@@ -7,6 +7,7 @@ const os = require('os');
 const path = require('path');
 const { readTranscriptInfo, prune: pruneTranscripts } = require('../transcripts');
 const { scanHistory } = require('../history');
+const { resolveProject } = require('../project');
 
 function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -77,11 +78,19 @@ function readLiveSessions() {
 
   return live.map((s) => {
     const info = readTranscriptInfo(s.sessionId);
+    const title = info.title || s.registryName || s.sessionId.slice(0, 8);
+    const project = resolveProject({
+      cwd: s.cwd,
+      title,
+      lastPrompt: info.lastPrompt,
+      hintProject: info.project
+    });
     return {
       provider: 'claude',
       sessionId: s.sessionId,
       pid: s.pid,
       cwd: s.cwd,
+      project,
       registryName: s.registryName,
       rawStatus: s.rawStatus,
       waitingFor: s.waitingFor,
@@ -90,7 +99,7 @@ function readLiveSessions() {
       statusUpdatedAt: s.state === 'busy' || s.state === 'waiting'
         ? s.statusUpdatedAt
         : (info.lastActivity || s.statusUpdatedAt),
-      title: info.title || s.registryName || s.sessionId.slice(0, 8),
+      title,
       lastPrompt: info.lastPrompt,
       rateLimit: info.rateLimit || null,
       activity: s.state === 'busy' ? (info.activity || 'Arbeitet…') : ''
@@ -115,7 +124,8 @@ async function readSessions() {
       provider: 'claude',
       sessionId: h.sessionId,
       pid: 0,
-      cwd: h.entrypoint || '',
+      cwd: h.cwd || h.entrypoint || '',
+      project: h.project || resolveProject({ cwd: h.cwd || h.entrypoint || '', title: h.title, lastPrompt: h.lastPrompt }),
       registryName: h.title,
       rawStatus: 'closed',
       waitingFor: '',

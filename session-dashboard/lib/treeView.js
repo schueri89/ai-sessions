@@ -6,7 +6,11 @@ const { STATES, STATE_ORDER, describe, formatDateTime } = require('./format');
 function tooltipFor(s) {
   const md = new vscode.MarkdownString(undefined, true);
   const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
-  md.appendMarkdown(`**[${providerLabel}] ${escapeMd(s.title)}**\n\n`);
+  const projectLabel = s.project ? `[${s.project}] ` : '';
+  md.appendMarkdown(`**${projectLabel}[${providerLabel}] ${escapeMd(s.title)}**\n\n`);
+  if (s.project) {
+    md.appendMarkdown(`📁 **Projekt:** \`${escapeMd(s.project)}\`\n\n`);
+  }
   if (s.rateLimit) {
     const isPastReset = s.rateLimit.resetsAt && Date.now() >= s.rateLimit.resetsAt;
     const warningHeader = isPastReset ? 'Session-Limit abgelaufen (bereit)' : 'Session-Limit erreicht';
@@ -83,11 +87,14 @@ class SessionTreeProvider {
     const item = new vscode.TreeItem(title, vscode.TreeItemCollapsibleState.None);
     item.id = `session:${s.sessionId}`;
     const providerPrefix = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+    const projectPrefix = s.project ? `[${s.project}] ` : '';
     const detail = describe(s);
     if (s.displayState === 'busy' && s.activity) {
-      item.description = `${providerPrefix} · ${s.activity}`;
+      item.description = `${projectPrefix}${providerPrefix} · ${s.activity}`;
     } else {
-      item.description = detail ? `${providerPrefix} · ${detail}` : providerPrefix;
+      item.description = detail
+        ? `${projectPrefix}${providerPrefix} · ${detail}`
+        : `${projectPrefix}${providerPrefix}`;
     }
     item.tooltip = tooltipFor(s);
     const state = STATES[s.displayState];

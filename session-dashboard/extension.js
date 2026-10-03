@@ -25,6 +25,7 @@ class SessionModel {
     this.done = new DoneStore(context.globalState);
     this.bookmarks = new BookmarkStore(context.globalState);
     this.providerFilter = context.globalState.get('sessionDashboard.providerFilter', 'all');
+    this.projectFilter = context.globalState.get('sessionDashboard.projectFilter', 'all');
     this.sessions = [];
     this.signature = '';
   }
@@ -35,20 +36,32 @@ class SessionModel {
     await this.context.globalState.update('sessionDashboard.providerFilter', filter);
   }
 
+  async setProjectFilter(filter) {
+    this.projectFilter = filter || 'all';
+    await this.context.globalState.update('sessionDashboard.projectFilter', this.projectFilter);
+  }
+
   visibleSessions() {
-    if (this.providerFilter === 'claude') return this.sessions.filter((s) => s.provider === 'claude');
-    if (this.providerFilter === 'antigravity') return this.sessions.filter((s) => s.provider === 'antigravity');
-    return this.sessions;
+    let list = this.sessions;
+    if (this.providerFilter === 'claude') list = list.filter((s) => s.provider === 'claude');
+    else if (this.providerFilter === 'antigravity') list = list.filter((s) => s.provider === 'antigravity');
+    if (this.projectFilter && this.projectFilter !== 'all') {
+      list = list.filter((s) => s.project === this.projectFilter);
+    }
+    return list;
   }
 
   counts() {
     let claude = 0;
     let antigravity = 0;
+    const byProject = {};
     for (const s of this.sessions) {
       if (s.provider === 'claude') claude++;
       else if (s.provider === 'antigravity') antigravity++;
+      const p = s.project || 'ROOT';
+      byProject[p] = (byProject[p] || 0) + 1;
     }
-    return { all: this.sessions.length, claude, antigravity };
+    return { all: this.sessions.length, claude, antigravity, byProject };
   }
 
   // Re-reads registry across all providers. Returns true if anything visible changed.
@@ -85,7 +98,8 @@ class SessionModel {
       .sort(compareSessions);
     const signature = JSON.stringify([
       this.providerFilter,
-      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
+      this.projectFilter,
+      this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;
@@ -163,11 +177,13 @@ function activate(context) {
         view.badge = waiting > 0
           ? { value: waiting, tooltip: waiting === 1 ? '1 Session wartet auf dich' : `${waiting} Sessions warten auf dich` }
           : undefined;
-        view.description = model.providerFilter === 'claude'
-          ? 'Claude Code'
-          : (model.providerFilter === 'antigravity' ? 'Antigravity' : '');
+        const filterParts = [];
+        if (model.providerFilter === 'claude') filterParts.push('Claude Code');
+        else if (model.providerFilter === 'antigravity') filterParts.push('Antigravity');
+        if (model.projectFilter && model.projectFilter !== 'all') filterParts.push(model.projectFilter);
+        view.description = filterParts.join(' · ');
         view.message = visible.length === 0
-          ? (model.sessions.length === 0 ? 'Keine laufenden KI-Sessions gefunden.' : 'Keine Sessions für diesen Filter.')
+          ? (model.sessions.length === 0 ? 'Keine laufenden KI-Sessions gefunden.' : `Keine Sessions für Filter (${filterParts.join(', ')}).`)
           : undefined;
       }
     } catch (err) {
@@ -237,6 +253,33 @@ function activate(context) {
         await update(true);
       }
     }),
+    vscode.commands.registerCommand('sessionDashboard.filterProject', async () => {
+      const counts = model.counts();
+      const current = model.projectFilter;
+      const sortedProjects = Object.entries(counts.byProject)
+        .sort((a, b) => b[1] - a[1]);
+      const items = [
+        {
+          label: '$(list-unordered) Alle Projekte',
+          description: `${counts.all}`,
+          detail: current === 'all' ? '✓ Aktiver Filter' : '',
+          filter: 'all'
+        },
+        ...sortedProjects.map(([proj, cnt]) => ({
+          label: `$(folder) ${proj}`,
+          description: `${cnt}`,
+          detail: current === proj ? '✓ Aktiver Filter' : '',
+          filter: proj
+        }))
+      ];
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Nach Projekt/Unterordner filtern...'
+      });
+      if (picked && picked.filter) {
+        await model.setProjectFilter(picked.filter);
+        await update(true);
+      }
+    }),
     vscode.commands.registerCommand('sessionDashboard.open', (arg) => {
       const info = sessionInfoOf(arg, model);
       if (info) return openSession(info);
@@ -287,9 +330,11 @@ function activate(context) {
         const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
         const state = STATES[s.displayState] || { label: s.displayState, icon: 'circle-outline' };
         const isBookmarked = s.isBookmarked ? '📌 ' : '';
+        const projectPrefix = s.project ? `[${s.project}] ` : '';
         const activityPrefix = s.displayState === 'busy' && s.activity ? `[${s.activity}] ` : '';
+        const detail = describe(s, now);
         return {
-          label: `${isBookmarked}${s.title}`,
+          label: `${isBookmarked}${projectPrefix}${s.title}`,
           description: `[${providerLabel}] ${state.label}${detail ? ' · ' + detail : ''}`,
           detail: activityPrefix + (s.lastPrompt || (s.cwd ? `Ordner: ${s.cwd}` : s.sessionId)),
           session: s
@@ -297,7 +342,7 @@ function activate(context) {
       });
 
       const picked = await vscode.window.showQuickPick(items, {
-        placeHolder: 'Session suchen nach Titel, Prompt, ID, Projektordner...',
+        placeHolder: 'Session suchen nach Titel, Projekt, Prompt, ID...',
         matchOnDescription: true,
         matchOnDetail: true
       });

@@ -6,6 +6,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
+const { resolveProject } = require('../project');
 
 const RECENT_IDLE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours for idle vs closed
 const TRANSCRIPT_TAIL_BYTES = 64 * 1024;
@@ -164,9 +165,9 @@ function readTranscriptTail(sessionId) {
       }
     }
 
-    return { lastPrompt, isWaiting, activity };
+    return { lastPrompt, isWaiting, activity, rawLines: lines };
   } catch {
-    return { lastPrompt: '', isWaiting: false, activity: '' };
+    return { lastPrompt: '', isWaiting: false, activity: '', rawLines: [] };
   } finally {
     if (fd !== null) {
       try { fs.closeSync(fd); } catch {}
@@ -209,6 +210,7 @@ async function readSessions() {
     let waitingFor = '';
     let lastPrompt = '';
     let activity = '';
+    let rawLines = [];
 
     if (notFullyIdle || isRunning) {
       const info = readTranscriptTail(sessionId);
@@ -220,6 +222,7 @@ async function readSessions() {
       }
       lastPrompt = info.lastPrompt;
       activity = state === 'busy' ? (info.activity || 'Arbeitet…') : '';
+      rawLines = info.rawLines || [];
     } else {
       if ((now - statusUpdatedAt) > RECENT_IDLE_WINDOW_MS) {
         state = 'closed';
@@ -228,6 +231,7 @@ async function readSessions() {
       if (state === 'idle') {
         const info = readTranscriptTail(sessionId);
         lastPrompt = info.lastPrompt;
+        rawLines = info.rawLines || [];
       }
     }
 
@@ -241,19 +245,28 @@ async function readSessions() {
     } catch {}
 
     const primaryCwd = workspaces.length > 0 ? decodeWorkspaceUri(workspaces[0]) : '';
+    const title = r.title || cleanPrompt(r.preview) || sessionId.slice(0, 8);
+    const project = resolveProject({
+      cwd: primaryCwd,
+      workspaces,
+      title,
+      lastPrompt,
+      rawLines
+    });
 
     sessions.push({
       provider: 'antigravity',
       sessionId,
       pid: 0,
       cwd: primaryCwd,
+      project,
       registryName: r.title || '',
       rawStatus: r.status || '',
       waitingFor,
       state,
       startedAt,
       statusUpdatedAt,
-      title: r.title || cleanPrompt(r.preview) || sessionId.slice(0, 8),
+      title,
       lastPrompt: lastPrompt || '',
       activity,
       workspaces,

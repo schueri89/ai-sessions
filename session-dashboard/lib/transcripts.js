@@ -34,7 +34,7 @@ function findTranscript(sessionId) {
 }
 
 function emptyInfo() {
-  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '' };
+  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '', project: '' };
 }
 
 function formatClaudeTool(c) {
@@ -85,6 +85,15 @@ function titleOf(info) {
 
 // Picks title, last prompt, rate-limit info and timestamps out of transcript lines; later lines win for last-*.
 function applyLine(info, line) {
+  if (!info.project) {
+    const m = line.match(/[\\\/]webapps[\\\/]ROOT[\\\/]([a-zA-Z0-9_\-\.]+)/i);
+    if (m) {
+      const sub = m[1];
+      if (!['WEB-INF', 'META-INF', 'lucee.code-workspace'].includes(sub)) {
+        info.project = sub;
+      }
+    }
+  }
   if (!INTERESTING.some((marker) => line.includes(marker))) return;
   let rec;
   try {
@@ -175,12 +184,12 @@ function readAppended(info) {
   }
 }
 
-// Returns { title, lastPrompt, rateLimit, startedAt, lastActivity, activity }; empty strings/0 if the transcript does not exist (yet).
+// Returns { title, lastPrompt, rateLimit, startedAt, lastActivity, activity, project }; empty strings/0 if the transcript does not exist (yet).
 function readTranscriptInfo(sessionId) {
   let info = cache.get(sessionId);
   if (!info) {
     const file = findTranscript(sessionId);
-    if (!file) return { title: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '' };
+    if (!file) return { title: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '', project: '' };
     info = { file, offset: 0, rest: Buffer.alloc(0), ...emptyInfo() };
     cache.set(sessionId, info);
   }
@@ -191,7 +200,8 @@ function readTranscriptInfo(sessionId) {
     rateLimit: info.rateLimit || null,
     startedAt: info.startedAt || 0,
     lastActivity: info.lastActivity || info.startedAt || 0,
-    activity: info.activity || ''
+    activity: info.activity || '',
+    project: info.project || ''
   };
 }
 

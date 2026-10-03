@@ -51,6 +51,12 @@ class BoardPanel {
         });
         return;
       }
+      if (msg && msg.action === 'setProjectFilter') {
+        this.model.setProjectFilter(msg.filter).then(() => {
+          vscode.commands.executeCommand('sessionDashboard.refresh');
+        });
+        return;
+      }
       if (msg && msg.action === 'toggleBookmark') {
         vscode.commands.executeCommand('sessionDashboard.toggleBookmark', msg.sessionId);
         return;
@@ -94,6 +100,7 @@ class BoardPanel {
         .map((s) => ({
           sessionId: s.sessionId,
           provider: s.provider || 'claude',
+          project: s.project || 'ROOT',
           isBookmarked: Boolean(s.isBookmarked),
           rateLimit: s.rateLimit || null,
           title: s.title,
@@ -108,6 +115,7 @@ class BoardPanel {
     this.panel.webview.postMessage({
       type: 'render',
       filter: this.model.providerFilter,
+      projectFilter: this.model.projectFilter,
       counts: this.model.counts(),
       initialSearch,
       columns
@@ -165,7 +173,8 @@ class BoardPanel {
     border: none; border-radius: 2px; padding: 2px 8px; cursor: pointer; font-size: 0.85em; }
   button:hover { background: var(--vscode-button-secondaryHoverBackground); }
   .empty { font-size: 0.85em; opacity: 0.5; font-style: italic; }
-  .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .toolbar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .toolbar-main { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; width: 100%; }
   .filter-group { display: flex; gap: 8px; align-items: center; }
   .filter-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px;
     font-size: 0.85em; font-weight: 500; cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
@@ -177,6 +186,23 @@ class BoardPanel {
   .filter-btn.active[data-filter="all"] { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
   .filter-btn.active.filter-claude { background: rgba(242, 101, 34, 0.25); color: #ff9e79; border-color: rgba(255, 158, 121, 0.5); }
   .filter-btn.active.filter-antigravity { background: rgba(66, 133, 244, 0.25); color: #70a9ff; border-color: rgba(112, 169, 255, 0.5); }
+  .project-chips-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%; padding-top: 4px; }
+  .project-chips-label { font-size: 0.74em; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-right: 2px; }
+  .project-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78em; padding: 2px 8px; border-radius: 12px;
+    cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
+    background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.1));
+    color: var(--vscode-button-secondaryForeground, inherit); transition: all 0.15s ease; }
+  .project-chip:hover { background: var(--vscode-button-secondaryHoverBackground, rgba(128, 128, 128, 0.2)); }
+  .project-chip.active { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border-color: transparent; font-weight: 600; }
+  .project-chip .count { opacity: 0.75; font-size: 0.9em; }
+  .card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 3px 0 4px; }
+  .project-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 0.72em;
+    padding: 1px 6px; border-radius: 3px; font-weight: 600; line-height: 1.3;
+    background: var(--vscode-badge-background, rgba(128, 128, 128, 0.2));
+    color: var(--vscode-badge-foreground);
+    border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.3));
+    cursor: pointer; transition: all 0.15s ease; }
+  .project-badge:hover { filter: brightness(1.2); border-color: var(--vscode-focusBorder, #007acc); }
   .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 420px; min-width: 220px; justify-content: flex-end; }
   .search-box { position: relative; display: flex; align-items: center; width: 100%; }
   .search-icon { position: absolute; left: 8px; pointer-events: none; display: flex; align-items: center;
@@ -223,25 +249,28 @@ class BoardPanel {
 </head>
 <body>
 <header class="toolbar">
-  <div class="filter-group">
-    <button class="filter-btn active" data-filter="all" id="btn-all">
-      Alle <span class="count" id="count-all">0</span>
-    </button>
-    <button class="filter-btn filter-claude" data-filter="claude" id="btn-claude">
-      ${ICONS.claude} Claude Code <span class="count" id="count-claude">0</span>
-    </button>
-    <button class="filter-btn filter-antigravity" data-filter="antigravity" id="btn-antigravity">
-      ${ICONS.antigravity} Antigravity <span class="count" id="count-antigravity">0</span>
-    </button>
-  </div>
-  <div class="search-group">
-    <div class="search-box">
-      <span class="search-icon">${ICONS.search}</span>
-      <input type="text" class="search-input" id="search-input" placeholder="Sessions suchen (Titel, Prompt, ID)... [/]" autocomplete="off" spellcheck="false">
-      <button class="search-clear-btn" id="search-clear" title="Suche leeren" style="display: none;">✕</button>
+  <div class="toolbar-main">
+    <div class="filter-group">
+      <button class="filter-btn active" data-filter="all" id="btn-all">
+        Alle <span class="count" id="count-all">0</span>
+      </button>
+      <button class="filter-btn filter-claude" data-filter="claude" id="btn-claude">
+        ${ICONS.claude} Claude Code <span class="count" id="count-claude">0</span>
+      </button>
+      <button class="filter-btn filter-antigravity" data-filter="antigravity" id="btn-antigravity">
+        ${ICONS.antigravity} Antigravity <span class="count" id="count-antigravity">0</span>
+      </button>
     </div>
-    <span class="search-status" id="search-status" style="display: none;"></span>
+    <div class="search-group">
+      <div class="search-box">
+        <span class="search-icon">${ICONS.search}</span>
+        <input type="text" class="search-input" id="search-input" placeholder="Sessions suchen (Titel, Prompt, ID, Projekt)... [/]" autocomplete="off" spellcheck="false">
+        <button class="search-clear-btn" id="search-clear" title="Suche leeren" style="display: none;">✕</button>
+      </div>
+      <span class="search-status" id="search-status" style="display: none;"></span>
+    </div>
   </div>
+  <div class="project-chips-row" id="project-chips" style="display: none;"></div>
 </header>
 <div class="board" id="board"></div>
 <script nonce="${nonce}">
@@ -273,6 +302,43 @@ class BoardPanel {
     filterBtns.forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-filter') === (filter || 'all'));
     });
+  }
+
+  const projectChips = document.getElementById('project-chips');
+  function updateProjectChipsUI(currentProjectFilter, counts) {
+    if (!projectChips) return;
+    projectChips.replaceChildren();
+
+    const byProj = (counts && counts.byProject) || {};
+    const projEntries = Object.entries(byProj).sort((a, b) => b[1] - a[1]);
+    if (projEntries.length === 0) {
+      projectChips.style.display = 'none';
+      return;
+    }
+    projectChips.style.display = 'flex';
+
+    const lbl = el('span', 'project-chips-label', 'Projekt:');
+    projectChips.append(lbl);
+
+    const isAll = !currentProjectFilter || currentProjectFilter === 'all';
+    const allChip = el('button', 'project-chip' + (isAll ? ' active' : ''));
+    allChip.append('Alle ', el('span', 'count', String(counts.all || 0)));
+    allChip.addEventListener('click', () => {
+      vscode.postMessage({ action: 'setProjectFilter', filter: 'all' });
+    });
+    projectChips.append(allChip);
+
+    for (const [proj, cnt] of projEntries) {
+      const isActive = currentProjectFilter === proj;
+      const chip = el('button', 'project-chip' + (isActive ? ' active' : ''));
+      chip.append(proj + ' ', el('span', 'count', String(cnt)));
+      chip.title = 'Nur Sessions für „' + proj + '“ anzeigen';
+      chip.addEventListener('click', () => {
+        const nextFilter = isActive ? 'all' : proj;
+        vscode.postMessage({ action: 'setProjectFilter', filter: nextFilter });
+      });
+      projectChips.append(chip);
+    }
   }
 
   function updateSearchUI() {
@@ -351,6 +417,7 @@ class BoardPanel {
     if (terms.length === 0) return true;
     const haystack = [
       s.title,
+      s.project || '',
       s.lastPrompt,
       s.activity,
       s.sessionId,
@@ -465,7 +532,22 @@ class BoardPanel {
         badges.append(icon);
         cardHeader.append(badges);
         card.append(cardHeader);
-        if (s.detail) card.append(el('div', 'detail', s.detail));
+        if (s.project || s.detail) {
+          const metaDiv = el('div', 'card-meta');
+          if (s.project) {
+            const pBadge = el('span', 'project-badge', '📁 ' + s.project);
+            pBadge.title = 'Nach Projekt „' + s.project + '“ filtern';
+            pBadge.addEventListener('click', (ev) => {
+              ev.stopPropagation();
+              vscode.postMessage({ action: 'setProjectFilter', filter: s.project });
+            });
+            metaDiv.append(pBadge);
+          }
+          if (s.detail) {
+            metaDiv.append(el('span', 'detail', s.detail));
+          }
+          card.append(metaDiv);
+        }
         if (s.activity && (col.state === 'busy' || s.displayState === 'busy' || s.state === 'busy')) {
           const actDiv = el('div', 'activity');
           actDiv.title = 'Aktuelle Aktivität: ' + s.activity;
@@ -512,6 +594,7 @@ class BoardPanel {
     if (ev.data.type === 'render') {
       cachedColumns = ev.data.columns || [];
       updateFilterUI(ev.data.filter, ev.data.counts);
+      updateProjectChipsUI(ev.data.projectFilter, ev.data.counts);
       if (typeof ev.data.initialSearch === 'string' && ev.data.initialSearch && !currentSearch) {
         setSearch(ev.data.initialSearch);
       } else {

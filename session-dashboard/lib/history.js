@@ -10,6 +10,7 @@ const fsp = require('fs/promises');
 const os = require('os');
 const path = require('path');
 const { emptyInfo, titleOf, applyLine } = require('./transcripts');
+const { resolveProject } = require('./project');
 
 function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -62,13 +63,15 @@ async function readEntry(file, sessionId, size, mtimeMs) {
 
     const info = emptyInfo();
     let entrypoint = '';
+    let cwd = '';
     let firstPrompt = '';
     for (const line of head) {
       applyLine(info, line);
-      if (entrypoint && firstPrompt) continue;
+      if (entrypoint && cwd && firstPrompt) continue;
       try {
         const rec = JSON.parse(line);
         if (!entrypoint && typeof rec.entrypoint === 'string') entrypoint = rec.entrypoint;
+        if (!cwd && typeof rec.cwd === 'string') cwd = rec.cwd;
         if (!firstPrompt) firstPrompt = userText(rec);
       } catch {
         // ignore malformed line
@@ -78,9 +81,20 @@ async function readEntry(file, sessionId, size, mtimeMs) {
 
     const title = titleOf(info) || info.lastPrompt || firstPrompt;
     if (!title) return null; // session without a single prompt
+
+    const project = resolveProject({
+      cwd: cwd || entrypoint,
+      title,
+      lastPrompt: info.lastPrompt || firstPrompt,
+      rawLines: [...head, ...tail],
+      hintProject: info.project
+    });
+
     return {
       sessionId,
-      entrypoint,
+      entrypoint: cwd || entrypoint,
+      cwd: cwd || entrypoint,
+      project,
       title: title.split('\n')[0].slice(0, 120),
       lastPrompt: info.lastPrompt || firstPrompt,
       lastActivity: info.lastActivity || info.startedAt || mtimeMs,
