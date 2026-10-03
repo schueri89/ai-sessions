@@ -7,7 +7,7 @@ const { DoneStore } = require('./lib/doneStore');
 const { BookmarkStore } = require('./lib/bookmarkStore');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
-const { describe } = require('./lib/format');
+const { STATES, describe } = require('./lib/format');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
@@ -279,7 +279,33 @@ function activate(context) {
         await update(true);
       }
     }),
-    vscode.commands.registerCommand('sessionDashboard.showBoard', () => board.show()),
+    vscode.commands.registerCommand('sessionDashboard.showBoard', (query) => board.show(query)),
+    vscode.commands.registerCommand('sessionDashboard.search', async () => {
+      const visible = model.visibleSessions();
+      const now = Date.now();
+      const items = visible.map((s) => {
+        const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+        const state = STATES[s.displayState] || { label: s.displayState, icon: 'circle-outline' };
+        const isBookmarked = s.isBookmarked ? '📌 ' : '';
+        const detail = describe(s, now);
+        return {
+          label: `${isBookmarked}${s.title}`,
+          description: `[${providerLabel}] ${state.label}${detail ? ' · ' + detail : ''}`,
+          detail: s.lastPrompt || (s.cwd ? `Ordner: ${s.cwd}` : s.sessionId),
+          session: s
+        };
+      });
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Session suchen nach Titel, Prompt, ID, Projektordner...',
+        matchOnDescription: true,
+        matchOnDetail: true
+      });
+
+      if (picked && picked.session) {
+        await openSession(picked.session);
+      }
+    }),
     vscode.commands.registerCommand('sessionDashboard.refresh', () => update(true))
   );
 

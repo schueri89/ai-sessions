@@ -9,18 +9,27 @@ const { STATES, STATE_ORDER, describe } = require('./format');
 const ICONS = {
   claude: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z"/></svg>',
   antigravity: '<svg viewBox="0 0 113 113" width="14" height="14" fill="currentColor"><path d="M89.6992 93.695C94.3659 97.195 101.366 94.8617 94.9492 88.445C75.6992 69.7783 79.7825 18.445 55.8659 18.445C31.9492 18.445 36.0325 69.7783 16.7825 88.445C9.78251 95.445 17.3658 97.195 22.0325 93.695C40.1159 81.445 38.9492 59.8617 55.8659 59.8617C72.7825 59.8617 71.6159 81.445 89.6992 93.695Z"/></svg>',
-  pin: '<svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.923-1.414.728-.195-.195.533-1.22.728-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146z"/></svg>'
+  pin: '<svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.923-1.414.728-.195-.195.533-1.22.728-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146z"/></svg>',
+  search: '<svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>'
 };
 
 class BoardPanel {
   constructor(model) {
     this.model = model;
     this.panel = null;
+    this.pendingSearch = '';
   }
 
-  show() {
+  show(query) {
+    if (typeof query === 'string') {
+      this.pendingSearch = query;
+    }
     if (this.panel) {
       this.panel.reveal();
+      if (this.pendingSearch) {
+        this.panel.webview.postMessage({ type: 'setSearch', query: this.pendingSearch });
+        this.pendingSearch = '';
+      }
       return;
     }
     this.panel = vscode.window.createWebviewPanel(
@@ -89,13 +98,17 @@ class BoardPanel {
           rateLimit: s.rateLimit || null,
           title: s.title,
           detail: describe(s, now),
-          lastPrompt: s.lastPrompt
+          lastPrompt: s.lastPrompt,
+          cwd: s.cwd || ''
         }))
     }));
+    const initialSearch = this.pendingSearch;
+    this.pendingSearch = '';
     this.panel.webview.postMessage({
       type: 'render',
       filter: this.model.providerFilter,
       counts: this.model.counts(),
+      initialSearch,
       columns
     });
   }
@@ -151,7 +164,7 @@ class BoardPanel {
     border: none; border-radius: 2px; padding: 2px 8px; cursor: pointer; font-size: 0.85em; }
   button:hover { background: var(--vscode-button-secondaryHoverBackground); }
   .empty { font-size: 0.85em; opacity: 0.5; font-style: italic; }
-  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
   .filter-group { display: flex; gap: 8px; align-items: center; }
   .filter-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px;
     font-size: 0.85em; font-weight: 500; cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
@@ -163,6 +176,29 @@ class BoardPanel {
   .filter-btn.active[data-filter="all"] { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
   .filter-btn.active.filter-claude { background: rgba(242, 101, 34, 0.25); color: #ff9e79; border-color: rgba(255, 158, 121, 0.5); }
   .filter-btn.active.filter-antigravity { background: rgba(66, 133, 244, 0.25); color: #70a9ff; border-color: rgba(112, 169, 255, 0.5); }
+  .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 420px; min-width: 220px; justify-content: flex-end; }
+  .search-box { position: relative; display: flex; align-items: center; width: 100%; }
+  .search-icon { position: absolute; left: 8px; pointer-events: none; display: flex; align-items: center;
+    color: var(--vscode-input-placeholderForeground); opacity: 0.7; }
+  .search-icon svg { width: 13px; height: 13px; display: block; }
+  .search-input { width: 100%; padding: 4px 26px 4px 26px; border-radius: 4px; font-size: 0.85em;
+    background: var(--vscode-input-background); color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-border, rgba(128, 128, 128, 0.35)); outline: none;
+    box-sizing: border-box; font-family: inherit; transition: border-color 0.15s ease; }
+  .search-input:focus { border-color: var(--vscode-focusBorder); }
+  .search-input::placeholder { color: var(--vscode-input-placeholderForeground); opacity: 0.8; }
+  .search-clear-btn { position: absolute; right: 5px; background: transparent; border: none;
+    color: var(--vscode-input-placeholderForeground); cursor: pointer; padding: 2px 4px; font-size: 0.8em;
+    line-height: 1; border-radius: 2px; }
+  .search-clear-btn:hover { color: var(--vscode-input-foreground); background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2)); }
+  .search-status { font-size: 0.75em; opacity: 0.85; white-space: nowrap; padding: 2px 6px; border-radius: 3px;
+    background: var(--vscode-badge-background, rgba(128, 128, 128, 0.2)); color: var(--vscode-badge-foreground); }
+  .search-status.no-matches { background: rgba(229, 192, 123, 0.2); color: #e5c07b; }
+  .search-highlight { background: rgba(234, 92, 0, 0.4); color: inherit; border-radius: 2px; padding: 0 1px; font-style: normal; }
+  .search-empty-banner { grid-column: 1 / -1; padding: 32px 16px; text-align: center;
+    border: 1px dashed var(--vscode-widget-border, rgba(128, 128, 128, 0.3)); border-radius: 6px; margin: 12px 0; }
+  .search-empty-title { font-size: 1.1em; font-weight: 600; margin-bottom: 6px; }
+  .search-empty-text { font-size: 0.85em; opacity: 0.7; margin-bottom: 12px; }
   .card.rate-limited { border-color: rgba(229, 192, 123, 0.45); }
   .card.rate-limited .detail { color: #e5c07b; opacity: 1; font-weight: 500; }
   .rate-limit-badge { display: inline-flex; align-items: center; font-size: 0.72em;
@@ -183,12 +219,27 @@ class BoardPanel {
       ${ICONS.antigravity} Antigravity <span class="count" id="count-antigravity">0</span>
     </button>
   </div>
+  <div class="search-group">
+    <div class="search-box">
+      <span class="search-icon">${ICONS.search}</span>
+      <input type="text" id="search-input" placeholder="Sessions suchen (Titel, Prompt, ID)... [/]" autocomplete="off" spellcheck="false">
+      <button class="search-clear-btn" id="search-clear" title="Suche leeren" style="display: none;">✕</button>
+    </div>
+    <span class="search-status" id="search-status" style="display: none;"></span>
+  </div>
 </header>
 <div class="board" id="board"></div>
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
   const board = document.getElementById('board');
   const ICONS = ${JSON.stringify(ICONS)};
+
+  let cachedColumns = [];
+  let currentSearch = '';
+
+  const searchInput = document.getElementById('search-input');
+  const searchClear = document.getElementById('search-clear');
+  const searchStatus = document.getElementById('search-status');
 
   const filterBtns = document.querySelectorAll('.filter-btn');
   filterBtns.forEach((btn) => {
@@ -209,6 +260,51 @@ class BoardPanel {
     });
   }
 
+  function updateSearchUI() {
+    searchClear.style.display = currentSearch ? 'inline-block' : 'none';
+  }
+
+  function setSearch(query) {
+    currentSearch = query || '';
+    if (searchInput.value !== currentSearch) {
+      searchInput.value = currentSearch;
+    }
+    updateSearchUI();
+    applySearchAndRender();
+  }
+
+  searchInput.addEventListener('input', () => {
+    currentSearch = searchInput.value;
+    updateSearchUI();
+    applySearchAndRender();
+  });
+
+  searchInput.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') {
+      if (searchInput.value) {
+        setSearch('');
+      } else {
+        searchInput.blur();
+      }
+      ev.stopPropagation();
+    }
+  });
+
+  searchClear.addEventListener('click', () => {
+    setSearch('');
+    searchInput.focus();
+  });
+
+  window.addEventListener('keydown', (ev) => {
+    const isCtrlF = (ev.ctrlKey || ev.metaKey) && (ev.key === 'f' || ev.key === 'F');
+    const isSlash = ev.key === '/' && document.activeElement !== searchInput && document.activeElement.tagName !== 'INPUT';
+    if (isCtrlF || isSlash) {
+      ev.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+
   function el(tag, cls, text) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -216,12 +312,98 @@ class BoardPanel {
     return node;
   }
 
-  function render(columns) {
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^\${}()|[\]\\]/g, '\\$&');
+  }
+
+  function highlightText(text, terms) {
+    const escaped = escapeHtml(text);
+    if (!terms || terms.length === 0) return escaped;
+    const pattern = new RegExp('(' + terms.map(escapeRegex).join('|') + ')', 'gi');
+    return escaped.replace(pattern, '<mark class="search-highlight">$1</mark>');
+  }
+
+  function matchesSession(s, terms) {
+    if (terms.length === 0) return true;
+    const haystack = [
+      s.title,
+      s.lastPrompt,
+      s.sessionId,
+      s.detail,
+      s.cwd,
+      s.provider === 'antigravity' ? 'antigravity google' : 'claude code anthropic'
+    ].join(' ').toLowerCase();
+
+    return terms.every((term) => haystack.includes(term));
+  }
+
+  function applySearchAndRender() {
+    const rawTerms = currentSearch.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    let totalSessions = 0;
+    let totalMatches = 0;
+
+    const filteredColumns = cachedColumns.map((col) => {
+      totalSessions += col.sessions.length;
+      const matched = col.sessions.filter((s) => matchesSession(s, rawTerms));
+      totalMatches += matched.length;
+      return {
+        ...col,
+        rawSessions: col.sessions,
+        sessions: matched
+      };
+    });
+
+    if (rawTerms.length > 0) {
+      searchStatus.style.display = 'inline-block';
+      if (totalMatches === 0) {
+        searchStatus.textContent = '0 Treffer';
+        searchStatus.className = 'search-status no-matches';
+      } else {
+        searchStatus.textContent = totalMatches === 1 ? '1 Treffer' : totalMatches + ' Treffer';
+        searchStatus.className = 'search-status';
+      }
+    } else {
+      searchStatus.style.display = 'none';
+    }
+
+    render(filteredColumns, rawTerms, totalMatches, totalSessions);
+  }
+
+  function render(columns, terms, totalMatches, totalSessions) {
     board.replaceChildren();
+
+    if (terms && terms.length > 0 && totalMatches === 0) {
+      const emptyBanner = el('div', 'search-empty-banner');
+      emptyBanner.append(
+        el('div', 'search-empty-title', 'Keine Sessions gefunden'),
+        el('div', 'search-empty-text', 'Keine Treffer für „' + currentSearch + '“ in ' + totalSessions + ' Sessions.')
+      );
+      const resetBtn = el('button', 'filter-btn', 'Suche zurücksetzen');
+      resetBtn.addEventListener('click', () => {
+        setSearch('');
+        searchInput.focus();
+      });
+      emptyBanner.append(resetBtn);
+      board.append(emptyBanner);
+      return;
+    }
+
     for (const col of columns) {
       const column = el('section', 'column ' + col.state);
       const heading = el('h2');
-      heading.append(el('span', 'dot'), col.label + ' (' + col.sessions.length + ')');
+      const countLabel = terms && terms.length > 0
+        ? col.label + ' (' + col.sessions.length + '/' + col.rawSessions.length + ')'
+        : col.label + ' (' + col.sessions.length + ')';
+      heading.append(el('span', 'dot'), countLabel);
       if (col.state === 'bookmarked' && col.sessions.length > 0) {
         const unpinAllBtn = el('button', 'mark-all-btn', 'Alle geprüft');
         unpinAllBtn.title = 'Alle gemerkten Sessions freigeben';
@@ -232,12 +414,20 @@ class BoardPanel {
         heading.append(unpinAllBtn);
       }
       column.append(heading);
-      if (col.sessions.length === 0) column.append(el('div', 'empty', 'keine'));
+      if (col.sessions.length === 0) {
+        column.append(el('div', 'empty', terms && terms.length > 0 ? 'keine Treffer' : 'keine'));
+      }
       for (const s of col.sessions) {
         const card = el('div', 'card' + (s.rateLimit ? ' rate-limited' : ''));
         card.title = 'Chat öffnen';
         const cardHeader = el('div', 'card-header');
-        cardHeader.append(el('div', 'title', s.title));
+        const titleDiv = el('div', 'title');
+        if (terms && terms.length > 0) {
+          titleDiv.innerHTML = highlightText(s.title, terms);
+        } else {
+          titleDiv.textContent = s.title;
+        }
+        cardHeader.append(titleDiv);
         const badges = el('div', 'header-badges');
         if (s.rateLimit) {
           const isPastReset = s.rateLimit.resetsAt && Date.now() >= s.rateLimit.resetsAt;
@@ -260,7 +450,15 @@ class BoardPanel {
         cardHeader.append(badges);
         card.append(cardHeader);
         if (s.detail) card.append(el('div', 'detail', s.detail));
-        if (s.lastPrompt) card.append(el('div', 'prompt', s.lastPrompt));
+        if (s.lastPrompt) {
+          const promptDiv = el('div', 'prompt');
+          if (terms && terms.length > 0) {
+            promptDiv.innerHTML = highlightText(s.lastPrompt, terms);
+          } else {
+            promptDiv.textContent = s.lastPrompt;
+          }
+          card.append(promptDiv);
+        }
         const actions = el('div', 'actions');
         if (col.state === 'bookmarked') {
           const unpinBtn = el('button', '', 'Geprüft');
@@ -290,8 +488,19 @@ class BoardPanel {
   window.addEventListener('message', (ev) => {
     if (!ev.data) return;
     if (ev.data.type === 'render') {
+      cachedColumns = ev.data.columns || [];
       updateFilterUI(ev.data.filter, ev.data.counts);
-      render(ev.data.columns);
+      if (typeof ev.data.initialSearch === 'string' && ev.data.initialSearch && !currentSearch) {
+        setSearch(ev.data.initialSearch);
+      } else {
+        applySearchAndRender();
+      }
+      return;
+    }
+    if (ev.data.type === 'setSearch') {
+      setSearch(ev.data.query || '');
+      searchInput.focus();
+      return;
     }
   });
   vscode.postMessage({ action: 'ready' });

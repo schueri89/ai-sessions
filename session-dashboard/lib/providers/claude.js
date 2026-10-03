@@ -114,7 +114,7 @@ async function readSessions() {
       provider: 'claude',
       sessionId: h.sessionId,
       pid: 0,
-      cwd: '',
+      cwd: h.entrypoint || '',
       registryName: h.title,
       rawStatus: 'closed',
       waitingFor: '',
