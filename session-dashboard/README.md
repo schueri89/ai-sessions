@@ -12,7 +12,8 @@ auf einen Blick zeigt:
 
 - **Seitenleiste:** Icon „AI Sessions" in der Aktivitätsleiste. Klick auf eine Session öffnet
   ihren Chat (in Claude Code oder Antigravity), das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.
-- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Badges (`Claude` / `Antigravity`).
+- **Provider-Filter:** Schnelle Filterung nach *Alle*, *Claude Code* oder *Antigravity* über das Filter-Icon in der Sidebar (`Filter nach Provider...`) sowie über die Toolbar-Buttons im Board.
+- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Icons und Filterleiste.
 
 Steuern lässt sich über die Extension nichts — das geschieht weiter im jeweiligen Chat.
 

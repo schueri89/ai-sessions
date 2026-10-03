@@ -19,10 +19,34 @@ function compareSessions(a, b) {
 
 class SessionModel {
   constructor(context) {
+    this.context = context;
     this.extensionUri = context.extensionUri;
     this.done = new DoneStore(context.globalState);
+    this.providerFilter = context.globalState.get('sessionDashboard.providerFilter', 'all');
     this.sessions = [];
     this.signature = '';
+  }
+
+  async setFilter(filter) {
+    if (!['all', 'claude', 'antigravity'].includes(filter)) filter = 'all';
+    this.providerFilter = filter;
+    await this.context.globalState.update('sessionDashboard.providerFilter', filter);
+  }
+
+  visibleSessions() {
+    if (this.providerFilter === 'claude') return this.sessions.filter((s) => s.provider === 'claude');
+    if (this.providerFilter === 'antigravity') return this.sessions.filter((s) => s.provider === 'antigravity');
+    return this.sessions;
+  }
+
+  counts() {
+    let claude = 0;
+    let antigravity = 0;
+    for (const s of this.sessions) {
+      if (s.provider === 'claude') claude++;
+      else if (s.provider === 'antigravity') antigravity++;
+    }
+    return { all: this.sessions.length, claude, antigravity };
   }
 
   // Re-reads registry across all providers. Returns true if anything visible changed.
@@ -36,7 +60,10 @@ class SessionModel {
         displayState: this.done.isDone(s.sessionId) ? 'done' : s.state
       }))
       .sort(compareSessions);
-    const signature = JSON.stringify(this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.title, describe(s), s.lastPrompt]));
+    const signature = JSON.stringify([
+      this.providerFilter,
+      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.title, describe(s), s.lastPrompt])
+    ]);
     const changed = signature !== this.signature;
     this.signature = signature;
     return changed;
@@ -108,11 +135,17 @@ function activate(context) {
       if (changed || force === true) {
         tree.refresh();
         board.update();
-        const waiting = model.sessions.filter((s) => s.displayState === 'waiting').length;
+        const visible = model.visibleSessions();
+        const waiting = visible.filter((s) => s.displayState === 'waiting').length;
         view.badge = waiting > 0
           ? { value: waiting, tooltip: waiting === 1 ? '1 Session wartet auf dich' : `${waiting} Sessions warten auf dich` }
           : undefined;
-        view.message = model.sessions.length === 0 ? 'Keine laufenden KI-Sessions gefunden.' : undefined;
+        view.description = model.providerFilter === 'claude'
+          ? 'Claude Code'
+          : (model.providerFilter === 'antigravity' ? 'Antigravity' : '');
+        view.message = visible.length === 0
+          ? (model.sessions.length === 0 ? 'Keine laufenden KI-Sessions gefunden.' : 'Keine Sessions für diesen Filter.')
+          : undefined;
       }
     } catch (err) {
       console.error('[session-dashboard] refresh failed', err);
@@ -149,6 +182,38 @@ function activate(context) {
   context.subscriptions.push({ dispose: () => clearTimeout(debounce) });
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('sessionDashboard.filter', async () => {
+      const counts = model.counts();
+      const current = model.providerFilter;
+      const items = [
+        {
+          label: '$(list-unordered) Alle Sessions',
+          description: `${counts.all}`,
+          detail: current === 'all' ? '✓ Aktiver Filter' : '',
+          filter: 'all'
+        },
+        {
+          label: '$(sparkle) Claude Code',
+          description: `${counts.claude}`,
+          detail: current === 'claude' ? '✓ Aktiver Filter' : '',
+          filter: 'claude'
+        },
+        {
+          label: '$(rocket) Google Antigravity',
+          description: `${counts.antigravity}`,
+          detail: current === 'antigravity' ? '✓ Aktiver Filter' : '',
+          filter: 'antigravity'
+        }
+      ];
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Nach Provider filtern...'
+      });
+      if (picked && picked.filter) {
+        await model.setFilter(picked.filter);
+        await update(true);
+      }
+    }),
     vscode.commands.registerCommand('sessionDashboard.open', (arg) => {
       const info = sessionInfoOf(arg, model);
       if (info) return openSession(info);

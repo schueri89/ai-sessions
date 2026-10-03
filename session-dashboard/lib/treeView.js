@@ -44,7 +44,7 @@ class SessionTreeProvider {
   }
 
   getChildren(element) {
-    const sessions = this.model.sessions;
+    const sessions = this.model.visibleSessions();
     if (!element) {
       return STATE_ORDER
         .map((state) => ({ state, members: sessions.filter((s) => s.displayState === state) }))
