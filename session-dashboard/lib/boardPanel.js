@@ -90,6 +90,7 @@ class BoardPanel {
           sessionId: s.sessionId,
           provider: s.provider || 'claude',
           isBookmarked: Boolean(s.isBookmarked),
+          rateLimit: s.rateLimit || null,
           title: s.title,
           detail: describe(s, now),
           lastPrompt: s.lastPrompt
@@ -168,6 +169,11 @@ class BoardPanel {
   .filter-btn.active[data-filter="all"] { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
   .filter-btn.active.filter-claude { background: rgba(242, 101, 34, 0.25); color: #ff9e79; border-color: rgba(255, 158, 121, 0.5); }
   .filter-btn.active.filter-antigravity { background: rgba(66, 133, 244, 0.25); color: #70a9ff; border-color: rgba(112, 169, 255, 0.5); }
+  .card.rate-limited { border-color: rgba(229, 192, 123, 0.45); }
+  .card.rate-limited .detail { color: #e5c07b; opacity: 1; font-weight: 500; }
+  .rate-limit-badge { display: inline-flex; align-items: center; font-size: 0.72em;
+    padding: 1px 5px; border-radius: 3px; font-weight: 600; line-height: 1.2;
+    background: rgba(229, 192, 123, 0.2); color: #e5c07b; border: 1px solid rgba(229, 192, 123, 0.4); }
 </style>
 </head>
 <body>
@@ -242,11 +248,17 @@ class BoardPanel {
       column.append(heading);
       if (col.sessions.length === 0) column.append(el('div', 'empty', 'keine'));
       for (const s of col.sessions) {
-        const card = el('div', 'card');
+        const card = el('div', 'card' + (s.rateLimit ? ' rate-limited' : ''));
         card.title = 'Chat öffnen';
         const cardHeader = el('div', 'card-header');
         cardHeader.append(el('div', 'title', s.title));
         const badges = el('div', 'header-badges');
+        if (s.rateLimit) {
+          const isPastReset = s.rateLimit.resetsAt && Date.now() >= s.rateLimit.resetsAt;
+          const badge = el('span', 'rate-limit-badge', isPastReset ? '⚠️ Limit vorbei' : '⏳ Limit erreicht');
+          if (s.rateLimit.humanText) badge.title = s.rateLimit.humanText;
+          badges.append(badge);
+        }
         const pinBtn = el('button', 'pin-btn' + (s.isBookmarked ? ' active' : ''));
         pinBtn.title = s.isBookmarked ? 'Nicht mehr merken' : 'Session merken';
         pinBtn.innerHTML = ICONS.pin;

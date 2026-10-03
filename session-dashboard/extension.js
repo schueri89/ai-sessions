@@ -57,6 +57,7 @@ class SessionModel {
     const knownIds = new Set(live.map((s) => s.sessionId));
     await this.done.reconcile(live, knownIds);
     await this.bookmarks.reconcile(live, knownIds);
+    const now = Date.now();
     this.sessions = live
       .map((s) => {
         const isDone = this.done.isDone(s.sessionId);
@@ -64,6 +65,12 @@ class SessionModel {
         let displayState = s.state;
         if (isDone) {
           displayState = 'done';
+        } else if (s.rateLimit) {
+          const isPastReset = s.rateLimit.resetsAt && now >= s.rateLimit.resetsAt;
+          displayState = isPastReset ? 'waiting' : 'busy';
+          if (isPastReset && !s.waitingFor) {
+            s.waitingFor = 'Limit abgelaufen';
+          }
         } else if (isBookmarked && (s.state === 'idle' || s.state === 'closed')) {
           displayState = 'bookmarked';
         }
@@ -76,7 +83,7 @@ class SessionModel {
       .sort(compareSessions);
     const signature = JSON.stringify([
       this.providerFilter,
-      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.isBookmarked, s.title, describe(s), s.lastPrompt])
+      this.sessions.map((s) => [s.sessionId, s.provider, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.title, describe(s, now), s.lastPrompt])
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;

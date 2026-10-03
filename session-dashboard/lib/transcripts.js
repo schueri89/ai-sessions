@@ -13,10 +13,10 @@ function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 }
 
-const INTERESTING = ['"custom-title"', '"ai-title"', '"agent-name"', '"last-prompt"'];
+const INTERESTING = ['"custom-title"', '"ai-title"', '"agent-name"', '"last-prompt"', '"rate_limit"', '"quotaLimits"', '"type":"assistant"'];
 const NEWLINE = 0x0a;
 
-const cache = new Map(); // sessionId -> { file, offset, rest, customTitle, aiTitle, agentName, lastPrompt }
+const cache = new Map(); // sessionId -> { file, offset, rest, customTitle, aiTitle, agentName, lastPrompt, rateLimit }
 
 function findTranscript(sessionId) {
   const root = path.join(claudeDir(), 'projects');
@@ -34,14 +34,14 @@ function findTranscript(sessionId) {
 }
 
 function emptyInfo() {
-  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '' };
+  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null };
 }
 
 function titleOf(info) {
   return info.customTitle || info.aiTitle || info.agentName;
 }
 
-// Picks title and last prompt out of one transcript line; later lines win.
+// Picks title, last prompt and rate-limit info out of one transcript line; later lines win.
 function applyLine(info, line) {
   if (!INTERESTING.some((marker) => line.includes(marker))) return;
   let rec;
@@ -62,6 +62,18 @@ function applyLine(info, line) {
       break;
     case 'last-prompt':
       if (typeof rec.lastPrompt === 'string') info.lastPrompt = rec.lastPrompt;
+      break;
+    case 'assistant':
+      if (rec.error === 'rate_limit' || (rec.quotaLimits && rec.quotaLimits.status === 'rejected') || rec.apiErrorStatus === 429) {
+        const resetsAt = (rec.quotaLimits && typeof rec.quotaLimits.resetsAt === 'number')
+          ? rec.quotaLimits.resetsAt * 1000
+          : null;
+        const humanText = (rec.message && Array.isArray(rec.message.content) && rec.message.content[0] && rec.message.content[0].text)
+          || "You've hit your session limit";
+        info.rateLimit = { resetsAt, humanText };
+      } else if (!rec.error && !rec.isApiErrorMessage) {
+        info.rateLimit = null;
+      }
       break;
   }
 }
@@ -100,17 +112,17 @@ function readAppended(info) {
   }
 }
 
-// Returns { title, lastPrompt }; empty strings if the transcript does not exist (yet).
+// Returns { title, lastPrompt, rateLimit }; empty strings if the transcript does not exist (yet).
 function readTranscriptInfo(sessionId) {
   let info = cache.get(sessionId);
   if (!info) {
     const file = findTranscript(sessionId);
-    if (!file) return { title: '', lastPrompt: '' };
+    if (!file) return { title: '', lastPrompt: '', rateLimit: null };
     info = { file, offset: 0, rest: Buffer.alloc(0), ...emptyInfo() };
     cache.set(sessionId, info);
   }
   readAppended(info);
-  return { title: titleOf(info), lastPrompt: info.lastPrompt };
+  return { title: titleOf(info), lastPrompt: info.lastPrompt, rateLimit: info.rateLimit || null };
 }
 
 // Drops cache entries of sessions that are no longer running.

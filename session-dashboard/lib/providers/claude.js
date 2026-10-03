@@ -89,7 +89,8 @@ function readLiveSessions() {
       startedAt: s.startedAt,
       statusUpdatedAt: s.statusUpdatedAt,
       title: info.title || s.registryName || s.sessionId.slice(0, 8),
-      lastPrompt: info.lastPrompt
+      lastPrompt: info.lastPrompt,
+      rateLimit: info.rateLimit || null
     };
   });
 }
@@ -119,7 +120,8 @@ async function readSessions() {
       startedAt: 0,
       statusUpdatedAt: h.lastActivity,
       title: h.title,
-      lastPrompt: h.lastPrompt
+      lastPrompt: h.lastPrompt,
+      rateLimit: h.rateLimit || null
     }));
 
   return [...live, ...closed];

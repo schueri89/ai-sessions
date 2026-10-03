@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -169,7 +169,7 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
+    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js",
     "package": "vsce package --skip-license --allow-missing-repository"
   },
   "devDependencies": {

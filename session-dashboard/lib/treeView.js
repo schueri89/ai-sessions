@@ -7,6 +7,11 @@ function tooltipFor(s) {
   const md = new vscode.MarkdownString(undefined, true);
   const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
   md.appendMarkdown(`**[${providerLabel}] ${escapeMd(s.title)}**\n\n`);
+  if (s.rateLimit) {
+    const isPastReset = s.rateLimit.resetsAt && Date.now() >= s.rateLimit.resetsAt;
+    const warningHeader = isPastReset ? 'Session-Limit abgelaufen (bereit)' : 'Session-Limit erreicht';
+    md.appendMarkdown(`$(warning) **${warningHeader}:** ${escapeMd(s.rateLimit.humanText)}\n\n`);
+  }
   if (s.isBookmarked) md.appendMarkdown(`$(pinned) **Gemerkt** · `);
   md.appendMarkdown(`$(${STATES[s.displayState].icon}) ${STATES[s.displayState].label}`);
   const detail = describe(s);
@@ -79,7 +84,11 @@ class SessionTreeProvider {
     item.description = detail ? `${providerPrefix} · ${detail}` : providerPrefix;
     item.tooltip = tooltipFor(s);
     const state = STATES[s.displayState];
-    item.iconPath = new vscode.ThemeIcon(state.icon, new vscode.ThemeColor(state.color));
+    if (s.rateLimit && s.displayState === 'busy') {
+      item.iconPath = new vscode.ThemeIcon('clock', new vscode.ThemeColor('charts.yellow'));
+    } else {
+      item.iconPath = new vscode.ThemeIcon(state.icon, new vscode.ThemeColor(state.color));
+    }
     
     let ctx = s.displayState === 'done' ? 'session-done' : 'session';
     if (s.isBookmarked) ctx += '-bookmarked';

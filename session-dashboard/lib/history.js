@@ -83,7 +83,8 @@ async function readEntry(file, sessionId, size, mtimeMs) {
       entrypoint,
       title: title.split('\n')[0].slice(0, 120),
       lastPrompt: info.lastPrompt || firstPrompt,
-      lastActivity: mtimeMs
+      lastActivity: mtimeMs,
+      rateLimit: info.rateLimit || null
     };
   } finally {
     await handle.close();

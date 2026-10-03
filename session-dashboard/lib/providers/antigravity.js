@@ -193,7 +193,8 @@ async function readSessions() {
       statusUpdatedAt,
       title: r.title || cleanPrompt(r.preview) || sessionId.slice(0, 8),
       lastPrompt: lastPrompt || '',
-      workspaces
+      workspaces,
+      rateLimit: null
     });
   }
 

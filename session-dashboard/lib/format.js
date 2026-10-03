@@ -35,6 +35,12 @@ function formatDateTime(ms) {
   return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
+function formatTime(ms) {
+  if (!ms) return '';
+  const d = new Date(ms);
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())} Uhr`;
+}
+
 function relativeTime(ms, now = Date.now()) {
   if (!ms) return '';
   const minutes = Math.floor((now - ms) / 60000);
@@ -56,6 +62,16 @@ function lastActive(ms, now = Date.now()) {
 
 // One-line summary under the title: reason (if waiting) and age of the current state.
 function describe(session, now = Date.now()) {
+  if (session.rateLimit) {
+    const isPastReset = session.rateLimit.resetsAt && now >= session.rateLimit.resetsAt;
+    if (isPastReset) {
+      return '⚠️ Limit vorbei · Bereit zum Fortsetzen';
+    }
+    if (session.rateLimit.resetsAt) {
+      return `⏳ Limit bis ${formatTime(session.rateLimit.resetsAt)}`;
+    }
+    return '⏳ Session-Limit erreicht';
+  }
   if (session.state === 'closed') return lastActive(session.statusUpdatedAt, now);
   const parts = [];
   if (session.state === 'waiting') parts.push(waitingReason(session.waitingFor));
@@ -66,4 +82,4 @@ function describe(session, now = Date.now()) {
   return parts.filter(Boolean).join(' · ');
 }
 
-module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, relativeTime, describe };
+module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, formatTime, relativeTime, describe };

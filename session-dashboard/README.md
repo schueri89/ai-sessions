@@ -13,6 +13,7 @@ auf einen Blick zeigt:
 
 - **Seitenleiste:** Icon „AI Sessions" in der Aktivitätsleiste. Klick auf eine Session öffnet
   ihren Chat (in Claude Code oder Antigravity), das Pinnadel-Icon merkt bzw. entmerkt die Session, das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.
+- **Rate-Limit-Erkennung (Claude Code):** Erreicht eine Session ihr Kontingentlimit („You've hit your session limit"), bleibt sie bis zum Reset-Zeitpunkt in **„Arbeitet“** (mit gelbem Warn-Badge `⏳ Limit bis HH:MM Uhr`). Nach Ablauf des Limits wechselt sie automatisch nach **„Wartet auf dich“** (`⚠️ Limit vorbei · Bereit zum Fortsetzen`), sodass man über das Sidebar-Badge sofort benachrichtigt wird.
 - **Provider-Filter:** Schnelle Filterung nach *Alle*, *Claude Code* oder *Antigravity* über das Filter-Icon in der Sidebar (`Filter nach Provider...`) sowie über die Toolbar-Buttons im Board.
 - **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Icons, Filterleiste und Pin-Schaltflächen auf den Karten sowie Massenfreigabe („Alle geprüft“).
 
