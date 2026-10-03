@@ -8,7 +8,7 @@ const { BookmarkStore } = require('./lib/bookmarkStore');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
-const { STATES, describe } = require('./lib/format');
+const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
@@ -100,7 +100,7 @@ class SessionModel {
     const signature = JSON.stringify([
       this.providerFilter,
       this.projectFilter,
-      this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
+      this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;
@@ -337,16 +337,17 @@ function activate(context) {
         const projectPrefix = s.project ? `[${s.project}] ` : '';
         const activityPrefix = s.displayState === 'busy' && s.activity ? `[${s.activity}] ` : '';
         const detail = describe(s, now);
+        const tokenDetail = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)} (${s.tokens.percent}%)${s.tokens.model ? ' ' + friendlyModel(s.tokens.model) : ''}` : '';
         return {
           label: `${isBookmarked}${projectPrefix}${s.title}`,
-          description: `[${providerLabel}] ${state.label}${detail ? ' · ' + detail : ''}`,
+          description: `[${providerLabel}] ${state.label}${detail ? ' · ' + detail : ''}${tokenDetail}`,
           detail: activityPrefix + (s.lastPrompt || (s.cwd ? `Ordner: ${s.cwd}` : s.sessionId)),
           session: s
         };
       });
 
       const picked = await vscode.window.showQuickPick(items, {
-        placeHolder: 'Session suchen nach Titel, Projekt, Prompt, ID...',
+        placeHolder: 'Session suchen nach Titel, Projekt, Prompt, ID, Modell...',
         matchOnDescription: true,
         matchOnDetail: true
       });
@@ -387,9 +388,10 @@ function activate(context) {
         for (const s of waitingSessions) {
           const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
           const proj = s.project ? `[${s.project}] ` : '';
+          const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
             label: `$(bell-dot) ${proj}${s.title}`,
-            description: providerLabel,
+            description: `${providerLabel}${tokenStr}`,
             detail: s.lastPrompt || s.waitingFor || 'Wartet auf deine Eingabe',
             session: s,
             action: 'session'
@@ -402,9 +404,10 @@ function activate(context) {
         for (const s of busySessions) {
           const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
           const proj = s.project ? `[${s.project}] ` : '';
+          const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
             label: `$(loading~spin) ${proj}${s.title}`,
-            description: s.activity || providerLabel,
+            description: (s.activity || providerLabel) + tokenStr,
             detail: s.lastPrompt || 'Wird ausgeführt...',
             session: s,
             action: 'session'

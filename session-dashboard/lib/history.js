@@ -99,7 +99,8 @@ async function readEntry(file, sessionId, size, mtimeMs) {
       lastPrompt: info.lastPrompt || firstPrompt,
       lastActivity: info.lastActivity || info.startedAt || mtimeMs,
       startedAt: info.startedAt || mtimeMs,
-      rateLimit: info.rateLimit || null
+      rateLimit: info.rateLimit || null,
+      tokens: info.tokens || null
     };
   } finally {
     await handle.close();

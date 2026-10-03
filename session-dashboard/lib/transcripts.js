@@ -13,7 +13,7 @@ function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 }
 
-const INTERESTING = ['"custom-title"', '"ai-title"', '"agent-name"', '"last-prompt"', '"rate_limit"', '"quotaLimits"', '"type":"assistant"', '"timestamp"'];
+const INTERESTING = ['"custom-title"', '"ai-title"', '"agent-name"', '"last-prompt"', '"rate_limit"', '"quotaLimits"', '"type":"assistant"', '"timestamp"', '"usage"'];
 const NEWLINE = 0x0a;
 
 const cache = new Map(); // sessionId -> { file, offset, rest, customTitle, aiTitle, agentName, lastPrompt, rateLimit, startedAt, lastActivity }
@@ -34,7 +34,7 @@ function findTranscript(sessionId) {
 }
 
 function emptyInfo() {
-  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '', project: '' };
+  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '', project: '', tokens: null };
 }
 
 function formatClaudeTool(c) {
@@ -145,6 +145,26 @@ function applyLine(info, line) {
             info.activity = '💬 Antwortet…';
           }
         }
+        if (rec.message && rec.message.usage) {
+          const u = rec.message.usage;
+          const input = Number(u.input_tokens) || 0;
+          const cacheCreation = Number(u.cache_creation_input_tokens) || 0;
+          const cacheRead = Number(u.cache_read_input_tokens) || 0;
+          const output = Number(u.output_tokens) || 0;
+          const context = input + cacheCreation + cacheRead;
+          const maxContext = 200000;
+          const model = typeof rec.message.model === 'string' ? rec.message.model : '';
+          info.tokens = {
+            context,
+            maxContext,
+            percent: Math.min(100, Math.round((context / maxContext) * 100)),
+            inputTokens: input,
+            cacheCreationTokens: cacheCreation,
+            cacheReadTokens: cacheRead,
+            outputTokens: output,
+            model
+          };
+        }
       }
       break;
   }
@@ -201,7 +221,8 @@ function readTranscriptInfo(sessionId) {
     startedAt: info.startedAt || 0,
     lastActivity: info.lastActivity || info.startedAt || 0,
     activity: info.activity || '',
-    project: info.project || ''
+    project: info.project || '',
+    tokens: info.tokens || null
   };
 }
 

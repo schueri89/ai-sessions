@@ -1,7 +1,7 @@
 'use strict';
 
 const vscode = require('vscode');
-const { STATES, STATE_ORDER, describe, formatDateTime } = require('./format');
+const { STATES, STATE_ORDER, describe, formatDateTime, formatTokens, friendlyModel } = require('./format');
 
 function tooltipFor(s) {
   const md = new vscode.MarkdownString(undefined, true);
@@ -10,6 +10,12 @@ function tooltipFor(s) {
   md.appendMarkdown(`**${projectLabel}[${providerLabel}] ${escapeMd(s.title)}**\n\n`);
   if (s.project) {
     md.appendMarkdown(`📁 **Projekt:** \`${escapeMd(s.project)}\`\n\n`);
+  }
+  if (s.tokens) {
+    const ctx = formatTokens(s.tokens.context);
+    const max = formatTokens(s.tokens.maxContext);
+    const model = s.tokens.model ? ` · ${friendlyModel(s.tokens.model)}` : '';
+    md.appendMarkdown(`🧠 **Kontextfenster:** ${ctx} / ${max} (${s.tokens.percent}%)${model}\n\n`);
   }
   if (s.rateLimit) {
     const isPastReset = s.rateLimit.resetsAt && Date.now() >= s.rateLimit.resetsAt;

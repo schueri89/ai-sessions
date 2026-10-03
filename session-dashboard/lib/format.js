@@ -81,4 +81,33 @@ function describe(session, now = Date.now()) {
   return parts.filter(Boolean).join(' · ');
 }
 
-module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, formatTime, relativeTime, describe };
+function formatTokens(n) {
+  if (!n || typeof n !== 'number') return '0';
+  if (n >= 1000000) {
+    const m = n / 1000000;
+    return (m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)) + 'M';
+  }
+  if (n >= 1000) {
+    const k = n / 1000;
+    return (k >= 100 ? Math.round(k) : (k % 1 === 0 ? k.toFixed(0) : k.toFixed(1))) + 'k';
+  }
+  return String(n);
+}
+
+function friendlyModel(m) {
+  if (!m) return '';
+  const lower = m.toLowerCase();
+  if (lower.includes('opus-5-5') || lower.includes('opus-5.5')) return 'Opus 5.5';
+  if (lower.includes('opus')) return 'Opus';
+  if (lower.includes('sonnet-3-7') || lower.includes('3.7-sonnet')) return 'Sonnet 3.7';
+  if (lower.includes('sonnet-3-5') || lower.includes('3.5-sonnet') || lower.includes('sonnet-20241022')) return 'Sonnet 3.5';
+  if (lower.includes('sonnet')) return 'Sonnet';
+  if (lower.includes('haiku')) return 'Haiku';
+  if (lower.includes('gemini-2.0-pro') || lower.includes('gemini-2-pro')) return 'Gemini 2.0 Pro';
+  if (lower.includes('gemini-2.0-flash') || lower.includes('gemini-2-flash')) return 'Gemini 2.0 Flash';
+  if (lower.includes('gemini-1.5-pro')) return 'Gemini 1.5 Pro';
+  if (lower.includes('gemini')) return 'Gemini';
+  return m.replace(/^claude-/, '');
+}
+
+module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, formatTime, relativeTime, describe, formatTokens, friendlyModel };

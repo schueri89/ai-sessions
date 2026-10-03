@@ -135,6 +135,7 @@ function readTranscriptTail(sessionId) {
     const lines = buf.toString('utf8').split('\n').filter(Boolean);
     let lastPrompt = '';
     let lastStep = null;
+    let tokens = null;
 
     for (let i = lines.length - 1; i >= 0; i--) {
       try {
@@ -143,7 +144,24 @@ function readTranscriptTail(sessionId) {
         if (!lastPrompt && step.type === 'USER_INPUT' && step.content) {
           lastPrompt = cleanPrompt(step.content);
         }
-        if (lastPrompt && lastStep) break;
+        if (!tokens && step.type === 'PLANNER_RESPONSE' && (step.input_tokens !== undefined || step.cache_read_tokens !== undefined)) {
+          const input = Number(step.input_tokens) || 0;
+          const cacheRead = Number(step.cache_read_tokens) || 0;
+          const output = Number(step.output_tokens) || 0;
+          const context = input + cacheRead;
+          const maxContext = 1000000;
+          tokens = {
+            context,
+            maxContext,
+            percent: Math.min(100, Math.round((context / maxContext) * 100)),
+            inputTokens: input,
+            cacheCreationTokens: 0,
+            cacheReadTokens: cacheRead,
+            outputTokens: output,
+            model: 'Gemini'
+          };
+        }
+        if (lastPrompt && lastStep && tokens) break;
       } catch {}
     }
 
@@ -165,9 +183,9 @@ function readTranscriptTail(sessionId) {
       }
     }
 
-    return { lastPrompt, isWaiting, activity, rawLines: lines };
+    return { lastPrompt, isWaiting, activity, rawLines: lines, tokens };
   } catch {
-    return { lastPrompt: '', isWaiting: false, activity: '', rawLines: [] };
+    return { lastPrompt: '', isWaiting: false, activity: '', rawLines: [], tokens: null };
   } finally {
     if (fd !== null) {
       try { fs.closeSync(fd); } catch {}
@@ -211,6 +229,7 @@ async function readSessions() {
     let lastPrompt = '';
     let activity = '';
     let rawLines = [];
+    let tokens = null;
 
     if (notFullyIdle || isRunning) {
       const info = readTranscriptTail(sessionId);
@@ -223,6 +242,7 @@ async function readSessions() {
       lastPrompt = info.lastPrompt;
       activity = state === 'busy' ? (info.activity || 'Arbeitet…') : '';
       rawLines = info.rawLines || [];
+      tokens = info.tokens || null;
     } else {
       if ((now - statusUpdatedAt) > RECENT_IDLE_WINDOW_MS) {
         state = 'closed';
@@ -232,6 +252,7 @@ async function readSessions() {
         const info = readTranscriptTail(sessionId);
         lastPrompt = info.lastPrompt;
         rawLines = info.rawLines || [];
+        tokens = info.tokens || null;
       }
     }
 
@@ -270,7 +291,8 @@ async function readSessions() {
       lastPrompt: lastPrompt || '',
       activity,
       workspaces,
-      rateLimit: null
+      rateLimit: null,
+      tokens: tokens || null
     });
   }
 

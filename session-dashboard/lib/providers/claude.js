@@ -102,6 +102,7 @@ function readLiveSessions() {
       title,
       lastPrompt: info.lastPrompt,
       rateLimit: info.rateLimit || null,
+      tokens: info.tokens || null,
       activity: s.state === 'busy' ? (info.activity || 'Arbeitet…') : ''
     };
   });
@@ -134,7 +135,8 @@ async function readSessions() {
       statusUpdatedAt: h.lastActivity,
       title: h.title,
       lastPrompt: h.lastPrompt,
-      rateLimit: h.rateLimit || null
+      rateLimit: h.rateLimit || null,
+      tokens: h.tokens || null
     }));
 
   return [...live, ...closed];

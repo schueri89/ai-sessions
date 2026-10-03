@@ -103,6 +103,7 @@ class BoardPanel {
           project: s.project || 'ROOT',
           isBookmarked: Boolean(s.isBookmarked),
           rateLimit: s.rateLimit || null,
+          tokens: s.tokens || null,
           title: s.title,
           detail: describe(s, now),
           lastPrompt: s.lastPrompt,
@@ -245,6 +246,25 @@ class BoardPanel {
     100% { opacity: 0.35; transform: scale(0.85); }
   }
   .activity-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-weight: 500; }
+  .token-bar { margin: 6px 0 2px; padding: 4px 6px; border-radius: 4px;
+    background: rgba(128, 128, 128, 0.08); border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.18));
+    cursor: default; transition: background 0.15s ease; }
+  .token-bar:hover { background: rgba(128, 128, 128, 0.14); }
+  .token-track { width: 100%; height: 4px; border-radius: 2px;
+    background: rgba(128, 128, 128, 0.2); overflow: hidden; margin-bottom: 4px; }
+  .token-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+  .token-fill.level-low { background: var(--vscode-charts-blue, #70a9ff); }
+  .token-fill.level-medium { background: var(--vscode-charts-yellow, #e5c07b); }
+  .token-fill.level-high { background: var(--vscode-charts-red, #f48771); }
+  .token-meta { display: flex; align-items: center; justify-content: space-between; font-size: 0.73em; line-height: 1.2; }
+  .token-stats { display: inline-flex; align-items: center; gap: 4px; }
+  .token-pct { font-weight: 600; }
+  .token-pct.level-low { color: var(--vscode-charts-blue, #70a9ff); }
+  .token-pct.level-medium { color: var(--vscode-charts-yellow, #e5c07b); }
+  .token-pct.level-high { color: var(--vscode-charts-red, #f48771); }
+  .token-counts { opacity: 0.75; }
+  .token-model-badge { opacity: 0.85; font-size: 0.95em; font-weight: 500;
+    padding: 1px 5px; border-radius: 3px; background: rgba(128, 128, 128, 0.15); }
 </style>
 </head>
 <body>
@@ -413,8 +433,38 @@ class BoardPanel {
     return escaped.replace(pattern, '<mark class="search-highlight">$1</mark>');
   }
 
+  function formatTokens(n) {
+    if (!n || typeof n !== 'number') return '0';
+    if (n >= 1000000) {
+      const m = n / 1000000;
+      return (m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)) + 'M';
+    }
+    if (n >= 1000) {
+      const k = n / 1000;
+      return (k >= 100 ? Math.round(k) : (k % 1 === 0 ? k.toFixed(0) : k.toFixed(1))) + 'k';
+    }
+    return String(n);
+  }
+
+  function friendlyModel(m) {
+    if (!m) return '';
+    const lower = m.toLowerCase();
+    if (lower.includes('opus-5-5') || lower.includes('opus-5.5')) return 'Opus 5.5';
+    if (lower.includes('opus')) return 'Opus';
+    if (lower.includes('sonnet-3-7') || lower.includes('3.7-sonnet')) return 'Sonnet 3.7';
+    if (lower.includes('sonnet-3-5') || lower.includes('3.5-sonnet') || lower.includes('sonnet-20241022')) return 'Sonnet 3.5';
+    if (lower.includes('sonnet')) return 'Sonnet';
+    if (lower.includes('haiku')) return 'Haiku';
+    if (lower.includes('gemini-2.0-pro') || lower.includes('gemini-2-pro')) return 'Gemini 2.0 Pro';
+    if (lower.includes('gemini-2.0-flash') || lower.includes('gemini-2-flash')) return 'Gemini 2.0 Flash';
+    if (lower.includes('gemini-1.5-pro')) return 'Gemini 1.5 Pro';
+    if (lower.includes('gemini')) return 'Gemini';
+    return m.replace(/^claude-/, '');
+  }
+
   function matchesSession(s, terms) {
     if (terms.length === 0) return true;
+    const modelText = s.tokens && s.tokens.model ? s.tokens.model : '';
     const haystack = [
       s.title,
       s.project || '',
@@ -423,6 +473,7 @@ class BoardPanel {
       s.sessionId,
       s.detail,
       s.cwd,
+      modelText,
       s.provider === 'antigravity' ? 'antigravity google' : 'claude code anthropic'
     ].join(' ').toLowerCase();
 
@@ -547,6 +598,42 @@ class BoardPanel {
             metaDiv.append(el('span', 'detail', s.detail));
           }
           card.append(metaDiv);
+        }
+        if (s.tokens && typeof s.tokens.context === 'number') {
+          const t = s.tokens;
+          const pct = Math.min(100, Math.max(0, t.percent || 0));
+          const level = pct >= 85 ? 'high' : (pct >= 65 ? 'medium' : 'low');
+
+          const tokenBar = el('div', 'token-bar');
+          const tooltipParts = [
+            'Kontextfenster: ' + formatTokens(t.context) + ' / ' + formatTokens(t.maxContext) + ' (' + pct + '% belegt)'
+          ];
+          if (t.model) tooltipParts.push('Modell: ' + friendlyModel(t.model));
+          if (t.cacheReadTokens || t.cacheCreationTokens || t.inputTokens) {
+            tooltipParts.push('Input: ' + formatTokens(t.cacheReadTokens || 0) + ' Cache-Read, ' + formatTokens(t.cacheCreationTokens || 0) + ' Cache-Create, ' + formatTokens(t.inputTokens || 0) + ' Neu');
+          }
+          if (t.outputTokens) {
+            tooltipParts.push('Output: ' + formatTokens(t.outputTokens) + ' Tokens');
+          }
+          tokenBar.title = tooltipParts.join('\\n');
+
+          const track = el('div', 'token-track');
+          const fill = el('div', 'token-fill level-' + level);
+          fill.style.width = pct + '%';
+          track.append(fill);
+          tokenBar.append(track);
+
+          const meta = el('div', 'token-meta');
+          const stats = el('div', 'token-stats');
+          stats.append(el('span', 'token-pct level-' + level, pct + '%'));
+          stats.append(el('span', 'token-counts', '· ' + formatTokens(t.context) + '/' + formatTokens(t.maxContext)));
+          meta.append(stats);
+
+          if (t.model) {
+            meta.append(el('span', 'token-model-badge', friendlyModel(t.model)));
+          }
+          tokenBar.append(meta);
+          card.append(tokenBar);
         }
         if (s.activity && (col.state === 'busy' || s.displayState === 'busy' || s.state === 'busy')) {
           const actDiv = el('div', 'activity');
