@@ -471,35 +471,110 @@ class BoardPanel {
       prov.innerHTML = ICONS.antigravity + ' Google Antigravity';
       header.append(prov);
 
-      const statusPill = el('span', 'quota-status-pill ' + (a.isRateLimited ? 'status-danger' : 'status-ok'));
-      statusPill.textContent = a.isRateLimited ? 'Limit (429)' : 'Bereit';
-      if (a.isRateLimited) statusPill.title = a.rateLimitMessage;
-      header.append(statusPill);
-      card.append(header);
+      if (a.hasLiveQuota && a.gemini) {
+        const maxPct = Math.max(a.gemini.fiveHour?.percent || 0, a.gemini.weekly?.percent || 0);
+        const statusClass = a.isRateLimited ? 'status-danger' : (maxPct >= 85 ? 'status-danger' : (maxPct >= 65 ? 'status-warn' : 'status-ok'));
+        const statusText = a.isRateLimited ? 'Limit (429)' : (maxPct >= 85 ? 'Fast voll' : (maxPct >= 65 ? 'Erhöht' : 'Normal'));
+        const statusPill = el('span', 'quota-status-pill ' + statusClass, statusText);
+        if (a.isRateLimited && a.rateLimitMessage) statusPill.title = a.rateLimitMessage;
+        header.append(statusPill);
+        card.append(header);
 
-      const meters = el('div', 'quota-meters');
+        const meters = el('div', 'quota-meters');
 
-      // 5h Antigravity
-      const m5 = el('div', 'quota-meter');
-      const lbl5 = el('div', 'quota-meter-label');
-      lbl5.append(el('span', '', '5h-Verbrauch'), el('span', 'quota-val', formatTokens(a.tokens5h)));
-      m5.append(lbl5);
-      const sub5 = el('div', 'quota-sub', 'Letzte 5 Stunden');
-      sub5.title = 'Tokens in den letzten 5 Stunden über alle Antigravity-Sessions: ' + (a.tokens5h || 0).toLocaleString('de-DE');
-      m5.append(sub5);
-      meters.append(m5);
+        // Gemini 5h meter
+        const m5 = el('div', 'quota-meter');
+        const p5 = Math.min(100, Math.max(0, a.gemini.fiveHour?.percent ?? 0));
+        const lvl5 = p5 >= 85 ? 'high' : (p5 >= 65 ? 'medium' : 'low');
+        const lbl5 = el('div', 'quota-meter-label');
+        lbl5.append(el('span', '', '5h-Limit'), el('span', 'quota-val level-' + lvl5, p5 + '%'));
+        m5.append(lbl5);
+        const tr5 = el('div', 'quota-progress-track');
+        const fl5 = el('div', 'quota-progress-fill level-' + lvl5);
+        fl5.style.width = p5 + '%';
+        tr5.append(fl5);
+        m5.append(tr5);
+        const r5Text = a.gemini.fiveHour?.resetLabel ? 'Reset ' + a.gemini.fiveHour.resetLabel : '5-Stunden-Fenster';
+        const sub5 = el('div', 'quota-sub', r5Text);
+        sub5.title = 'Gemini 5-Stunden-Limit: ' + p5 + '% genutzt' +
+          (a.gemini.fiveHour?.resetLabel ? ' · Zurücksetzung um ' + a.gemini.fiveHour.resetLabel : '') +
+          (a.tokens5h ? ' · ~' + formatTokens(a.tokens5h) + ' Tokens verbraucht' : '') +
+          (a.gemini.fiveHour?.description ? ' · ' + a.gemini.fiveHour.description : '');
+        m5.append(sub5);
+        meters.append(m5);
 
-      // 7d Antigravity
-      const m7 = el('div', 'quota-meter');
-      const lbl7 = el('div', 'quota-meter-label');
-      lbl7.append(el('span', '', '7d-Verbrauch'), el('span', 'quota-val', formatTokens(a.tokens7d)));
-      m7.append(lbl7);
-      const sub7 = el('div', 'quota-sub', 'Letzte 7 Tage');
-      sub7.title = 'Tokens in den letzten 7 Tagen über alle Antigravity-Sessions: ' + (a.tokens7d || 0).toLocaleString('de-DE');
-      m7.append(sub7);
-      meters.append(m7);
+        // Gemini Weekly meter
+        const m7 = el('div', 'quota-meter');
+        const p7 = Math.min(100, Math.max(0, a.gemini.weekly?.percent ?? 0));
+        const lvl7 = p7 >= 85 ? 'high' : (p7 >= 65 ? 'medium' : 'low');
+        const lbl7 = el('div', 'quota-meter-label');
+        lbl7.append(el('span', '', '7d-Woche'), el('span', 'quota-val level-' + lvl7, p7 + '%'));
+        m7.append(lbl7);
+        const tr7 = el('div', 'quota-progress-track');
+        const fl7 = el('div', 'quota-progress-fill level-' + lvl7);
+        fl7.style.width = p7 + '%';
+        tr7.append(fl7);
+        m7.append(tr7);
+        const r7Text = a.gemini.weekly?.resetLabel ? 'Reset ' + a.gemini.weekly.resetLabel : 'Wöchentliches Fenster';
+        const sub7 = el('div', 'quota-sub', r7Text);
+        sub7.title = 'Gemini Wöchentliches Limit: ' + p7 + '% genutzt' +
+          (a.gemini.weekly?.resetLabel ? ' · Zurücksetzung am ' + a.gemini.weekly.resetLabel : '') +
+          (a.tokens7d ? ' · ~' + formatTokens(a.tokens7d) + ' Tokens verbraucht' : '') +
+          (a.gemini.weekly?.description ? ' · ' + a.gemini.weekly.description : '');
+        m7.append(sub7);
+        meters.append(m7);
 
-      card.append(meters);
+        // Optional 3p meter if 3p has usage
+        const p3p = Math.max(a.thirdParty?.fiveHour?.percent || 0, a.thirdParty?.weekly?.percent || 0);
+        if (p3p > 0) {
+          const m3p = el('div', 'quota-meter');
+          const lvl3p = p3p >= 85 ? 'high' : (p3p >= 65 ? 'medium' : 'low');
+          const lbl3p = el('div', 'quota-meter-label');
+          lbl3p.append(el('span', '', 'Claude/GPT'), el('span', 'quota-val level-' + lvl3p, p3p + '%'));
+          m3p.append(lbl3p);
+          const tr3p = el('div', 'quota-progress-track');
+          const fl3p = el('div', 'quota-progress-fill level-' + lvl3p);
+          fl3p.style.width = p3p + '%';
+          tr3p.append(fl3p);
+          m3p.append(tr3p);
+          const sub3p = el('div', 'quota-sub', a.thirdParty?.fiveHour?.resetLabel ? 'Reset ' + a.thirdParty.fiveHour.resetLabel : '3p-Limit');
+          m3p.append(sub3p);
+          meters.append(m3p);
+        }
+
+        card.append(meters);
+      } else {
+        const statusPill = el('span', 'quota-status-pill ' + (a.isRateLimited ? 'status-danger' : 'status-ok'));
+        statusPill.textContent = a.isRateLimited ? 'Limit (429)' : 'Bereit';
+        if (a.isRateLimited) statusPill.title = a.rateLimitMessage;
+        header.append(statusPill);
+        card.append(header);
+
+        const meters = el('div', 'quota-meters');
+
+        // 5h Antigravity fallback
+        const m5 = el('div', 'quota-meter');
+        const lbl5 = el('div', 'quota-meter-label');
+        lbl5.append(el('span', '', '5h-Verbrauch'), el('span', 'quota-val', formatTokens(a.tokens5h)));
+        m5.append(lbl5);
+        const sub5 = el('div', 'quota-sub', 'Letzte 5 Stunden');
+        sub5.title = 'Tokens in den letzten 5 Stunden über alle Antigravity-Sessions: ' + (a.tokens5h || 0).toLocaleString('de-DE');
+        m5.append(sub5);
+        meters.append(m5);
+
+        // 7d Antigravity fallback
+        const m7 = el('div', 'quota-meter');
+        const lbl7 = el('div', 'quota-meter-label');
+        lbl7.append(el('span', '', '7d-Verbrauch'), el('span', 'quota-val', formatTokens(a.tokens7d)));
+        m7.append(lbl7);
+        const sub7 = el('div', 'quota-sub', 'Letzte 7 Tage');
+        sub7.title = 'Tokens in den letzten 7 Tagen über alle Antigravity-Sessions: ' + (a.tokens7d || 0).toLocaleString('de-DE');
+        m7.append(sub7);
+        meters.append(m7);
+
+        card.append(meters);
+      }
+
       quotaStrip.append(card);
     }
   }

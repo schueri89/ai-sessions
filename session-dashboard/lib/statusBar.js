@@ -89,10 +89,24 @@ class StatusBarWidget {
         if (q.antigravity.isRateLimited) {
           md.appendMarkdown(`⚠️ **Status:** ${q.antigravity.rateLimitMessage || 'Rate-Limit aktiv (429)'}\n\n`);
         }
-        const t5 = formatTokens(q.antigravity.tokens5h);
-        const t7 = formatTokens(q.antigravity.tokens7d);
-        md.appendMarkdown(`⚡ **5-Std.-Verbrauch:** ~${t5} Tokens\n\n`);
-        md.appendMarkdown(`📅 **7-Tage-Verbrauch:** ~${t7} Tokens\n\n`);
+        if (q.antigravity.hasLiveQuota && q.antigravity.gemini) {
+          if (q.antigravity.gemini.fiveHour && q.antigravity.gemini.fiveHour.percent !== null) {
+            const r5 = q.antigravity.gemini.fiveHour.resetLabel ? ` (Reset ${q.antigravity.gemini.fiveHour.resetLabel})` : '';
+            md.appendMarkdown(`⚡ **Gemini 5-Std.-Limit:** ${q.antigravity.gemini.fiveHour.percent}%${r5}\n\n`);
+          }
+          if (q.antigravity.gemini.weekly && q.antigravity.gemini.weekly.percent !== null) {
+            const r7 = q.antigravity.gemini.weekly.resetLabel ? ` (Reset ${q.antigravity.gemini.weekly.resetLabel})` : '';
+            md.appendMarkdown(`📅 **Gemini 7-Tage-Limit:** ${q.antigravity.gemini.weekly.percent}%${r7}\n\n`);
+          }
+          const t5 = formatTokens(q.antigravity.tokens5h);
+          const t7 = formatTokens(q.antigravity.tokens7d);
+          md.appendMarkdown(`*(Rolling Tokens: ~${t5} in 5h · ~${t7} in 7d)*\n\n`);
+        } else {
+          const t5 = formatTokens(q.antigravity.tokens5h);
+          const t7 = formatTokens(q.antigravity.tokens7d);
+          md.appendMarkdown(`⚡ **5-Std.-Verbrauch:** ~${t5} Tokens\n\n`);
+          md.appendMarkdown(`📅 **7-Tage-Verbrauch:** ~${t7} Tokens\n\n`);
+        }
       }
     }
 

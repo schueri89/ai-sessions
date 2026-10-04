@@ -3,9 +3,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] Token/Usage Verbrauch bei Antigravity muss messbar sein... Antigravity Plugin selbst zeigt es auch an!
+- [ ] kann der Tab mit dem Dashboard irgendwie immer angepinnt geladen werden?
 
 ## Erledigt
+- [x] session-dashboard: Antigravity Live-Quota & Limit-Tracking via Language Server Hub (Plan: `.agents/plans/2026-10-04_session-dashboard-antigravity-usage-tracking.md`) — 04.10.2026
 - [x] session-dashboard: Footerbar zeigt neben den aktiven ("arbeitet") auch fertige ("fertig") Sessions an (Plan: `.agents/plans/2026-10-04_session-dashboard-footerbar-fertig-sessions.md`) — 04.10.2026
 - [x] session-dashboard: Context-Window pro Modell dynamisch auflösen (1M für Opus 5.5 etc.) (Plan: `.agents/plans/2026-10-04_session-dashboard-model-context-window.md`) — 04.10.2026
 - [x] session-dashboard: 5-Stunden- und 7-Tage-Limits von Claude Code & Antigravity anzeigen (Plan: `.agents/plans/2026-10-04_session-dashboard-quota-limits.md`) — 04.10.2026

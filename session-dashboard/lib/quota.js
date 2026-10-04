@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const http = require('http');
 const { execFileSync } = require('child_process');
 const { DatabaseSync } = require('node:sqlite');
 
@@ -150,11 +151,88 @@ async function fetchClaudeQuota() {
   }
 }
 
+let cachedHub = null;
+let lastHubCheckTime = 0;
+const HUB_CACHE_TTL_MS = 60 * 1000;
+
+function detectAgyHub() {
+  const now = Date.now();
+  if (cachedHub && (now - lastHubCheckTime) < HUB_CACHE_TTL_MS) {
+    return cachedHub;
+  }
+  try {
+    const out = execFileSync('powershell.exe', [
+      '-NoProfile',
+      '-Command',
+      "Get-CimInstance Win32_Process -Filter \"Name = 'agy.exe'\" | Select-Object -ExpandProperty CommandLine"
+    ], { encoding: 'utf8', timeout: 3500 });
+    const portMatch = out.match(/--hub-port=(\d+)/);
+    const csrfMatch = out.match(/--csrf_token=([a-zA-Z0-9-]+)/);
+    if (portMatch && csrfMatch) {
+      cachedHub = {
+        port: Number(portMatch[1]),
+        csrfToken: csrfMatch[1]
+      };
+      lastHubCheckTime = now;
+      return cachedHub;
+    }
+  } catch {}
+  return cachedHub;
+}
+
+async function fetchLiveAntigravityQuota(hub) {
+  if (!hub || !hub.port || !hub.csrfToken) return null;
+  return new Promise((resolve) => {
+    const body = JSON.stringify({});
+    const req = http.request({
+      hostname: '127.0.0.1',
+      port: hub.port,
+      path: '/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-codeium-csrf-token': hub.csrfToken,
+        'Content-Length': Buffer.byteLength(body)
+      },
+      timeout: 3000
+    }, (res) => {
+      if (res.statusCode !== 200) {
+        cachedHub = null;
+        return resolve(null);
+      }
+      let buf = '';
+      res.on('data', (chunk) => { buf += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(buf);
+          resolve(json?.response || null);
+        } catch {
+          resolve(null);
+        }
+      });
+    });
+    req.on('error', () => {
+      cachedHub = null;
+      resolve(null);
+    });
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(null);
+    });
+    req.write(body);
+    req.end();
+  });
+}
+
 async function fetchAntigravityQuota() {
   const dbFile = path.join(antigravityDir(), 'conversation_summaries.db');
   if (!fs.existsSync(dbFile)) {
     return { available: false, error: 'Keine Antigravity-Datenbank gefunden' };
   }
+
+  // Trigger live hub fetch in parallel with database reading
+  const hub = detectAgyHub();
+  const livePromise = fetchLiveAntigravityQuota(hub);
 
   let db = null;
   try {
@@ -200,8 +278,61 @@ async function fetchAntigravityQuota() {
       } catch {}
     }
 
+    let liveResponse = null;
+    try {
+      liveResponse = await livePromise;
+    } catch {}
+
+    let gemini5h = null;
+    let geminiWeekly = null;
+    let thirdParty5h = null;
+    let thirdPartyWeekly = null;
+
+    if (liveResponse && Array.isArray(liveResponse.groups)) {
+      for (const g of liveResponse.groups) {
+        const name = (g.displayName || '').toLowerCase();
+        const buckets = Array.isArray(g.buckets) ? g.buckets : [];
+        const isGemini = name.includes('gemini');
+        const is3p = name.includes('claude') || name.includes('gpt') || name.includes('3p');
+
+        for (const b of buckets) {
+          const remFrac = typeof b.remainingFraction === 'number' ? b.remainingFraction : null;
+          const usedPct = remFrac !== null ? Math.min(100, Math.max(0, Math.round((1 - remFrac) * 100))) : null;
+          const resetsAt = b.resetTime ? new Date(b.resetTime).getTime() : 0;
+          const resetLabel = formatResetTime(resetsAt);
+          const bucketData = {
+            percent: usedPct,
+            remainingFraction: remFrac,
+            resetsAt,
+            resetLabel,
+            description: b.description || ''
+          };
+
+          const is5h = b.window === '5h' || (b.bucketId && b.bucketId.includes('5h'));
+          const isWeekly = b.window === 'weekly' || (b.bucketId && b.bucketId.includes('weekly'));
+
+          if (is5h) {
+            if (isGemini) gemini5h = bucketData;
+            else if (is3p) thirdParty5h = bucketData;
+          } else if (isWeekly) {
+            if (isGemini) geminiWeekly = bucketData;
+            else if (is3p) thirdPartyWeekly = bucketData;
+          }
+        }
+      }
+    }
+
     return {
       available: true,
+      hasLiveQuota: Boolean(gemini5h || geminiWeekly),
+      gemini: {
+        fiveHour: gemini5h,
+        weekly: geminiWeekly
+      },
+      thirdParty: {
+        fiveHour: thirdParty5h,
+        weekly: thirdPartyWeekly
+      },
       tokens5h,
       tokens7d,
       isRateLimited: rateLimited,
