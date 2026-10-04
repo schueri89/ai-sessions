@@ -94,15 +94,50 @@ function formatTokens(n) {
   return String(n);
 }
 
+function resolveMaxContext(model) {
+  if (!model) return 200000;
+  const m = String(model).toLowerCase();
+  if (m.includes('2m')) return 2000000;
+  if (m.includes('gemini') || m.includes('antigravity')) return 1000000;
+  if (
+    m.includes('opus-5') ||
+    m.includes('opus-4-8') || m.includes('opus-4.8') ||
+    m.includes('opus-4-7') || m.includes('opus-4.7') ||
+    m.includes('opus-4-6') || m.includes('opus-4.6') ||
+    m.includes('sonnet-5') ||
+    m.includes('sonnet-4-6') || m.includes('sonnet-4.6') ||
+    m.includes('fable') ||
+    m.includes('mythos') ||
+    m.includes('1m')
+  ) {
+    return 1000000;
+  }
+  return 200000;
+}
+
 function friendlyModel(m) {
   if (!m) return '';
   const lower = m.toLowerCase();
   if (lower.includes('opus-5-5') || lower.includes('opus-5.5')) return 'Opus 5.5';
+  if (lower.includes('opus-5') || lower.includes('opus-5.')) return 'Opus 5';
+  if (lower.includes('opus-4-8') || lower.includes('opus-4.8')) return 'Opus 4.8';
+  if (lower.includes('opus-4-7') || lower.includes('opus-4.7')) return 'Opus 4.7';
+  if (lower.includes('opus-4-6') || lower.includes('opus-4.6')) return 'Opus 4.6';
+  if (lower.includes('opus-4-5') || lower.includes('opus-4.5')) return 'Opus 4.5';
   if (lower.includes('opus')) return 'Opus';
+  if (lower.includes('sonnet-5-5') || lower.includes('sonnet-5.5')) return 'Sonnet 5.5';
+  if (lower.includes('sonnet-5') || lower.includes('sonnet-5.')) return 'Sonnet 5';
+  if (lower.includes('sonnet-4-6') || lower.includes('sonnet-4.6')) return 'Sonnet 4.6';
+  if (lower.includes('sonnet-4-5') || lower.includes('sonnet-4.5')) return 'Sonnet 4.5';
   if (lower.includes('sonnet-3-7') || lower.includes('3.7-sonnet')) return 'Sonnet 3.7';
   if (lower.includes('sonnet-3-5') || lower.includes('3.5-sonnet') || lower.includes('sonnet-20241022')) return 'Sonnet 3.5';
   if (lower.includes('sonnet')) return 'Sonnet';
+  if (lower.includes('haiku-4-5') || lower.includes('haiku-4.5')) return 'Haiku 4.5';
+  if (lower.includes('haiku-3-5') || lower.includes('haiku-3.5')) return 'Haiku 3.5';
   if (lower.includes('haiku')) return 'Haiku';
+  if (lower.includes('fable-5-1') || lower.includes('fable-5.1')) return 'Fable 5.1';
+  if (lower.includes('fable')) return 'Fable';
+  if (lower.includes('mythos')) return 'Mythos';
   if (lower.includes('gemini-2.0-pro') || lower.includes('gemini-2-pro')) return 'Gemini 2.0 Pro';
   if (lower.includes('gemini-2.0-flash') || lower.includes('gemini-2-flash')) return 'Gemini 2.0 Flash';
   if (lower.includes('gemini-1.5-pro')) return 'Gemini 1.5 Pro';
@@ -110,4 +145,4 @@ function friendlyModel(m) {
   return m.replace(/^claude-/, '');
 }
 
-module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, formatTime, relativeTime, describe, formatTokens, friendlyModel };
+module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, formatTime, relativeTime, describe, formatTokens, friendlyModel, resolveMaxContext };

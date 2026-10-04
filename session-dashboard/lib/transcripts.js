@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { resolveMaxContext } = require('./format');
 
 function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -34,7 +35,7 @@ function findTranscript(sessionId) {
 }
 
 function emptyInfo() {
-  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '', project: '', tokens: null };
+  return { customTitle: '', aiTitle: '', agentName: '', lastPrompt: '', rateLimit: null, startedAt: 0, lastActivity: 0, activity: '', project: '', tokens: null, model: '' };
 }
 
 function formatClaudeTool(c) {
@@ -145,6 +146,9 @@ function applyLine(info, line) {
             info.activity = '💬 Antwortet…';
           }
         }
+        if (rec.message && typeof rec.message.model === 'string') {
+          info.model = rec.message.model;
+        }
         if (rec.message && rec.message.usage) {
           const u = rec.message.usage;
           const input = Number(u.input_tokens) || 0;
@@ -152,8 +156,8 @@ function applyLine(info, line) {
           const cacheRead = Number(u.cache_read_input_tokens) || 0;
           const output = Number(u.output_tokens) || 0;
           const context = input + cacheCreation + cacheRead;
-          const maxContext = 200000;
-          const model = typeof rec.message.model === 'string' ? rec.message.model : '';
+          const model = (rec.message && typeof rec.message.model === 'string' ? rec.message.model : '') || info.model || '';
+          const maxContext = resolveMaxContext(model);
           info.tokens = {
             context,
             maxContext,

@@ -7,6 +7,7 @@ const os = require('os');
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
 const { resolveProject } = require('../project');
+const { resolveMaxContext } = require('../format');
 
 const RECENT_IDLE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours for idle vs closed
 const TRANSCRIPT_TAIL_BYTES = 64 * 1024;
@@ -149,7 +150,8 @@ function readTranscriptTail(sessionId) {
           const cacheRead = Number(step.cache_read_tokens) || 0;
           const output = Number(step.output_tokens) || 0;
           const context = input + cacheRead;
-          const maxContext = 1000000;
+          const model = step.model || 'Gemini';
+          const maxContext = resolveMaxContext(model);
           tokens = {
             context,
             maxContext,
@@ -158,7 +160,7 @@ function readTranscriptTail(sessionId) {
             cacheCreationTokens: 0,
             cacheReadTokens: cacheRead,
             outputTokens: output,
-            model: 'Gemini'
+            model
           };
         }
         if (lastPrompt && lastStep && tokens) break;
