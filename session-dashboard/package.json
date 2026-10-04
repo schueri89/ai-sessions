@@ -226,6 +226,6 @@
     "package": "vsce package --skip-license --allow-missing-repository"
   },
   "devDependencies": {
-    "@vscode/vsce": "^3.6.0"
+    "@vscode/vsce": "^4.0.0"
   }
 }
