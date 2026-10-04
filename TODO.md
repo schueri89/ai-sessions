@@ -3,9 +3,13 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] Übersich/Analyse analog zum VSCode Plugin "Claude Code Usage" umsetzen
+- [ ] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 2: 30-Tage-Historie, Stufe 3: Tool-/Content-Breakdown, Stufe 4: Read-Only Viewer)
+- [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 
 ## Erledigt
+- [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 1 & Visual Fix v0.23.1: SVG-Skalierung/Clipping, integrierte X-Achse, Netto/Cache-Toggle, Wall-Clock-Arbeitszeit, CSP-Fix für Modellbalken) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-1.md`) — 04.10.2026
+- [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 1 & Visual Polish v0.23.3: Lesbare Badges 12-13px, saubere Flexbox-Uhrzeitenachse ohne CSS-Haufen, Netto/Cache-Toggle, Wall-Clock-Arbeitszeit, Codebase-Bereinigung von Duplikaten) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-1.md`) — 04.10.2026
+- [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 1 & Visual Polish v0.23.4: Vergrößerte Typografie für Toolbar, Filter-Buttons, Projekt-Chips, Quota-Karten und Board-Karten) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-1.md`) — 04.10.2026
 - [x] session-dashboard: Schutz von „Erledigt“- und „Gemerkt“-Markierungen gegen Datenverlust bei Lesefehlern & Entfernen von Antigravity LIMIT 250 (Plan: `.agents/plans/2026-10-04_session-dashboard-fix-erledigt-verlust-und-limit-250.md`) — 04.10.2026
 - [x] session-dashboard: Filter für Projekte im Dashboard (Chips) & QuickPick nach Alphabet sortieren (Plan: `.agents/plans/2026-10-04_session-dashboard-projekt-filter-alphabetisch.md`) — 04.10.2026
 - [x] session-dashboard: "Erledigt" ausschließlich durch manuelles Abhaken vergeben (kein automatisches Timeout/Schließen) (Plan: `.agents/plans/2026-10-04_session-dashboard-manuell-erledigt.md`) — 04.10.2026

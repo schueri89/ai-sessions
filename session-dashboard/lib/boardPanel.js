@@ -5,6 +5,7 @@
 const vscode = require('vscode');
 const crypto = require('crypto');
 const { STATES, STATE_ORDER, describe } = require('./format');
+const { getTodayMetrics } = require('./analytics');
 
 const ICONS = {
   claude: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z"/></svg>',
@@ -18,6 +19,8 @@ class BoardPanel {
     this.model = model;
     this.panel = null;
     this.pendingSearch = '';
+    this.viewMode = 'board';
+    this.analyseFilter = 'all';
   }
 
   attach(panel) {
@@ -28,6 +31,14 @@ class BoardPanel {
     this.panel.webview.onDidReceiveMessage((msg) => {
       if (msg && msg.action === 'ready') {
         this.update();
+        return;
+      }
+      if (msg && msg.action === 'setViewMode') {
+        this.viewMode = msg.mode === 'analyse' ? 'analyse' : 'board';
+        return;
+      }
+      if (msg && msg.action === 'setAnalyseFilter') {
+        this.analyseFilter = msg.filter || 'all';
         return;
       }
       if (msg && msg.action === 'setFilter') {
@@ -96,7 +107,10 @@ class BoardPanel {
     }, 150);
   }
 
-  show(query) {
+  show(query, viewMode) {
+    if (viewMode) {
+      this.viewMode = viewMode === 'analyse' ? 'analyse' : 'board';
+    }
     if (typeof query === 'string') {
       this.pendingSearch = query;
     }
@@ -105,6 +119,9 @@ class BoardPanel {
       if (this.pendingSearch) {
         this.panel.webview.postMessage({ type: 'setSearch', query: this.pendingSearch });
         this.pendingSearch = '';
+      }
+      if (viewMode) {
+        this.panel.webview.postMessage({ type: 'setViewMode', mode: this.viewMode });
       }
       this.ensurePinned();
       return;
@@ -144,6 +161,18 @@ class BoardPanel {
     }));
     const initialSearch = this.pendingSearch;
     this.pendingSearch = '';
+
+    let analytics = null;
+    try {
+      analytics = {
+        all: getTodayMetrics('all'),
+        claude: getTodayMetrics('claude'),
+        antigravity: getTodayMetrics('antigravity')
+      };
+    } catch (err) {
+      console.error('[SessionDashboard] Error calculating analytics:', err);
+    }
+
     this.panel.webview.postMessage({
       type: 'render',
       filter: this.model.providerFilter,
@@ -151,13 +180,16 @@ class BoardPanel {
       counts: this.model.counts(),
       quota: this.model.quota,
       initialSearch,
-      columns
+      columns,
+      viewMode: this.viewMode,
+      analyseFilter: this.analyseFilter,
+      analytics
     });
   }
 
   html() {
     const nonce = crypto.randomBytes(16).toString('base64');
-    const csp = `default-src 'none'; style-src 'nonce-${nonce}'; script-src 'nonce-${nonce}';`;
+    const csp = `default-src 'none'; style-src 'unsafe-inline' 'nonce-${nonce}'; script-src 'nonce-${nonce}';`;
     return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -169,6 +201,10 @@ class BoardPanel {
   .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; align-items: start; }
   .column h2 { font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px; opacity: 0.8; }
   .column h2 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); padding: 14px; font-size: 13px; }
+  .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; align-items: start; }
+  .column h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 10px; opacity: 0.85; font-weight: 600; }
+  .column h2 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
   .waiting .dot { background: var(--vscode-charts-orange); }
   .busy .dot { background: var(--vscode-charts-blue); }
   .bookmarked .dot { background: var(--vscode-charts-yellow, #e5c07b); }
@@ -176,6 +212,7 @@ class BoardPanel {
   .done .dot { background: var(--vscode-disabledForeground); }
   .card { background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-widget-border, transparent);
     border-left: 3px solid transparent; border-radius: 4px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; }
+    border-left: 3px solid transparent; border-radius: 5px; padding: 10px 12px; margin-bottom: 10px; cursor: pointer; }
   .card:hover { background: var(--vscode-list-hoverBackground); }
   .waiting .card { border-left-color: var(--vscode-charts-orange); }
   .busy .card { border-left-color: var(--vscode-charts-blue); }
@@ -187,34 +224,54 @@ class BoardPanel {
   .title { font-weight: 600; flex: 1; min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
   .header-badges { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; margin-top: -1px; }
   .pin-btn { background: transparent; border: none; padding: 3px 4px; border-radius: 3px; cursor: pointer;
+  .mark-all-btn { float: right; font-size: 12px; padding: 2px 7px; }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+  .title { font-weight: 600; font-size: 13.5px; flex: 1; min-width: 0; overflow-wrap: anywhere; line-height: 1.4; }
+  .header-badges { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; margin-top: -1px; }
+  .pin-btn { background: transparent; border: none; padding: 3px 5px; border-radius: 3px; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center; line-height: 1;
     color: var(--vscode-descriptionForeground); opacity: 0.35; transition: all 0.15s ease; }
   .card:hover .pin-btn { opacity: 0.75; }
   .pin-btn:hover { opacity: 1; background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2)); }
   .pin-btn.active { opacity: 1; color: var(--vscode-charts-yellow, #e5c07b); }
   .pin-btn svg { width: 13px; height: 13px; display: block; }
+  .pin-btn svg { width: 14px; height: 14px; display: block; }
   .provider-icon { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
     width: 22px; height: 22px; border-radius: 4px; line-height: 1; }
   .provider-icon svg { width: 14px; height: 14px; display: block; }
+    width: 24px; height: 24px; border-radius: 4px; line-height: 1; }
+  .provider-icon svg { width: 15px; height: 15px; display: block; }
   .provider-icon.claude { color: #ff9e79; background: rgba(242, 101, 34, 0.18); border: 1px solid rgba(255, 158, 121, 0.35); }
   .provider-icon.antigravity { color: #70a9ff; background: rgba(66, 133, 244, 0.18); border: 1px solid rgba(112, 169, 255, 0.35); }
   .detail { font-size: 0.85em; opacity: 0.75; }
   .prompt { font-size: 0.85em; opacity: 0.75; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2;
     -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
   .actions { margin-top: 6px; text-align: right; }
+  .detail { font-size: 12.5px; opacity: 0.8; }
+  .prompt { font-size: 12.5px; opacity: 0.8; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; line-height: 1.4; }
+  .actions { margin-top: 8px; text-align: right; }
   button { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground);
     border: none; border-radius: 2px; padding: 2px 8px; cursor: pointer; font-size: 0.85em; }
+    border: none; border-radius: 3px; padding: 3px 9px; cursor: pointer; font-size: 12.5px; }
   button:hover { background: var(--vscode-button-secondaryHoverBackground); }
   .empty { font-size: 0.85em; opacity: 0.5; font-style: italic; }
   .toolbar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
   .toolbar-main { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; width: 100%; }
+  .empty { font-size: 12.5px; opacity: 0.55; font-style: italic; }
+  .toolbar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .toolbar-main { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; width: 100%; }
   .filter-group { display: flex; gap: 8px; align-items: center; }
   .filter-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px;
     font-size: 0.85em; font-weight: 500; cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
+  .filter-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 4px;
+    font-size: 13.5px; font-weight: 500; cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
     background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); transition: all 0.15s ease; }
   .filter-btn:hover { background: var(--vscode-button-secondaryHoverBackground); }
   .filter-btn svg { width: 14px; height: 14px; display: block; }
   .filter-btn .count { opacity: 0.75; font-size: 0.9em; margin-left: 2px; }
+  .filter-btn svg { width: 15px; height: 15px; display: block; }
+  .filter-btn .count { opacity: 0.8; font-size: 12.5px; margin-left: 3px; font-weight: 600; }
   .filter-btn.active { font-weight: 600; border-color: transparent; }
   .filter-btn.active[data-filter="all"] { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
   .filter-btn.active.filter-claude { background: rgba(242, 101, 34, 0.25); color: #ff9e79; border-color: rgba(255, 158, 121, 0.5); }
@@ -222,6 +279,8 @@ class BoardPanel {
   .project-chips-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%; padding-top: 4px; }
   .project-chips-label { font-size: 0.74em; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-right: 2px; }
   .project-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78em; padding: 2px 8px; border-radius: 12px;
+  .project-chips-label { font-size: 12.5px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-right: 4px; }
+  .project-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; padding: 3px 10px; border-radius: 12px;
     cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
     background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.1));
     color: var(--vscode-button-secondaryForeground, inherit); transition: all 0.15s ease; }
@@ -229,19 +288,26 @@ class BoardPanel {
   .project-chip.active { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border-color: transparent; font-weight: 600; }
   .project-chip .count { opacity: 0.75; font-size: 0.9em; }
   .card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 3px 0 4px; }
-  .project-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 0.72em;
-    padding: 1px 6px; border-radius: 3px; font-weight: 600; line-height: 1.3;
+  .project-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px;
+  .project-chip .count { opacity: 0.8; font-size: 12px; font-weight: 600; }
+  .card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 4px 0 5px; }
+  .project-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px;
+    padding: 2px 8px; border-radius: 4px; font-weight: 500; line-height: 1.35;
     background: var(--vscode-badge-background, rgba(128, 128, 128, 0.2));
     color: var(--vscode-badge-foreground);
     border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.3));
     cursor: pointer; transition: all 0.15s ease; }
   .project-badge:hover { filter: brightness(1.2); border-color: var(--vscode-focusBorder, #007acc); }
   .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 420px; min-width: 220px; justify-content: flex-end; }
+  .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 440px; min-width: 240px; justify-content: flex-end; }
   .search-box { position: relative; display: flex; align-items: center; width: 100%; }
   .search-icon { position: absolute; left: 8px; pointer-events: none; display: flex; align-items: center;
+  .search-icon { position: absolute; left: 9px; pointer-events: none; display: flex; align-items: center;
     color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.7)); opacity: 0.8; z-index: 1; }
   .search-icon svg { width: 13px; height: 13px; display: block; }
   #search-input, .search-input { width: 100%; height: 26px; padding: 4px 26px 4px 28px; border-radius: 4px; font-size: 0.85em;
+  .search-icon svg { width: 14px; height: 14px; display: block; }
+  #search-input, .search-input { width: 100%; height: 28px; padding: 4px 28px 4px 30px; border-radius: 4px; font-size: 13px;
     background: transparent !important; color: var(--vscode-foreground) !important;
     border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.35)); outline: none;
     box-sizing: border-box; font-family: inherit; transition: all 0.15s ease; }
@@ -249,9 +315,12 @@ class BoardPanel {
   #search-input::placeholder, .search-input::placeholder { color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.6)); opacity: 0.8; }
   .search-clear-btn { position: absolute; right: 5px; background: transparent; border: none;
     color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.7)); cursor: pointer; padding: 2px 4px; font-size: 0.8em;
+  .search-clear-btn { position: absolute; right: 6px; background: transparent; border: none;
+    color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.7)); cursor: pointer; padding: 2px 4px; font-size: 13px;
     line-height: 1; border-radius: 2px; z-index: 1; }
   .search-clear-btn:hover { color: var(--vscode-foreground); background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2)); }
   .search-status { font-size: 0.75em; opacity: 0.85; white-space: nowrap; padding: 2px 6px; border-radius: 3px;
+  .search-status { font-size: 12px; opacity: 0.9; white-space: nowrap; padding: 2px 8px; border-radius: 3px;
     background: var(--vscode-badge-background, rgba(128, 128, 128, 0.2)); color: var(--vscode-badge-foreground); }
   .search-status.no-matches { background: rgba(229, 192, 123, 0.2); color: #e5c07b; }
   .search-highlight { background: rgba(234, 92, 0, 0.4); color: inherit; border-radius: 2px; padding: 0 1px; font-style: normal; }
@@ -259,12 +328,16 @@ class BoardPanel {
     border: 1px dashed var(--vscode-widget-border, rgba(128, 128, 128, 0.3)); border-radius: 6px; margin: 12px 0; }
   .search-empty-title { font-size: 1.1em; font-weight: 600; margin-bottom: 6px; }
   .search-empty-text { font-size: 0.85em; opacity: 0.7; margin-bottom: 12px; }
+  .search-empty-text { font-size: 13px; opacity: 0.7; margin-bottom: 12px; }
   .card.rate-limited { border-color: rgba(229, 192, 123, 0.45); }
   .card.rate-limited .detail { color: #e5c07b; opacity: 1; font-weight: 500; }
   .rate-limit-badge { display: inline-flex; align-items: center; font-size: 0.72em;
     padding: 1px 5px; border-radius: 3px; font-weight: 600; line-height: 1.2;
+  .rate-limit-badge { display: inline-flex; align-items: center; font-size: 12px;
+    padding: 2px 6px; border-radius: 3px; font-weight: 600; line-height: 1.25;
     background: rgba(229, 192, 123, 0.2); color: #e5c07b; border: 1px solid rgba(229, 192, 123, 0.4); }
   .activity { display: flex; align-items: center; gap: 6px; font-size: 0.8em; margin-top: 6px;
+  .activity { display: flex; align-items: center; gap: 6px; font-size: 12.5px; margin-top: 6px;
     padding: 3px 8px; border-radius: 4px; overflow: hidden; line-height: 1.35;
     background: rgba(112, 169, 255, 0.1); color: var(--vscode-charts-blue, #70a9ff);
     border: 1px solid rgba(112, 169, 255, 0.25); }
@@ -283,14 +356,18 @@ class BoardPanel {
     cursor: default; transition: background 0.15s ease; }
   .token-bar:hover { background: rgba(128, 128, 128, 0.14); }
   .token-track { width: 100%; height: 4px; border-radius: 2px;
+  .token-track { width: 100%; height: 5px; border-radius: 2.5px;
     background: rgba(128, 128, 128, 0.2); overflow: hidden; margin-bottom: 4px; }
   .token-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+  .token-fill { height: 100%; border-radius: 2.5px; transition: width 0.3s ease; }
   .token-fill.level-low { background: var(--vscode-charts-blue, #70a9ff); }
   .token-fill.level-medium { background: var(--vscode-charts-yellow, #e5c07b); }
   .token-fill.level-high { background: var(--vscode-charts-red, #f48771); }
   .token-meta { display: flex; align-items: center; justify-content: space-between; font-size: 0.73em; line-height: 1.2; }
+  .token-meta { display: flex; align-items: center; justify-content: space-between; font-size: 12px; line-height: 1.25; }
   .token-stats { display: inline-flex; align-items: center; gap: 4px; }
   .token-pct { font-weight: 600; }
+  .token-pct { font-weight: 600; font-size: 12px; }
   .token-pct.level-low { color: var(--vscode-charts-blue, #70a9ff); }
   .token-pct.level-medium { color: var(--vscode-charts-yellow, #e5c07b); }
   .token-pct.level-high { color: var(--vscode-charts-red, #f48771); }
@@ -303,9 +380,19 @@ class BoardPanel {
   .quota-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
   .quota-provider { display: inline-flex; align-items: center; gap: 5px; font-size: 0.8em; font-weight: 600; }
   .quota-provider svg { width: 13px; height: 13px; display: block; }
+  .token-counts { opacity: 0.8; }
+  .token-model-badge { opacity: 0.9; font-size: 12px; font-weight: 500;
+    padding: 1px 6px; border-radius: 3px; background: rgba(128, 128, 128, 0.15); }
+  .quota-strip { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; padding-top: 6px; }
+  .quota-card { flex: 1; min-width: 280px; background: rgba(128, 128, 128, 0.06);
+    border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); border-radius: 6px; padding: 8px 12px; }
+  .quota-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .quota-provider { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; }
+  .quota-provider svg { width: 15px; height: 15px; display: block; }
   .quota-provider.claude { color: #ff9e79; }
   .quota-provider.antigravity { color: #70a9ff; }
   .quota-status-pill { font-size: 0.72em; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+  .quota-status-pill { font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
   .quota-status-pill.status-ok { background: rgba(78, 201, 176, 0.15); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.3); }
   .quota-status-pill.status-warn { background: rgba(229, 192, 123, 0.2); color: #e5c07b; border: 1px solid rgba(229, 192, 123, 0.4); }
   .quota-status-pill.status-danger { background: rgba(244, 135, 113, 0.2); color: #f48771; border: 1px solid rgba(244, 135, 113, 0.4); }
@@ -313,44 +400,288 @@ class BoardPanel {
   .quota-meter { display: flex; flex-direction: column; gap: 2px; }
   .quota-meter-label { display: flex; justify-content: space-between; align-items: center; font-size: 0.74em; opacity: 0.85; }
   .quota-val { font-weight: 600; font-size: 0.92em; }
+  .quota-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .quota-meter { display: flex; flex-direction: column; gap: 3px; }
+  .quota-meter-label { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; opacity: 0.9; }
+  .quota-val { font-weight: 700; font-size: 13.5px; }
   .quota-val.level-low { color: var(--vscode-charts-blue, #70a9ff); }
   .quota-val.level-medium { color: var(--vscode-charts-yellow, #e5c07b); }
   .quota-val.level-high { color: var(--vscode-charts-red, #f48771); }
   .quota-progress-track { width: 100%; height: 4px; border-radius: 2px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin: 3px 0 2px; }
   .quota-progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+  .quota-progress-track { width: 100%; height: 6px; border-radius: 3px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin: 3px 0 2px; }
+  .quota-progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
   .quota-progress-fill.level-low { background: var(--vscode-charts-blue, #70a9ff); }
   .quota-progress-fill.level-medium { background: var(--vscode-charts-yellow, #e5c07b); }
   .quota-progress-fill.level-high { background: var(--vscode-charts-red, #f48771); }
   .quota-sub { font-size: 0.72em; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .quota-sub { font-size: 12px; opacity: 0.75; font-family: var(--vscode-editor-font-family, monospace); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Mode Switcher Bar */
+  .view-mode-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .mode-tabs { display: inline-flex; background: rgba(128, 128, 128, 0.1); border-radius: 5px; padding: 2px; gap: 3px; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .mode-tab-btn { background: transparent; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; color: var(--vscode-foreground); cursor: pointer; transition: all 0.15s ease; opacity: 0.8; display: inline-flex; align-items: center; gap: 8px; }
+  .view-mode-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .mode-tabs { display: inline-flex; background: rgba(128, 128, 128, 0.1); border-radius: 6px; padding: 3px; gap: 3px; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); }
+  .mode-tab-btn { background: transparent; border: none; padding: 7px 16px; border-radius: 4px; font-size: 14px; font-weight: 600; color: var(--vscode-foreground); cursor: pointer; transition: all 0.15s ease; opacity: 0.8; display: inline-flex; align-items: center; gap: 8px; }
+  .mode-tab-btn:hover { opacity: 1; background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.15)); }
+  .mode-tab-btn.active { opacity: 1; font-weight: 600; background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+  .mode-badge { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: rgba(128, 128, 128, 0.25); color: inherit; font-weight: 600; }
+  .mode-badge { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: rgba(128, 128, 128, 0.25); color: inherit; font-weight: 600; }
+
+  /* Analyse View Styles */
+  .analyse-view { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  .analyse-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.15)); }
+  .analyse-filters { display: flex; align-items: center; gap: 8px; }
+  .analyse-label { font-size: 11.5px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-right: 2px; }
+  .analyse-filter-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 12px; border-radius: 4px; cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25)); background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); transition: all 0.15s ease; }
+  .analyse-label { font-size: 12.5px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-right: 2px; }
+  .analyse-filter-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 12px; border-radius: 4px; cursor: pointer; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25)); background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); transition: all 0.15s ease; }
+  .analyse-filter-btn:hover { background: var(--vscode-button-secondaryHoverBackground); }
+  .analyse-filter-btn svg { width: 14px; height: 14px; display: block; }
+  .analyse-filter-btn.active { font-weight: 600; background: var(--vscode-button-background); color: var(--vscode-button-foreground); border-color: transparent; }
+  .analyse-filter-btn.active.filter-claude { background: rgba(242, 101, 34, 0.25); color: #ff9e79; border-color: rgba(255, 158, 121, 0.5); }
+  .analyse-filter-btn.active.filter-antigravity { background: rgba(66, 133, 244, 0.25); color: #70a9ff; border-color: rgba(112, 169, 255, 0.5); }
+  .analyse-scope-tabs { display: flex; align-items: center; gap: 6px; }
+  .analyse-scope-btn { font-size: 12px; padding: 3px 10px; border-radius: 4px; font-weight: 600; background: rgba(128, 128, 128, 0.15); border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.3)); color: var(--vscode-foreground); cursor: default; }
+  .analyse-scope-btn { font-size: 12.5px; padding: 3px 10px; border-radius: 4px; font-weight: 600; background: rgba(128, 128, 128, 0.15); border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.3)); color: var(--vscode-foreground); cursor: default; }
+
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .kpi-card { background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); border-radius: 6px; padding: 14px 16px; transition: border-color 0.15s ease; }
+  .kpi-card:hover { border-color: var(--vscode-focusBorder, rgba(128, 128, 128, 0.4)); }
+  .kpi-header { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; opacity: 0.8; margin-bottom: 6px; }
+  .kpi-tag { font-size: 11px; padding: 2px 7px; border-radius: 3px; font-weight: 600; text-transform: none; }
+  .kpi-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; opacity: 0.85; margin-bottom: 6px; }
+  .kpi-tag { font-size: 11.5px; padding: 2px 7px; border-radius: 3px; font-weight: 600; text-transform: none; }
+  .kpi-tag.blue { background: rgba(112, 169, 255, 0.2); color: #70a9ff; }
+  .kpi-tag.amber { background: rgba(229, 192, 123, 0.2); color: #e5c07b; }
+  .kpi-tag.green { background: rgba(78, 201, 176, 0.2); color: #4ec9b0; }
+  .kpi-value { font-size: 26px; font-weight: 700; line-height: 1.2; margin-bottom: 10px; font-family: var(--vscode-editor-font-family, monospace); letter-spacing: -0.02em; }
+  .kpi-value.green { color: #4ec9b0; }
+  .kpi-rows { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; opacity: 0.9; }
+  .kpi-rows { display: flex; flex-direction: column; gap: 5px; font-size: 13px; opacity: 0.9; }
+  .kpi-row { display: flex; justify-content: space-between; align-items: center; }
+  .kpi-num { font-family: var(--vscode-editor-font-family, monospace); font-weight: 600; font-size: 12.5px; }
+  .kpi-num { font-family: var(--vscode-editor-font-family, monospace); font-weight: 600; font-size: 13px; }
+  .kpi-num.green { color: #4ec9b0; }
+  .kpi-sub-note { opacity: 0.65; font-size: 11.5px; }
+  .kpi-sub-note { opacity: 0.65; font-size: 12px; }
+
+  /* Hourly Chart */
+  .chart-card { background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); border-radius: 6px; padding: 14px 16px; position: relative; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+  .chart-title { font-weight: 600; font-size: 13.5px; display: flex; align-items: center; gap: 8px; }
+  .chart-title { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .chart-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .chart-toggle-group { display: inline-flex; border-radius: 4px; background: rgba(128, 128, 128, 0.12); padding: 2px; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25)); gap: 2px; }
+  .chart-toggle-btn { font-size: 12px; padding: 3px 10px; border: none; background: transparent; color: var(--vscode-foreground); cursor: pointer; border-radius: 3px; font-weight: 500; transition: all 0.15s ease; }
+  .chart-toggle-btn { font-size: 12.5px; padding: 3px 10px; border: none; background: transparent; color: var(--vscode-foreground); cursor: pointer; border-radius: 3px; font-weight: 500; transition: all 0.15s ease; }
+  .chart-toggle-btn.active { background: var(--vscode-button-background, #0e639c); color: var(--vscode-button-foreground, #fff); font-weight: 600; }
+  .chart-legend { display: flex; gap: 12px; font-size: 12px; align-items: center; }
+  .chart-legend { display: flex; gap: 12px; font-size: 12.5px; align-items: center; }
+  .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .chart-svg-wrap { width: 100%; height: 130px; position: relative; box-sizing: border-box; overflow: hidden; }
+  .chart-svg-wrap svg { width: 100%; height: 100%; display: block; overflow: hidden; }
+  .chart-x-axis { display: flex; justify-content: space-between; width: 100%; height: 20px; margin-top: 6px; font-family: var(--vscode-editor-font-family, monospace); font-size: 11px; color: var(--vscode-descriptionForeground, rgba(255, 255, 255, 0.65)); }
+  .chart-x-axis { display: flex; justify-content: space-between; width: 100%; height: 20px; margin-top: 6px; font-family: var(--vscode-editor-font-family, monospace); font-size: 12px; color: var(--vscode-descriptionForeground, rgba(255, 255, 255, 0.7)); }
+  .bar-group { cursor: pointer; }
+  .bar-group:hover rect { filter: brightness(1.25); }
+
+  /* Details Grid (Models & Projects) */
+  .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+  .detail-card { background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); border-radius: 6px; padding: 14px 16px; overflow: hidden; }
+  .detail-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .detail-card-title { font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; }
+  .detail-card-title { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; }
+  .detail-card-sub { font-size: 12px; opacity: 0.7; }
+  .model-list { display: flex; flex-direction: column; gap: 10px; }
+  .model-row { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .model-row { display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
+  .model-meta { display: flex; justify-content: space-between; align-items: center; }
+  .model-name { font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+  .model-name { font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px; }
+  .prov-badge { display: inline-flex; align-items: center; }
+  .prov-badge svg { width: 14px; height: 14px; }
+  .model-stat { opacity: 0.9; font-family: var(--vscode-editor-font-family, monospace); font-size: 12px; }
+  .model-stat { opacity: 0.9; font-family: var(--vscode-editor-font-family, monospace); font-size: 12.5px; }
+  .model-bar-track { width: 100%; height: 7px; border-radius: 3.5px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin-top: 3px; }
+  .model-bar-fill { height: 100%; border-radius: 3.5px; transition: width 0.25s ease; }
+  .model-bar-fill.claude { background-color: #f26522; }
+  .model-bar-fill.antigravity { background-color: #4285f4; }
+  .proj-table-wrap { overflow-x: auto; max-height: 240px; }
+  .proj-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .proj-table th { text-align: left; padding: 7px 10px; opacity: 0.8; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25)); font-weight: 600; font-size: 12px; position: sticky; top: 0; background: var(--vscode-editorWidget-background); }
+  .proj-table th { text-align: left; padding: 7px 10px; opacity: 0.8; border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25)); font-weight: 600; font-size: 12.5px; position: sticky; top: 0; background: var(--vscode-editorWidget-background); }
+  .proj-table td { padding: 7px 10px; border-bottom: 1px solid rgba(128, 128, 128, 0.08); font-size: 13px; }
+  .proj-table tr:hover td { background: var(--vscode-list-hoverBackground); }
+  .font-mono { font-family: var(--vscode-editor-font-family, monospace); }
 </style>
 </head>
 <body>
 <header class="toolbar">
-  <div class="toolbar-main">
-    <div class="filter-group">
-      <button class="filter-btn active" data-filter="all" id="btn-all">
-        Alle <span class="count" id="count-all">0</span>
+  <div class="view-mode-bar">
+    <div class="mode-tabs">
+      <button class="mode-tab-btn active" id="btn-mode-board" title="Operatives Session-Board">
+        📋 Board <span class="mode-badge" id="mode-badge-board">0</span>
       </button>
-      <button class="filter-btn filter-claude" data-filter="claude" id="btn-claude">
-        ${ICONS.claude} Claude Code <span class="count" id="count-claude">0</span>
+      <button class="mode-tab-btn" id="btn-mode-analyse" title="Token- & Verbrauchsanalyse Heute">
+        📊 Analyse & Verbrauch <span class="mode-badge" style="background: rgba(0, 122, 204, 0.35); color: #70a9ff;">Neu</span>
       </button>
-      <button class="filter-btn filter-antigravity" data-filter="antigravity" id="btn-antigravity">
-        ${ICONS.antigravity} Antigravity <span class="count" id="count-antigravity">0</span>
-      </button>
-    </div>
-    <div class="search-group">
-      <div class="search-box">
-        <span class="search-icon">${ICONS.search}</span>
-        <input type="text" class="search-input" id="search-input" placeholder="Sessions suchen (Titel, Prompt, ID, Projekt)... [/]" autocomplete="off" spellcheck="false">
-        <button class="search-clear-btn" id="search-clear" title="Suche leeren" style="display: none;">✕</button>
-      </div>
-      <span class="search-status" id="search-status" style="display: none;"></span>
     </div>
   </div>
-  <div class="project-chips-row" id="project-chips" style="display: none;"></div>
+
+  <div id="board-controls-wrap">
+    <div class="toolbar-main">
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all" id="btn-all">
+          Alle <span class="count" id="count-all">0</span>
+        </button>
+        <button class="filter-btn filter-claude" data-filter="claude" id="btn-claude">
+          ${ICONS.claude} Claude Code <span class="count" id="count-claude">0</span>
+        </button>
+        <button class="filter-btn filter-antigravity" data-filter="antigravity" id="btn-antigravity">
+          ${ICONS.antigravity} Antigravity <span class="count" id="count-antigravity">0</span>
+        </button>
+      </div>
+      <div class="search-group">
+        <div class="search-box">
+          <span class="search-icon">${ICONS.search}</span>
+          <input type="text" class="search-input" id="search-input" placeholder="Sessions suchen (Titel, Prompt, ID, Projekt)... [/]" autocomplete="off" spellcheck="false">
+          <button class="search-clear-btn" id="search-clear" title="Suche leeren" style="display: none;">✕</button>
+        </div>
+        <span class="search-status" id="search-status" style="display: none;"></span>
+      </div>
+    </div>
+    <div class="project-chips-row" id="project-chips" style="display: none;"></div>
+  </div>
+
   <div class="quota-strip" id="quota-strip" style="display: none;"></div>
 </header>
+
 <div class="board" id="board"></div>
+
+<div class="analyse-view" id="analyse-view" style="display: none;">
+  <div class="analyse-toolbar">
+    <div class="analyse-filters">
+      <span class="analyse-label">Provider:</span>
+      <button class="analyse-filter-btn active" data-filter="all" id="af-all">Alle</button>
+      <button class="analyse-filter-btn filter-claude" data-filter="claude" id="af-claude">${ICONS.claude} Claude Code</button>
+      <button class="analyse-filter-btn filter-antigravity" data-filter="antigravity" id="af-antigravity">${ICONS.antigravity} Antigravity</button>
+    </div>
+    <div class="analyse-scope-tabs">
+      <span class="analyse-scope-btn">Heute</span>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span>Gesamt-Tokens Heute</span>
+        <span class="kpi-tag blue">Aktiv</span>
+      </div>
+      <div class="kpi-value" id="kpi-total-tokens">0</div>
+      <div class="kpi-rows">
+        <div class="kpi-row"><span>Input:</span><span id="kpi-input-tokens" class="kpi-num">0</span></div>
+        <div class="kpi-row"><span>Output / Thinking:</span><span id="kpi-output-tokens" class="kpi-num">0</span></div>
+        <div class="kpi-row"><span>Cache Read:</span><span id="kpi-cache-tokens" class="kpi-num green">0</span></div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span>Geschätzte Kosten</span>
+        <span class="kpi-tag amber">API-Basis</span>
+      </div>
+      <div class="kpi-value green" id="kpi-cost">$0.00</div>
+      <div class="kpi-rows">
+        <div class="kpi-row"><span>Claude Code:</span><span id="kpi-claude-cost" class="kpi-num">$0.00</span></div>
+        <div class="kpi-row"><span>Antigravity:</span><span id="kpi-agy-cost" class="kpi-num">$0.00</span></div>
+        <div class="kpi-row" style="opacity: 0.6; font-size: 0.9em;"><span>Keine offizielle Rechnung</span></div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span>Cache Hit-Rate</span>
+        <span class="kpi-tag green">Effizient</span>
+      </div>
+      <div class="kpi-value" id="kpi-cache-rate">0%</div>
+      <div class="kpi-rows">
+        <div class="kpi-row"><span>Cache-Reads:</span><span id="kpi-cache-reads" class="kpi-num">0</span></div>
+        <div class="kpi-row"><span>Cache-Writes:</span><span id="kpi-cache-writes" class="kpi-num">0</span></div>
+        <div class="kpi-row" style="opacity: 0.6; font-size: 0.9em;"><span>Prompt Caching aktiv</span></div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span>Arbeitszeit & Turns</span>
+        <span class="kpi-tag" id="kpi-sessions-count">0 Sessions</span>
+      </div>
+      <div class="kpi-value" id="kpi-active-time">0 Min.</div>
+      <div class="kpi-rows">
+        <div class="kpi-row"><span>Dialog-Turns:</span><span id="kpi-turns-count" class="kpi-num">0</span></div>
+        <div class="kpi-row"><span>Sessions heute:</span><span id="kpi-sessions-val" class="kpi-num">0</span></div>
+        <div class="kpi-row" style="opacity: 0.6; font-size: 0.9em;"><span>Geschätzte Netto-Zeit</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M1 14h14v1H0V0h1v14zm2-2h2V6H3v6zm4 0h2V2H7v10zm4 0h2V9h-2v3z"/></svg>
+        Stündlicher Verlauf Heute (00:00 – 23:00 Uhr)
+      </div>
+      <div class="chart-actions">
+        <div class="chart-toggle-group">
+          <button class="chart-toggle-btn active" id="btn-chart-mode-all" title="Gesamtes Tokenvolumen inkl. Cache-Reads anzeigen">Inkl. Cache</button>
+          <button class="chart-toggle-btn" id="btn-chart-mode-net" title="Nur neue Tokens (Input + Output) anzeigen">Nur Input & Output</button>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background: var(--vscode-charts-blue, #70a9ff);"></span> Input</span>
+          <span class="legend-item"><span class="legend-dot" style="background: #f26522;"></span> Output / Thinking</span>
+          <span class="legend-item" id="legend-cache-dot"><span class="legend-dot" style="background: #10b981;"></span> Cache Read</span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-svg-wrap" id="chart-svg-container"></div>
+    <div class="chart-x-axis" id="chart-x-axis"></div>
+  </div>
+
+  <div class="details-grid">
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <span class="detail-card-title">Modelle & Provider</span>
+        <span class="detail-card-sub" id="model-count-label">Heute</span>
+      </div>
+      <div class="model-list" id="model-list"></div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <span class="detail-card-title">Projekt-Verbrauch Heute</span>
+        <span class="detail-card-sub" id="proj-count-label">Heute</span>
+      </div>
+      <div class="proj-table-wrap">
+        <table class="proj-table">
+          <thead>
+            <tr>
+              <th>Projekt</th>
+              <th>Sessions</th>
+              <th>Turns</th>
+              <th>Tokens</th>
+              <th>Gesch. Kosten</th>
+            </tr>
+          </thead>
+          <tbody id="proj-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
   const board = document.getElementById('board');
@@ -718,9 +1049,13 @@ class BoardPanel {
     if (lower.includes('fable-5-1') || lower.includes('fable-5.1')) return 'Fable 5.1';
     if (lower.includes('fable')) return 'Fable';
     if (lower.includes('mythos')) return 'Mythos';
+    if (lower.includes('gemini-2.5-pro') || lower.includes('gemini-2-5-pro')) return 'Gemini 2.5 Pro';
+    if (lower.includes('gemini-2.5-flash') || lower.includes('gemini-2-5-flash')) return 'Gemini 2.5 Flash';
     if (lower.includes('gemini-2.0-pro') || lower.includes('gemini-2-pro')) return 'Gemini 2.0 Pro';
     if (lower.includes('gemini-2.0-flash') || lower.includes('gemini-2-flash')) return 'Gemini 2.0 Flash';
     if (lower.includes('gemini-1.5-pro')) return 'Gemini 1.5 Pro';
+    if (lower.includes('gemini-1.5-flash')) return 'Gemini 1.5 Flash';
+    if (lower.includes('gemini-ultra')) return 'Gemini Ultra';
     if (lower.includes('gemini')) return 'Gemini';
     return m.replace(/^claude-/, '');
   }
@@ -944,6 +1279,10 @@ class BoardPanel {
     if (ev.data.type === 'render') {
       cachedColumns = ev.data.columns || [];
       cachedQuota = ev.data.quota || null;
+      cachedAnalytics = ev.data.analytics || null;
+      if (modeBadgeBoard) {
+        modeBadgeBoard.textContent = ev.data.counts ? (ev.data.counts.all || 0) : 0;
+      }
       updateFilterUI(ev.data.filter, ev.data.counts);
       updateProjectChipsUI(ev.data.projectFilter, ev.data.counts);
       updateQuotaUI(cachedQuota, ev.data.filter);
@@ -952,6 +1291,13 @@ class BoardPanel {
       } else {
         applySearchAndRender();
       }
+      if (currentViewMode === 'analyse') {
+        renderAnalyseView();
+      }
+      return;
+    }
+    if (ev.data.type === 'setViewMode') {
+      setViewMode(ev.data.mode || 'board');
       return;
     }
     if (ev.data.type === 'setSearch') {
@@ -960,6 +1306,252 @@ class BoardPanel {
       return;
     }
   });
+
+  // Mode Switcher Logic
+  let currentViewMode = 'board';
+  let currentAnalyseFilter = 'all';
+  let cachedAnalytics = null;
+
+  const btnModeBoard = document.getElementById('btn-mode-board');
+  const btnModeAnalyse = document.getElementById('btn-mode-analyse');
+  const boardEl = document.getElementById('board');
+  const analyseEl = document.getElementById('analyse-view');
+  const boardControlsWrap = document.getElementById('board-controls-wrap');
+  const modeBadgeBoard = document.getElementById('mode-badge-board');
+
+  function setViewMode(mode) {
+    currentViewMode = mode === 'analyse' ? 'analyse' : 'board';
+    btnModeBoard.classList.toggle('active', currentViewMode === 'board');
+    btnModeAnalyse.classList.toggle('active', currentViewMode === 'analyse');
+    boardEl.style.display = currentViewMode === 'board' ? 'grid' : 'none';
+    boardControlsWrap.style.display = currentViewMode === 'board' ? 'block' : 'none';
+    analyseEl.style.display = currentViewMode === 'analyse' ? 'flex' : 'none';
+    vscode.postMessage({ action: 'setViewMode', mode: currentViewMode });
+    if (currentViewMode === 'analyse') {
+      renderAnalyseView();
+    }
+  }
+
+  btnModeBoard.addEventListener('click', () => setViewMode('board'));
+  btnModeAnalyse.addEventListener('click', () => setViewMode('analyse'));
+
+  const analyseFilterBtns = document.querySelectorAll('.analyse-filter-btn');
+  analyseFilterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      currentAnalyseFilter = btn.getAttribute('data-filter') || 'all';
+      analyseFilterBtns.forEach((b) => b.classList.toggle('active', b === btn));
+      vscode.postMessage({ action: 'setAnalyseFilter', filter: currentAnalyseFilter });
+      renderAnalyseView();
+    });
+  });
+
+  function formatCurrency(val) {
+    if (typeof val !== 'number' || isNaN(val)) return '$0.00';
+    return '$' + val.toFixed(2);
+  }
+
+  function formatActiveDuration(minutes) {
+    if (!minutes || minutes < 1) return '0 Min.';
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    if (h === 0) return m + ' Min.';
+    return h + 'h ' + (m < 10 ? '0' : '') + m + 'm';
+  }
+
+  function renderAnalyseView() {
+    if (!cachedAnalytics) return;
+    const data = cachedAnalytics[currentAnalyseFilter] || cachedAnalytics.all;
+    if (!data) return;
+
+    const s = data.summary || {};
+    document.getElementById('kpi-total-tokens').textContent = formatTokens(s.totalTokens);
+    document.getElementById('kpi-input-tokens').textContent = formatTokens(s.inputTokens);
+    document.getElementById('kpi-output-tokens').textContent = formatTokens(s.outputTokens);
+    document.getElementById('kpi-cache-tokens').textContent = formatTokens(s.cacheReadTokens);
+
+    document.getElementById('kpi-cost').textContent = formatCurrency(s.estimatedCost);
+    document.getElementById('kpi-claude-cost').textContent = formatCurrency(s.claudeCost);
+    document.getElementById('kpi-agy-cost').textContent = formatCurrency(s.antigravityCost);
+
+    document.getElementById('kpi-cache-rate').textContent = (s.cacheHitRate || 0) + '%';
+    document.getElementById('kpi-cache-reads').textContent = formatTokens(s.cacheReadTokens);
+    document.getElementById('kpi-cache-writes').textContent = formatTokens(s.cacheWriteTokens);
+
+    document.getElementById('kpi-active-time').textContent = formatActiveDuration(s.activeMinutes);
+    document.getElementById('kpi-turns-count').textContent = (s.turnsCount || 0) + ' Turns';
+    document.getElementById('kpi-sessions-val').textContent = (s.sessionsCount || 0) + ' Sessions';
+    document.getElementById('kpi-sessions-count').textContent = (s.sessionsCount || 0) + ' Sessions';
+
+    renderHourlyChart(data.hourly || [], data.maxHourlyTokens || 1);
+    renderModelsList(data.models || []);
+    renderProjectsTable(data.projects || []);
+  }
+
+  let currentChartMode = 'all'; // 'all' or 'net'
+
+  const btnChartModeAll = document.getElementById('btn-chart-mode-all');
+  const btnChartModeNet = document.getElementById('btn-chart-mode-net');
+  const legendCacheDot = document.getElementById('legend-cache-dot');
+
+  if (btnChartModeAll && btnChartModeNet) {
+    btnChartModeAll.addEventListener('click', () => {
+      currentChartMode = 'all';
+      btnChartModeAll.classList.add('active');
+      btnChartModeNet.classList.remove('active');
+      if (legendCacheDot) legendCacheDot.style.display = 'inline-flex';
+      renderAnalyseView();
+    });
+    btnChartModeNet.addEventListener('click', () => {
+      currentChartMode = 'net';
+      btnChartModeNet.classList.add('active');
+      btnChartModeAll.classList.remove('active');
+      if (legendCacheDot) legendCacheDot.style.display = 'none';
+      renderAnalyseView();
+    });
+  }
+
+  function renderHourlyChart(hourly, maxHourlyTokens) {
+    const container = document.getElementById('chart-svg-container');
+    const xAxis = document.getElementById('chart-x-axis');
+    if (!container || !xAxis) return;
+
+    const w = 960;
+    const h = 130;
+    const chartH = 118; // maximum bar height
+    const yBase = 126;  // baseline axis
+
+    const isNet = currentChartMode === 'net';
+
+    let max = 1000;
+    if (isNet) {
+      for (const d of (hourly || [])) {
+        const net = (d.inputTokens || 0) + (d.outputTokens || 0);
+        if (net > max) max = net;
+      }
+    } else {
+      max = Math.max(maxHourlyTokens || 1, 1000);
+    }
+
+    let svgInner = '';
+
+    // Subtle horizontal dashed guide lines
+    for (let step = 1; step <= 3; step++) {
+      const y = Math.round(yBase - (chartH * (step / 4)));
+      svgInner += '<line x1="0" y1="' + y + '" x2="' + w + '" y2="' + y + '" stroke="rgba(128,128,128,0.14)" stroke-dasharray="3,3" />';
+    }
+
+    // Baseline axis line
+    svgInner += '<line x1="0" y1="' + yBase + '" x2="' + w + '" y2="' + yBase + '" stroke="var(--vscode-widget-border, rgba(128,128,128,0.3))" stroke-width="1" />';
+
+    const slotW = w / 24; // 40px
+    const barW = 20;
+
+    for (let i = 0; i < 24; i++) {
+      const cx = Math.round(i * slotW + slotW / 2);
+      const bx = Math.round(cx - barW / 2);
+      const d = (hourly && hourly[i]) || { inputTokens: 0, outputTokens: 0, cacheTokens: 0, totalTokens: 0, turns: 0, cost: 0, label: i + ':00' };
+
+      const inTok = d.inputTokens || 0;
+      const outTok = d.outputTokens || 0;
+      const cacheTok = isNet ? 0 : (d.cacheTokens || 0);
+      const activeTok = isNet ? (inTok + outTok) : (d.totalTokens || (inTok + outTok + cacheTok));
+
+      if (activeTok > 0) {
+        const totalBarH = Math.min(chartH, Math.max(4, Math.round((activeTok / max) * chartH)));
+
+        let inH = 0;
+        let outH = 0;
+        let cacheH = 0;
+
+        if (isNet) {
+          inH = inTok > 0 ? Math.max(2, Math.round((inTok / activeTok) * totalBarH)) : 0;
+          outH = outTok > 0 ? Math.max(2, totalBarH - inH) : 0;
+        } else {
+          inH = inTok > 0 ? Math.max(3, Math.round((inTok / activeTok) * totalBarH)) : 0;
+          outH = outTok > 0 ? Math.max(3, Math.round((outTok / activeTok) * totalBarH)) : 0;
+          cacheH = cacheTok > 0 ? Math.max(2, totalBarH - inH - outH) : 0;
+        }
+
+        const yIn = yBase - inH;
+        const yCache = yIn - cacheH;
+        const yOut = yCache - outH;
+
+        const tip = d.label + ' Uhr: ' + d.turns + ' Turns · ' +
+          formatTokens(d.totalTokens) + ' Tokens' +
+          ' (' + formatTokens(inTok) + ' In · ' + formatTokens(outTok) + ' Out · ' + formatTokens(d.cacheTokens || 0) + ' Cache) · ' +
+          formatCurrency(d.cost);
+
+        svgInner += '<g class="bar-group">';
+        svgInner += '<title>' + escapeHtml(tip) + '</title>';
+        if (inH > 0) svgInner += '<rect x="' + bx + '" y="' + yIn + '" width="' + barW + '" height="' + inH + '" fill="var(--vscode-charts-blue, #70a9ff)" rx="1" />';
+        if (cacheH > 0) svgInner += '<rect x="' + bx + '" y="' + yCache + '" width="' + barW + '" height="' + cacheH + '" fill="#10b981" rx="1" />';
+        if (outH > 0) svgInner += '<rect x="' + bx + '" y="' + yOut + '" width="' + barW + '" height="' + outH + '" fill="#f26522" rx="1" />';
+        svgInner += '<rect x="' + (bx - 5) + '" y="0" width="' + (barW + 10) + '" height="' + yBase + '" fill="transparent" />';
+        svgInner += '</g>';
+      }
+
+      // Small tick mark on baseline at every 2 hours (0, 2, 4, ..., 22)
+      if (i % 2 === 0) {
+        const tickX = Math.round(i * slotW);
+        svgInner += '<line x1="' + tickX + '" y1="' + yBase + '" x2="' + tickX + '" y2="' + (yBase + 4) + '" stroke="rgba(128,128,128,0.4)" />';
+      }
+    }
+    // Final tick mark at 24:00 (right edge)
+    svgInner += '<line x1="' + w + '" y1="' + yBase + '" x2="' + w + '" y2="' + (yBase + 4) + '" stroke="rgba(128,128,128,0.4)" />';
+
+    container.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="100%" preserveAspectRatio="none" style="width: 100%; height: 100%; display: block; overflow: hidden;">' + svgInner + '</svg>';
+
+    // X-Axis labels using flexbox justify-content: space-between (13 points from 00:00 to 24:00)
+    let xLabels = '';
+    for (let i = 0; i <= 24; i += 2) {
+      xLabels += '<span>' + String(i).padStart(2, '0') + ':00</span>';
+    }
+    xAxis.innerHTML = xLabels;
+  }
+
+  function renderModelsList(models) {
+    const container = document.getElementById('model-list');
+    if (!container) return;
+    const validModels = (models || []).filter((m) => m.tokens > 0 && m.name !== '<synthetic>');
+    if (validModels.length === 0) {
+      container.innerHTML = '<div style="opacity: 0.6; font-style: italic; font-size: 12px; padding: 12px 0;">Keine Modell-Aktivität heute</div>';
+      return;
+    }
+    container.innerHTML = validModels.map((m) => {
+      const isClaude = m.provider === 'claude';
+      const color = isClaude ? '#f26522' : '#4285f4';
+      const icon = isClaude ? ICONS.claude : ICONS.antigravity;
+      const displayName = friendlyModel(m.name) || m.name;
+      return '<div class="model-row">' +
+        '<div class="model-meta">' +
+          '<span class="model-name"><span class="prov-badge ' + m.provider + '">' + icon + '</span> ' + escapeHtml(displayName) + '</span>' +
+          '<span class="model-stat">' + formatTokens(m.tokens) + ' Tokens · ' + formatCurrency(m.cost) + ' (' + m.percent + '%)</span>' +
+        '</div>' +
+        '<div class="model-bar-track">' +
+          '<div class="model-bar-fill ' + m.provider + '" style="width: ' + Math.max(3, m.percent) + '%; background-color: ' + color + ';"></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderProjectsTable(projects) {
+    const tbody = document.getElementById('proj-table-body');
+    if (!tbody) return;
+    if (!projects || projects.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="opacity: 0.6; font-style: italic; padding: 12px 0;">Keine Projekt-Aktivität heute</td></tr>';
+      return;
+    }
+    tbody.innerHTML = projects.slice(0, 15).map((p) => {
+      return '<tr>' +
+        '<td><span class="project-badge" style="font-size: 12.5px; padding: 2px 8px;">📁 ' + escapeHtml(p.name) + '</span></td>' +
+        '<td>' + p.sessionsCount + '</td>' +
+        '<td>' + p.turns + '</td>' +
+        '<td class="font-mono">' + formatTokens(p.tokens) + '</td>' +
+        '<td class="font-mono" style="color: #4ec9b0; font-weight: 600;">' + formatCurrency(p.cost) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
   vscode.postMessage({ action: 'ready' });
 </script>
 </body>
