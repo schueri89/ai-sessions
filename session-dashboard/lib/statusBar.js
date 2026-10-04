@@ -1,6 +1,7 @@
 'use strict';
 
 const vscode = require('vscode');
+const { formatTokens } = require('./format');
 
 class StatusBarWidget {
   constructor(model) {
@@ -68,6 +69,32 @@ class StatusBarWidget {
     if (busy === 0 && waiting === 0 && bookmarked === 0) {
       md.appendMarkdown('*Keine aktiven Aufgaben*\n\n');
     }
+
+    const q = this.model.quota;
+    if (q) {
+      if (q.claude && q.claude.available) {
+        md.appendMarkdown('---\n**Claude Code Limits:**\n\n');
+        if (q.claude.fiveHour && q.claude.fiveHour.percent !== null) {
+          const r5 = q.claude.fiveHour.resetLabel ? ` (Reset ${q.claude.fiveHour.resetLabel})` : '';
+          md.appendMarkdown(`⚡ **5-Std.-Limit:** ${q.claude.fiveHour.percent}%${r5}\n\n`);
+        }
+        if (q.claude.sevenDay && q.claude.sevenDay.percent !== null) {
+          const r7 = q.claude.sevenDay.resetLabel ? ` (Reset ${q.claude.sevenDay.resetLabel})` : '';
+          md.appendMarkdown(`📅 **7-Tage-Limit:** ${q.claude.sevenDay.percent}%${r7}\n\n`);
+        }
+      }
+      if (q.antigravity && q.antigravity.available) {
+        md.appendMarkdown('---\n**Google Antigravity:**\n\n');
+        if (q.antigravity.isRateLimited) {
+          md.appendMarkdown(`⚠️ **Status:** ${q.antigravity.rateLimitMessage || 'Rate-Limit aktiv (429)'}\n\n`);
+        }
+        const t5 = formatTokens(q.antigravity.tokens5h);
+        const t7 = formatTokens(q.antigravity.tokens7d);
+        md.appendMarkdown(`⚡ **5-Std.-Verbrauch:** ~${t5} Tokens\n\n`);
+        md.appendMarkdown(`📅 **7-Tage-Verbrauch:** ~${t7} Tokens\n\n`);
+      }
+    }
+
     md.appendMarkdown('---\n*Klicken für Direktzugriff*');
     this.item.tooltip = md;
     this.item.show();

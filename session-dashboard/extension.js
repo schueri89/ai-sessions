@@ -2,7 +2,7 @@
 
 const vscode = require('vscode');
 const fs = require('fs');
-const { readSessions, watchTargets } = require('./lib/registry');
+const { readSessions, watchTargets, getQuotaSummary } = require('./lib/registry');
 const { DoneStore } = require('./lib/doneStore');
 const { BookmarkStore } = require('./lib/bookmarkStore');
 const { SessionTreeProvider } = require('./lib/treeView');
@@ -28,6 +28,7 @@ class SessionModel {
     this.providerFilter = context.globalState.get('sessionDashboard.providerFilter', 'all');
     this.projectFilter = context.globalState.get('sessionDashboard.projectFilter', 'all');
     this.sessions = [];
+    this.quota = null;
     this.signature = '';
   }
 
@@ -67,7 +68,11 @@ class SessionModel {
 
   // Re-reads registry across all providers. Returns true if anything visible changed.
   async refresh() {
-    const live = await readSessions();
+    const [live, quota] = await Promise.all([
+      readSessions(),
+      getQuotaSummary().catch(() => null)
+    ]);
+    this.quota = quota;
     const knownIds = new Set(live.map((s) => s.sessionId));
     await this.done.reconcile(live, knownIds);
     await this.bookmarks.reconcile(live, knownIds);
@@ -100,6 +105,10 @@ class SessionModel {
     const signature = JSON.stringify([
       this.providerFilter,
       this.projectFilter,
+      this.quota ? [
+        this.quota.claude ? [this.quota.claude.fiveHour?.percent, this.quota.claude.sevenDay?.percent] : null,
+        this.quota.antigravity ? [this.quota.antigravity.tokens5h, this.quota.antigravity.isRateLimited] : null
+      ] : null,
       this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
     ]);
     const changed = signature !== this.signature;
@@ -182,8 +191,13 @@ function activate(context) {
           ? { value: waiting, tooltip: waiting === 1 ? '1 Session wartet auf dich' : `${waiting} Sessions warten auf dich` }
           : undefined;
         const filterParts = [];
-        if (model.providerFilter === 'claude') filterParts.push('Claude Code');
-        else if (model.providerFilter === 'antigravity') filterParts.push('Antigravity');
+        if (model.providerFilter === 'claude') {
+          const c5 = model.quota?.claude?.fiveHour?.percent;
+          filterParts.push(c5 !== undefined && c5 !== null ? `Claude (${c5}% 5h)` : 'Claude Code');
+        } else if (model.providerFilter === 'antigravity') {
+          const a5 = model.quota?.antigravity?.tokens5h;
+          filterParts.push(a5 ? `Antigravity (~${formatTokens(a5)})` : 'Antigravity');
+        }
         if (model.projectFilter && model.projectFilter !== 'all') filterParts.push(model.projectFilter);
         view.description = filterParts.join(' · ');
         view.message = visible.length === 0

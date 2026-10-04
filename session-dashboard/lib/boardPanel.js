@@ -118,6 +118,7 @@ class BoardPanel {
       filter: this.model.providerFilter,
       projectFilter: this.model.projectFilter,
       counts: this.model.counts(),
+      quota: this.model.quota,
       initialSearch,
       columns
     });
@@ -265,6 +266,31 @@ class BoardPanel {
   .token-counts { opacity: 0.75; }
   .token-model-badge { opacity: 0.85; font-size: 0.95em; font-weight: 500;
     padding: 1px 5px; border-radius: 3px; background: rgba(128, 128, 128, 0.15); }
+  .quota-strip { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; padding-top: 6px; }
+  .quota-card { flex: 1; min-width: 250px; background: rgba(128, 128, 128, 0.06);
+    border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2)); border-radius: 5px; padding: 6px 10px; }
+  .quota-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .quota-provider { display: inline-flex; align-items: center; gap: 5px; font-size: 0.8em; font-weight: 600; }
+  .quota-provider svg { width: 13px; height: 13px; display: block; }
+  .quota-provider.claude { color: #ff9e79; }
+  .quota-provider.antigravity { color: #70a9ff; }
+  .quota-status-pill { font-size: 0.72em; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+  .quota-status-pill.status-ok { background: rgba(78, 201, 176, 0.15); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.3); }
+  .quota-status-pill.status-warn { background: rgba(229, 192, 123, 0.2); color: #e5c07b; border: 1px solid rgba(229, 192, 123, 0.4); }
+  .quota-status-pill.status-danger { background: rgba(244, 135, 113, 0.2); color: #f48771; border: 1px solid rgba(244, 135, 113, 0.4); }
+  .quota-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .quota-meter { display: flex; flex-direction: column; gap: 2px; }
+  .quota-meter-label { display: flex; justify-content: space-between; align-items: center; font-size: 0.74em; opacity: 0.85; }
+  .quota-val { font-weight: 600; font-size: 0.92em; }
+  .quota-val.level-low { color: var(--vscode-charts-blue, #70a9ff); }
+  .quota-val.level-medium { color: var(--vscode-charts-yellow, #e5c07b); }
+  .quota-val.level-high { color: var(--vscode-charts-red, #f48771); }
+  .quota-progress-track { width: 100%; height: 4px; border-radius: 2px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin: 3px 0 2px; }
+  .quota-progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+  .quota-progress-fill.level-low { background: var(--vscode-charts-blue, #70a9ff); }
+  .quota-progress-fill.level-medium { background: var(--vscode-charts-yellow, #e5c07b); }
+  .quota-progress-fill.level-high { background: var(--vscode-charts-red, #f48771); }
+  .quota-sub { font-size: 0.72em; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
@@ -291,6 +317,7 @@ class BoardPanel {
     </div>
   </div>
   <div class="project-chips-row" id="project-chips" style="display: none;"></div>
+  <div class="quota-strip" id="quota-strip" style="display: none;"></div>
 </header>
 <div class="board" id="board"></div>
 <script nonce="${nonce}">
@@ -309,6 +336,7 @@ class BoardPanel {
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       const filter = btn.getAttribute('data-filter');
+      updateQuotaUI(cachedQuota, filter);
       vscode.postMessage({ action: 'setFilter', filter });
     });
   });
@@ -358,6 +386,121 @@ class BoardPanel {
         vscode.postMessage({ action: 'setProjectFilter', filter: nextFilter });
       });
       projectChips.append(chip);
+    }
+  }
+
+  const quotaStrip = document.getElementById('quota-strip');
+  let cachedQuota = null;
+
+  function updateQuotaUI(quota, filter) {
+    if (!quotaStrip) return;
+    quotaStrip.replaceChildren();
+    if (!quota) {
+      quotaStrip.style.display = 'none';
+      return;
+    }
+
+    const showClaude = (!filter || filter === 'all' || filter === 'claude') && quota.claude && quota.claude.available;
+    const showAntigravity = (!filter || filter === 'all' || filter === 'antigravity') && quota.antigravity && quota.antigravity.available;
+
+    if (!showClaude && !showAntigravity) {
+      quotaStrip.style.display = 'none';
+      return;
+    }
+    quotaStrip.style.display = 'flex';
+
+    if (showClaude) {
+      const c = quota.claude;
+      const card = el('div', 'quota-card quota-claude');
+      const header = el('div', 'quota-header');
+      const prov = el('span', 'quota-provider claude');
+      prov.innerHTML = ICONS.claude + ' Claude Code';
+      header.append(prov);
+
+      const maxPct = Math.max(c.fiveHour?.percent || 0, c.sevenDay?.percent || 0);
+      const statusPill = el('span', 'quota-status-pill ' + (maxPct >= 85 ? 'status-danger' : (maxPct >= 65 ? 'status-warn' : 'status-ok')));
+      statusPill.textContent = maxPct >= 85 ? 'Fast voll' : (maxPct >= 65 ? 'Erhöht' : 'Normal');
+      header.append(statusPill);
+      card.append(header);
+
+      const meters = el('div', 'quota-meters');
+
+      // 5h meter
+      const m5 = el('div', 'quota-meter');
+      const p5 = Math.min(100, Math.max(0, c.fiveHour?.percent ?? 0));
+      const lvl5 = p5 >= 85 ? 'high' : (p5 >= 65 ? 'medium' : 'low');
+      const lbl5 = el('div', 'quota-meter-label');
+      lbl5.append(el('span', '', '5h-Limit'), el('span', 'quota-val level-' + lvl5, p5 + '%'));
+      m5.append(lbl5);
+      const tr5 = el('div', 'quota-progress-track');
+      const fl5 = el('div', 'quota-progress-fill level-' + lvl5);
+      fl5.style.width = p5 + '%';
+      tr5.append(fl5);
+      m5.append(tr5);
+      const sub5 = el('div', 'quota-sub', c.fiveHour?.resetLabel ? 'Reset ' + c.fiveHour.resetLabel : 'Laufendes Fenster');
+      sub5.title = '5-Stunden-Sitzungslimit: ' + p5 + '% genutzt' + (c.fiveHour?.resetLabel ? ' · Zurücksetzung um ' + c.fiveHour.resetLabel : '');
+      m5.append(sub5);
+      meters.append(m5);
+
+      // 7d meter
+      const m7 = el('div', 'quota-meter');
+      const p7 = Math.min(100, Math.max(0, c.sevenDay?.percent ?? 0));
+      const lvl7 = p7 >= 85 ? 'high' : (p7 >= 65 ? 'medium' : 'low');
+      const lbl7 = el('div', 'quota-meter-label');
+      lbl7.append(el('span', '', '7d-Woche'), el('span', 'quota-val level-' + lvl7, p7 + '%'));
+      m7.append(lbl7);
+      const tr7 = el('div', 'quota-progress-track');
+      const fl7 = el('div', 'quota-progress-fill level-' + lvl7);
+      fl7.style.width = p7 + '%';
+      tr7.append(fl7);
+      m7.append(tr7);
+      const sub7 = el('div', 'quota-sub', c.sevenDay?.resetLabel ? 'Reset ' + c.sevenDay.resetLabel : 'Wöchentliches Fenster');
+      sub7.title = '7-Tage-Gesamtlimit: ' + p7 + '% genutzt' + (c.sevenDay?.resetLabel ? ' · Zurücksetzung am ' + c.sevenDay.resetLabel : '');
+      m7.append(sub7);
+      meters.append(m7);
+
+      card.append(meters);
+      quotaStrip.append(card);
+    }
+
+    if (showAntigravity) {
+      const a = quota.antigravity;
+      const card = el('div', 'quota-card quota-antigravity');
+      const header = el('div', 'quota-header');
+      const prov = el('span', 'quota-provider antigravity');
+      prov.innerHTML = ICONS.antigravity + ' Google Antigravity';
+      header.append(prov);
+
+      const statusPill = el('span', 'quota-status-pill ' + (a.isRateLimited ? 'status-danger' : 'status-ok'));
+      statusPill.textContent = a.isRateLimited ? 'Limit (429)' : 'Bereit';
+      if (a.isRateLimited) statusPill.title = a.rateLimitMessage;
+      header.append(statusPill);
+      card.append(header);
+
+      const meters = el('div', 'quota-meters');
+
+      // 5h Antigravity
+      const m5 = el('div', 'quota-meter');
+      const lbl5 = el('div', 'quota-meter-label');
+      lbl5.append(el('span', '', '5h-Verbrauch'), el('span', 'quota-val', formatTokens(a.tokens5h)));
+      m5.append(lbl5);
+      const sub5 = el('div', 'quota-sub', 'Letzte 5 Stunden');
+      sub5.title = 'Tokens in den letzten 5 Stunden über alle Antigravity-Sessions: ' + (a.tokens5h || 0).toLocaleString('de-DE');
+      m5.append(sub5);
+      meters.append(m5);
+
+      // 7d Antigravity
+      const m7 = el('div', 'quota-meter');
+      const lbl7 = el('div', 'quota-meter-label');
+      lbl7.append(el('span', '', '7d-Verbrauch'), el('span', 'quota-val', formatTokens(a.tokens7d)));
+      m7.append(lbl7);
+      const sub7 = el('div', 'quota-sub', 'Letzte 7 Tage');
+      sub7.title = 'Tokens in den letzten 7 Tagen über alle Antigravity-Sessions: ' + (a.tokens7d || 0).toLocaleString('de-DE');
+      m7.append(sub7);
+      meters.append(m7);
+
+      card.append(meters);
+      quotaStrip.append(card);
     }
   }
 
@@ -680,8 +823,10 @@ class BoardPanel {
     if (!ev.data) return;
     if (ev.data.type === 'render') {
       cachedColumns = ev.data.columns || [];
+      cachedQuota = ev.data.quota || null;
       updateFilterUI(ev.data.filter, ev.data.counts);
       updateProjectChipsUI(ev.data.projectFilter, ev.data.counts);
+      updateQuotaUI(cachedQuota, ev.data.filter);
       if (typeof ev.data.initialSearch === 'string' && ev.data.initialSearch && !currentSearch) {
         setSearch(ev.data.initialSearch);
       } else {

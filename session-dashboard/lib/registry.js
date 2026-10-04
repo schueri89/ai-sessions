@@ -4,6 +4,7 @@
 
 const claude = require('./providers/claude');
 const antigravity = require('./providers/antigravity');
+const { getQuotaSummary } = require('./quota');
 
 async function readSessions() {
   const [claudeSessions, antigravitySessions] = await Promise.all([
@@ -27,6 +28,7 @@ function watchTargets() {
 module.exports = {
   readSessions,
   watchTargets,
+  getQuotaSummary,
   // Backward compatibility exports for Claude Code helpers (transcripts.js, history.js)
   claudeDir: claude.claudeDir,
   sessionsDir: claude.sessionsDir,
