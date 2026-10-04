@@ -1,6 +1,6 @@
 'use strict';
 
-// Aggregation and metrics for daily token usage, costs and hourly timelines
+// Aggregation and metrics for token usage, costs and timelines (today, 7d, 30d)
 // for Claude Code and Google Antigravity.
 
 const fs = require('fs');
@@ -9,9 +9,12 @@ const os = require('os');
 const { DatabaseSync } = require('node:sqlite');
 const { resolveProject } = require('./project');
 
-const CACHE_TTL_MS = 25 * 1000;
-let cachedData = null;
-let lastCacheTime = 0;
+const BUNDLE_CACHE_TTL_MS = 20 * 1000;
+let cachedAnalyticsBundle = null;
+let lastBundleTime = 0;
+
+// Incremental file cache: filePath -> { mtimeMs, size, turns: [...] }
+const fileTurnCache = new Map();
 
 function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -24,7 +27,9 @@ function antigravityDir() {
 // Rates per 1,000,000 tokens in USD
 const MODEL_PRICING = {
   'claude-opus-5-5': { input: 5.0, output: 25.0, cacheRead: 0.50, cacheWrite: 6.25 },
+  'claude-opus-5': { input: 5.0, output: 25.0, cacheRead: 0.50, cacheWrite: 6.25 },
   'claude-opus-4': { input: 5.0, output: 25.0, cacheRead: 0.50, cacheWrite: 6.25 },
+  'claude-sonnet-5': { input: 3.0, output: 15.0, cacheRead: 0.30, cacheWrite: 3.75 },
   'claude-3-opus': { input: 15.0, output: 75.0, cacheRead: 1.50, cacheWrite: 18.75 },
   'claude-3-7-sonnet': { input: 3.0, output: 15.0, cacheRead: 0.30, cacheWrite: 3.75 },
   'claude-3-5-sonnet': { input: 3.0, output: 15.0, cacheRead: 0.30, cacheWrite: 3.75 },
@@ -50,35 +55,42 @@ function getModelPricing(modelName, provider = 'claude') {
   if (m.includes('sonnet')) return MODEL_PRICING['claude-3-7-sonnet'];
   if (m.includes('flash')) return MODEL_PRICING['gemini-2.5-flash'];
   if (m.includes('pro')) return MODEL_PRICING['gemini-2.5-pro'];
-  if (m.includes('ultra')) return MODEL_PRICING['gemini-ultra'];
   return provider === 'antigravity' ? MODEL_PRICING['gemini-2.5-flash'] : MODEL_PRICING['claude-3-7-sonnet'];
 }
 
-function calculateTurnCost(tokens, modelName, provider) {
+function calculateTurnCost(usage, modelName, provider) {
   const p = getModelPricing(modelName, provider);
-  const inputCost = ((tokens.input || 0) / 1000000) * p.input;
-  const outputCost = ((tokens.output || 0) / 1000000) * p.output;
-  const cacheReadCost = ((tokens.cacheRead || 0) / 1000000) * p.cacheRead;
-  const cacheWriteCost = ((tokens.cacheWrite || 0) / 1000000) * p.cacheWrite;
-  return inputCost + outputCost + cacheReadCost + cacheWriteCost;
+  const inCost = ((usage.input || 0) / 1000000) * p.input;
+  const outCost = ((usage.output || 0) / 1000000) * p.output;
+  const readCost = ((usage.cacheRead || 0) / 1000000) * p.cacheRead;
+  const writeCost = ((usage.cacheWrite || 0) / 1000000) * p.cacheWrite;
+  return inCost + outCost + readCost + writeCost;
 }
 
-function getTodayStartMs() {
+function getStartOfDay(daysAgo = 0) {
   const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
   d.setHours(0, 0, 0, 0);
   return d.getTime();
 }
 
+function toDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function loadAntigravityWorkspaceMap() {
   const map = new Map();
-  const dbFile = path.join(antigravityDir(), 'conversation_summaries.db');
-  if (!fs.existsSync(dbFile)) return map;
+  const dbPath = path.join(antigravityDir(), 'conversations.db');
+  if (!fs.existsSync(dbPath)) return map;
   try {
-    const db = new DatabaseSync(dbFile, { readOnly: true });
+    const db = new DatabaseSync(dbPath, { open: true, readOnly: true });
     try {
-      const rows = db.prepare('SELECT conversation_id, workspace_uris, title FROM conversation_summaries').all();
+      const rows = db.prepare('SELECT conversation_id, workspace_uris, title FROM conversations').all();
       for (const r of rows) {
-        if (r.conversation_id) {
+        if (r && r.conversation_id) {
           map.set(r.conversation_id, {
             workspaces: r.workspace_uris ? [r.workspace_uris] : [],
             title: r.title || ''
@@ -92,7 +104,7 @@ function loadAntigravityWorkspaceMap() {
   return map;
 }
 
-function collectRawTurns(todayStartMs) {
+function collectRawTurns(thirtyDaysStartMs) {
   const turns = [];
 
   // 1. Collect Claude Code turns
@@ -112,56 +124,70 @@ function collectRawTurns(todayStartMs) {
         const filePath = path.join(dirPath, f);
         try {
           const stat = fs.statSync(filePath);
-          if (stat.mtimeMs < todayStartMs) continue;
+          if (stat.mtimeMs < thirtyDaysStartMs) continue;
 
-          const content = fs.readFileSync(filePath, 'utf8');
-          const lines = content.split('\n');
-          let detectedProject = '';
+          let cached = fileTurnCache.get(filePath);
+          if (!cached || cached.mtimeMs !== stat.mtimeMs || cached.size !== stat.size) {
+            const fileTurns = [];
+            const content = fs.readFileSync(filePath, 'utf8');
+            const lines = content.split('\n');
+            let detectedProject = '';
 
-          for (const line of lines) {
-            if (!line) continue;
-            if (!detectedProject) {
-              const m = line.match(/[\\\/]webapps[\\\/]ROOT[\\\/]([a-zA-Z0-9_\-\.]+)/i);
-              if (m && !['WEB-INF', 'META-INF', 'lucee.code-workspace'].includes(m[1])) {
-                detectedProject = m[1];
+            for (const line of lines) {
+              if (!line) continue;
+              if (!detectedProject) {
+                const m = line.match(/[\\\/]webapps[\\\/]ROOT[\\\/]([a-zA-Z0-9_\-\.]+)/i);
+                if (m && !['WEB-INF', 'META-INF', 'lucee.code-workspace'].includes(m[1])) {
+                  detectedProject = m[1];
+                }
               }
             }
 
-            if (!line.includes('"type":"assistant"') || !line.includes('"usage"')) continue;
-            let rec;
-            try { rec = JSON.parse(line); } catch { continue; }
+            for (const line of lines) {
+              if (!line || !line.includes('"type":"assistant"') || !line.includes('"usage"')) continue;
+              let rec;
+              try { rec = JSON.parse(line); } catch { continue; }
 
-            const ts = Date.parse(rec.timestamp);
-            if (isNaN(ts) || ts < todayStartMs) continue;
+              const ts = Date.parse(rec.timestamp);
+              if (isNaN(ts)) continue;
 
-            const u = rec.message && rec.message.usage;
-            if (!u) continue;
+              const u = rec.message && rec.message.usage;
+              if (!u) continue;
 
-            const input = Number(u.input_tokens) || 0;
-            const output = Number(u.output_tokens) || 0;
-            const cacheWrite = Number(u.cache_creation_input_tokens) || 0;
-            const cacheRead = Number(u.cache_read_input_tokens) || 0;
-            const model = (rec.message && rec.message.model) || 'claude-3-7-sonnet';
-            const sessionId = rec.sessionId || path.basename(f, '.jsonl');
+              const input = Number(u.input_tokens) || 0;
+              const output = Number(u.output_tokens) || 0;
+              const cacheWrite = Number(u.cache_creation_input_tokens) || 0;
+              const cacheRead = Number(u.cache_read_input_tokens) || 0;
+              const model = (rec.message && rec.message.model) || 'claude-3-7-sonnet';
+              const sessionId = rec.sessionId || path.basename(f, '.jsonl');
 
-            const project = resolveProject({
-              cwd: rec.cwd || '',
-              hintProject: detectedProject
-            });
+              const project = resolveProject({
+                cwd: rec.cwd || '',
+                hintProject: detectedProject
+              });
 
-            turns.push({
-              provider: 'claude',
-              timestamp: ts,
-              hour: new Date(ts).getHours(),
-              sessionId,
-              project,
-              model,
-              input,
-              output,
-              cacheWrite,
-              cacheRead,
-              cost: calculateTurnCost({ input, output, cacheRead, cacheWrite }, model, 'claude')
-            });
+              fileTurns.push({
+                provider: 'claude',
+                timestamp: ts,
+                dateKey: toDateKey(new Date(ts)),
+                hour: new Date(ts).getHours(),
+                sessionId,
+                project,
+                model,
+                input,
+                output,
+                cacheWrite,
+                cacheRead,
+                cost: calculateTurnCost({ input, output, cacheRead, cacheWrite }, model, 'claude')
+              });
+            }
+
+            cached = { mtimeMs: stat.mtimeMs, size: stat.size, turns: fileTurns };
+            fileTurnCache.set(filePath, cached);
+          }
+
+          for (const t of cached.turns) {
+            if (t.timestamp >= thirtyDaysStartMs) turns.push(t);
           }
         } catch {}
       }
@@ -183,43 +209,55 @@ function collectRawTurns(todayStartMs) {
       if (!fs.existsSync(transcriptFile)) continue;
       try {
         const stat = fs.statSync(transcriptFile);
-        if (stat.mtimeMs < todayStartMs) continue;
+        if (stat.mtimeMs < thirtyDaysStartMs) continue;
 
-        const content = fs.readFileSync(transcriptFile, 'utf8');
-        const lines = content.split('\n');
-        const meta = agyMetaMap.get(sessionId) || {};
-        const project = resolveProject({
-          workspaces: meta.workspaces || [],
-          title: meta.title || ''
-        });
-
-        for (const line of lines) {
-          if (!line || !line.includes('"PLANNER_RESPONSE"') || !line.includes('input_tokens')) continue;
-          let rec;
-          try { rec = JSON.parse(line); } catch { continue; }
-
-          const ts = Date.parse(rec.created_at);
-          if (isNaN(ts) || ts < todayStartMs) continue;
-
-          const input = Number(rec.input_tokens) || 0;
-          const output = Number(rec.output_tokens) || 0;
-          const cacheRead = Number(rec.cache_read_tokens) || 0;
-          const cacheWrite = 0;
-          const model = rec.model || 'Gemini 2.5 Flash';
-
-          turns.push({
-            provider: 'antigravity',
-            timestamp: ts,
-            hour: new Date(ts).getHours(),
-            sessionId,
-            project,
-            model,
-            input,
-            output,
-            cacheWrite,
-            cacheRead,
-            cost: calculateTurnCost({ input, output, cacheRead, cacheWrite }, model, 'antigravity')
+        let cached = fileTurnCache.get(transcriptFile);
+        if (!cached || cached.mtimeMs !== stat.mtimeMs || cached.size !== stat.size) {
+          const fileTurns = [];
+          const content = fs.readFileSync(transcriptFile, 'utf8');
+          const lines = content.split('\n');
+          const meta = agyMetaMap.get(sessionId) || {};
+          const project = resolveProject({
+            workspaces: meta.workspaces || [],
+            title: meta.title || ''
           });
+
+          for (const line of lines) {
+            if (!line || !line.includes('"PLANNER_RESPONSE"') || !line.includes('input_tokens')) continue;
+            let rec;
+            try { rec = JSON.parse(line); } catch { continue; }
+
+            const ts = Date.parse(rec.created_at);
+            if (isNaN(ts)) continue;
+
+            const input = Number(rec.input_tokens) || 0;
+            const output = Number(rec.output_tokens) || 0;
+            const cacheRead = Number(rec.cache_read_tokens) || 0;
+            const cacheWrite = 0;
+            const model = rec.model || 'Gemini 2.5 Flash';
+
+            fileTurns.push({
+              provider: 'antigravity',
+              timestamp: ts,
+              dateKey: toDateKey(new Date(ts)),
+              hour: new Date(ts).getHours(),
+              sessionId,
+              project,
+              model,
+              input,
+              output,
+              cacheWrite,
+              cacheRead,
+              cost: calculateTurnCost({ input, output, cacheRead, cacheWrite }, model, 'antigravity')
+            });
+          }
+
+          cached = { mtimeMs: stat.mtimeMs, size: stat.size, turns: fileTurns };
+          fileTurnCache.set(transcriptFile, cached);
+        }
+
+        for (const t of cached.turns) {
+          if (t.timestamp >= thirtyDaysStartMs) turns.push(t);
         }
       } catch {}
     }
@@ -228,19 +266,13 @@ function collectRawTurns(todayStartMs) {
   return turns;
 }
 
-function getTodayMetrics(filterProvider = 'all') {
-  const now = Date.now();
-  const todayStartMs = getTodayStartMs();
+function aggregateScope(rawTurns, scope = 'today', filterProvider = 'all') {
+  const startToday = getStartOfDay(0);
+  const start7d = getStartOfDay(6);
+  const start30d = getStartOfDay(29);
 
-  if (!cachedData || (now - lastCacheTime) > CACHE_TTL_MS) {
-    cachedData = collectRawTurns(todayStartMs);
-    lastCacheTime = now;
-  }
-
-  const rawTurns = cachedData;
-  const filtered = filterProvider === 'all'
-    ? rawTurns
-    : rawTurns.filter((t) => t.provider === filterProvider);
+  const sinceMs = scope === 'today' ? startToday : (scope === '7d' ? start7d : start30d);
+  const filtered = rawTurns.filter((t) => t.timestamp >= sinceMs && (filterProvider === 'all' || t.provider === filterProvider));
 
   // 1. Summary aggregations
   let inputTokens = 0;
@@ -251,6 +283,8 @@ function getTodayMetrics(filterProvider = 'all') {
   let claudeCost = 0;
   let antigravityCost = 0;
   const uniqueSessions = new Set();
+  const activeMinutesSet = new Set();
+  const activeDaysSet = new Set();
 
   for (const t of filtered) {
     inputTokens += t.input;
@@ -261,45 +295,88 @@ function getTodayMetrics(filterProvider = 'all') {
     if (t.provider === 'claude') claudeCost += t.cost;
     else antigravityCost += t.cost;
     uniqueSessions.add(t.sessionId);
+    if (t.timestamp) activeMinutesSet.add(Math.floor(t.timestamp / 60000));
+    if (t.dateKey) activeDaysSet.add(t.dateKey);
   }
 
   const totalTokens = inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens;
   const totalInputBase = inputTokens + cacheReadTokens + cacheWriteTokens;
   const cacheHitRate = totalInputBase > 0 ? (cacheReadTokens / totalInputBase) * 100 : 0;
 
-  // Active time estimation: wall-clock minutes where at least one turn occurred
-  const activeMinutesSet = new Set();
-  for (const t of filtered) {
-    if (t.timestamp) {
-      activeMinutesSet.add(Math.floor(t.timestamp / 60000));
+  // 2. Timeline aggregation
+  let timeline = [];
+  const weekdays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  const fullWeekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+  if (scope === 'today') {
+    timeline = Array.from({ length: 24 }, (_, i) => ({
+      slotIndex: i,
+      label: String(i).padStart(2, '0') + ':00',
+      fullDateLabel: 'Heute, ' + String(i).padStart(2, '0') + ':00 Uhr',
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheTokens: 0,
+      totalTokens: 0,
+      turns: 0,
+      cost: 0
+    }));
+
+    for (const t of filtered) {
+      const h = t.hour >= 0 && t.hour < 24 ? t.hour : 0;
+      timeline[h].inputTokens += t.input + t.cacheWrite;
+      timeline[h].outputTokens += t.output;
+      timeline[h].cacheTokens += t.cacheRead;
+      timeline[h].totalTokens += (t.input + t.output + t.cacheRead + t.cacheWrite);
+      timeline[h].turns += 1;
+      timeline[h].cost += t.cost;
+    }
+  } else {
+    const daysCount = scope === '7d' ? 7 : 30;
+    const startMs = scope === '7d' ? start7d : start30d;
+    const slotMap = new Map();
+
+    for (let d = 0; d < daysCount; d++) {
+      const dt = new Date(startMs);
+      dt.setDate(dt.getDate() + d);
+      const dateKey = toDateKey(dt);
+      const dayNum = String(dt.getDate()).padStart(2, '0');
+      const monNum = String(dt.getMonth() + 1).padStart(2, '0');
+      const weekday = weekdays[dt.getDay()];
+      const fullWeekday = fullWeekdays[dt.getDay()];
+      const label = scope === '7d' ? `${weekday} ${dayNum}.${monNum}.` : `${dayNum}.${monNum}.`;
+      const fullDateLabel = `${fullWeekday}, ${dayNum}.${monNum}.${dt.getFullYear()}`;
+
+      const item = {
+        slotIndex: d,
+        dateKey,
+        label,
+        fullDateLabel,
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheTokens: 0,
+        totalTokens: 0,
+        turns: 0,
+        cost: 0
+      };
+      timeline.push(item);
+      slotMap.set(dateKey, item);
+    }
+
+    for (const t of filtered) {
+      const slot = slotMap.get(t.dateKey);
+      if (slot) {
+        slot.inputTokens += t.input + t.cacheWrite;
+        slot.outputTokens += t.output;
+        slot.cacheTokens += t.cacheRead;
+        slot.totalTokens += (t.input + t.output + t.cacheRead + t.cacheWrite);
+        slot.turns += 1;
+        slot.cost += t.cost;
+      }
     }
   }
-  const activeMinutes = activeMinutesSet.size;
 
-  // 2. Hourly breakdown (24 hours)
-  const hourly = Array.from({ length: 24 }, (_, i) => ({
-    hour: i,
-    label: String(i).padStart(2, '0') + ':00',
-    inputTokens: 0,
-    outputTokens: 0,
-    cacheTokens: 0,
-    totalTokens: 0,
-    turns: 0,
-    cost: 0
-  }));
-
-  for (const t of filtered) {
-    const h = t.hour >= 0 && t.hour < 24 ? t.hour : 0;
-    hourly[h].inputTokens += t.input + t.cacheWrite;
-    hourly[h].outputTokens += t.output;
-    hourly[h].cacheTokens += t.cacheRead;
-    hourly[h].totalTokens += (t.input + t.output + t.cacheRead + t.cacheWrite);
-    hourly[h].turns += 1;
-    hourly[h].cost += t.cost;
-  }
-
-  // Find max hourly total tokens for responsive bar heights
-  const maxHourlyTokens = Math.max(...hourly.map((h) => h.totalTokens), 1);
+  // Max total tokens in timeline for SVG scaling
+  const maxTimelineTokens = Math.max(...timeline.map((s) => s.totalTokens), 1);
 
   // 3. Model breakdown
   const modelMap = new Map();
@@ -360,6 +437,7 @@ function getTodayMetrics(filterProvider = 'all') {
     .sort((a, b) => b.tokens - a.tokens);
 
   return {
+    scope,
     filterProvider,
     summary: {
       totalTokens,
@@ -373,16 +451,65 @@ function getTodayMetrics(filterProvider = 'all') {
       antigravityCost,
       turnsCount: filtered.length,
       sessionsCount: uniqueSessions.size,
-      activeMinutes
+      activeMinutes: activeMinutesSet.size,
+      activeDays: activeDaysSet.size
     },
-    hourly,
-    maxHourlyTokens,
+    hourly: timeline, // for backward compatibility if hourly is read
+    maxHourlyTokens: maxTimelineTokens,
+    timeline,
+    timelineType: scope === 'today' ? 'hourly' : 'daily',
+    maxTimelineTokens,
     models,
     projects
   };
 }
 
+function getAllAnalytics() {
+  const now = Date.now();
+  if (cachedAnalyticsBundle && (now - lastBundleTime) < BUNDLE_CACHE_TTL_MS) {
+    return cachedAnalyticsBundle;
+  }
+
+  const thirtyDaysStartMs = getStartOfDay(29);
+  const rawTurns = collectRawTurns(thirtyDaysStartMs);
+
+  const bundle = {
+    all: {
+      today: aggregateScope(rawTurns, 'today', 'all'),
+      '7d': aggregateScope(rawTurns, '7d', 'all'),
+      '30d': aggregateScope(rawTurns, '30d', 'all')
+    },
+    claude: {
+      today: aggregateScope(rawTurns, 'today', 'claude'),
+      '7d': aggregateScope(rawTurns, '7d', 'claude'),
+      '30d': aggregateScope(rawTurns, '30d', 'claude')
+    },
+    antigravity: {
+      today: aggregateScope(rawTurns, 'today', 'antigravity'),
+      '7d': aggregateScope(rawTurns, '7d', 'antigravity'),
+      '30d': aggregateScope(rawTurns, '30d', 'antigravity')
+    }
+  };
+
+  cachedAnalyticsBundle = bundle;
+  lastBundleTime = now;
+  return bundle;
+}
+
+function getTodayMetrics(filterProvider = 'all') {
+  const bundle = getAllAnalytics();
+  return (bundle[filterProvider] && bundle[filterProvider].today) || bundle.all.today;
+}
+
+function getScopeMetrics(scope = 'today', filterProvider = 'all') {
+  const bundle = getAllAnalytics();
+  const prov = bundle[filterProvider] || bundle.all;
+  return prov[scope] || prov.today;
+}
+
 module.exports = {
+  getAllAnalytics,
+  getScopeMetrics,
   getTodayMetrics,
   calculateTurnCost
 };
