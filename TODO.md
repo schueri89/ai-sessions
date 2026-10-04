@@ -3,9 +3,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] AI Sessions: Foooterbar sollte neben den aktiven ("arbeitet") auch die fertigen ("fertig") Sessions anzeigen
+- [ ] Token/Usage Verbrauch bei Antigravity muss messbar sein... Antigravity Plugin selbst zeigt es auch an!
 
 ## Erledigt
+- [x] session-dashboard: Footerbar zeigt neben den aktiven ("arbeitet") auch fertige ("fertig") Sessions an (Plan: `.agents/plans/2026-10-04_session-dashboard-footerbar-fertig-sessions.md`) — 04.10.2026
 - [x] session-dashboard: Context-Window pro Modell dynamisch auflösen (1M für Opus 5.5 etc.) (Plan: `.agents/plans/2026-10-04_session-dashboard-model-context-window.md`) — 04.10.2026
 - [x] session-dashboard: 5-Stunden- und 7-Tage-Limits von Claude Code & Antigravity anzeigen (Plan: `.agents/plans/2026-10-04_session-dashboard-quota-limits.md`) — 04.10.2026
 - [x] session-dashboard: `@vscode/vsce` 3.9.2 → 4.0.0 (Major, Paketier-Werkzeug aktualisiert und verifiziert) — 04.10.2026

@@ -388,6 +388,7 @@ function activate(context) {
       const visible = model.visibleSessions();
       const waitingSessions = visible.filter((s) => s.displayState === 'waiting');
       const busySessions = visible.filter((s) => s.displayState === 'busy');
+      const idleSessions = visible.filter((s) => s.displayState === 'idle');
 
       const items = [
         {
@@ -423,6 +424,22 @@ function activate(context) {
             label: `$(loading~spin) ${proj}${s.title}`,
             description: (s.activity || providerLabel) + tokenStr,
             detail: s.lastPrompt || 'Wird ausgeführt...',
+            session: s,
+            action: 'session'
+          });
+        }
+      }
+
+      if (idleSessions.length > 0) {
+        items.push({ label: 'Fertig', kind: vscode.QuickPickItemKind.Separator });
+        for (const s of idleSessions) {
+          const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+          const proj = s.project ? `[${s.project}] ` : '';
+          const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
+          items.push({
+            label: `$(pass) ${proj}${s.title}`,
+            description: providerLabel + tokenStr,
+            detail: s.lastPrompt || 'Aufgabe abgeschlossen',
             session: s,
             action: 'session'
           });

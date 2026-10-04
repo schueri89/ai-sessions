@@ -36,13 +36,14 @@ class StatusBarWidget {
       else if (s.displayState === 'idle') idle++;
     }
 
+    const parts = [];
+    if (busy > 0) parts.push(`${busy} arbeitet`);
+    if (waiting > 0) parts.push(`${waiting} wartet`);
+    if (idle > 0) parts.push(`${idle} fertig`);
+
     let text = '';
-    if (busy > 0 && waiting > 0) {
-      text = `🤖 ${busy} arbeitet · ${waiting} wartet`;
-    } else if (busy > 0) {
-      text = `🤖 ${busy} arbeitet`;
-    } else if (waiting > 0) {
-      text = `🤖 ${waiting} wartet`;
+    if (parts.length > 0) {
+      text = `🤖 ${parts.join(' · ')}`;
     } else if (bookmarked > 0) {
       text = `🤖 ${bookmarked} gemerkt`;
     } else {
@@ -66,7 +67,7 @@ class StatusBarWidget {
     if (waiting > 0) md.appendMarkdown(`$(bell-dot) **${waiting}** wartet auf dich\n\n`);
     if (bookmarked > 0) md.appendMarkdown(`$(pinned) **${bookmarked}** gemerkt\n\n`);
     if (idle > 0) md.appendMarkdown(`$(pass) **${idle}** fertig / bereit\n\n`);
-    if (busy === 0 && waiting === 0 && bookmarked === 0) {
+    if (busy === 0 && waiting === 0 && bookmarked === 0 && idle === 0) {
       md.appendMarkdown('*Keine aktiven Aufgaben*\n\n');
     }
 
