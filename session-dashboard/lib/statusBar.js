@@ -30,8 +30,8 @@ class StatusBarWidget {
 
     const parts = [];
     const useIcons = format !== 'text';
-    const claudePrefix = useIcons ? '$(claude) ' : 'Claude: ';
-    const agPrefix = useIcons ? '$(antigravity) ' : 'AG: ';
+    const claudePrefix = useIcons ? '$(dashboard-claude) ' : 'Claude: ';
+    const agPrefix = useIcons ? '$(dashboard-antigravity) ' : 'AG: ';
 
     // 1. Claude Code
     if (q.claude && q.claude.available) {
@@ -76,8 +76,10 @@ class StatusBarWidget {
           }
         } else if (a7 !== null) {
           parts.push(`${agPrefix}${a7}% (7d)`);
+        } else if (typeof q.antigravity.tokens5h === 'number') {
+          parts.push(`${agPrefix}~${formatTokens(q.antigravity.tokens5h)}`);
         }
-      } else if (q.antigravity.tokens5h) {
+      } else if (typeof q.antigravity.tokens5h === 'number') {
         parts.push(`${agPrefix}~${formatTokens(q.antigravity.tokens5h)}`);
       }
     }
@@ -144,7 +146,7 @@ class StatusBarWidget {
     const q = this.model.quota;
     if (q) {
       if (q.claude && q.claude.available) {
-        md.appendMarkdown('---\n$(claude) **Claude Code Limits:**\n\n');
+        md.appendMarkdown('---\n$(dashboard-claude) **Claude Code Limits:**\n\n');
         if (q.claude.fiveHour && q.claude.fiveHour.percent !== null) {
           const r5 = q.claude.fiveHour.resetLabel ? ` (Reset ${q.claude.fiveHour.resetLabel})` : '';
           md.appendMarkdown(`⚡ **5-Std.-Limit:** ${q.claude.fiveHour.percent}%${r5}\n\n`);
@@ -155,7 +157,7 @@ class StatusBarWidget {
         }
       }
       if (q.antigravity && q.antigravity.available) {
-        md.appendMarkdown('---\n$(antigravity) **Google Antigravity:**\n\n');
+        md.appendMarkdown('---\n$(dashboard-antigravity) **Google Antigravity:**\n\n');
         if (q.antigravity.isRateLimited) {
           md.appendMarkdown(`⚠️ **Status:** ${q.antigravity.rateLimitMessage || 'Rate-Limit aktiv (429)'}\n\n`);
         }

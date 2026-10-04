@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -19,17 +19,17 @@
   ],
   "contributes": {
     "icons": {
-      "claude": {
+      "dashboard-claude": {
         "description": "Claude Code",
         "default": {
-          "fontPath": "resources/icons.woff",
+          "fontPath": "./resources/icons.woff",
           "fontCharacter": "\\ea02"
         }
       },
-      "antigravity": {
+      "dashboard-antigravity": {
         "description": "Google Antigravity",
         "default": {
-          "fontPath": "resources/icons.woff",
+          "fontPath": "./resources/icons.woff",
           "fontCharacter": "\\ea01"
         }
       }
@@ -256,11 +256,11 @@
             "off"
           ],
           "enumDescriptions": [
-            "Icons kompakt: $(claude) X% · $(antigravity) Y% (Standard)",
+            "Icons kompakt: $(dashboard-claude) X% · $(dashboard-antigravity) Y% (Standard)",
             "Text kompakt: Claude: X% · AG: Y%",
-            "5-Stunden-Fenster beschriftet: $(claude) X% (5h) · $(antigravity) Y% (5h)",
-            "5h & 7d kombiniert: $(claude) X%/Y% · $(antigravity) A%/B%",
-            "Ausführlich mit Beschriftung: $(claude) X% (5h) · Y% (7d) · $(antigravity) A% (5h) · B% (7d)",
+            "5-Stunden-Fenster beschriftet: $(dashboard-claude) X% (5h) · $(dashboard-antigravity) Y% (5h)",
+            "5h & 7d kombiniert: $(dashboard-claude) X%/Y% · $(dashboard-antigravity) A%/B%",
+            "Ausführlich mit Beschriftung: $(dashboard-claude) X% (5h) · Y% (7d) · $(dashboard-antigravity) A% (5h) · B% (7d)",
             "Usage in Statusleiste ausblenden (nur beim Hover)"
           ],
           "default": "compact",

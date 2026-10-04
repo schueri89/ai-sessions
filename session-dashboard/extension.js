@@ -269,13 +269,13 @@ function activate(context) {
           filter: 'all'
         },
         {
-          label: '$(claude) Claude Code',
+          label: '$(dashboard-claude) Claude Code',
           description: `${counts.claude}`,
           detail: current === 'claude' ? '✓ Aktiver Filter' : '',
           filter: 'claude'
         },
         {
-          label: '$(antigravity) Google Antigravity',
+          label: '$(dashboard-antigravity) Google Antigravity',
           description: `${counts.antigravity}`,
           detail: current === 'antigravity' ? '✓ Aktiver Filter' : '',
           filter: 'antigravity'
@@ -421,14 +421,14 @@ function activate(context) {
       if (q && ((q.claude && q.claude.available) || (q.antigravity && q.antigravity.available))) {
         const qParts = [];
         if (q.claude && q.claude.available && q.claude.fiveHour && typeof q.claude.fiveHour.percent === 'number') {
-          qParts.push(`$(claude) ${q.claude.fiveHour.percent}% (5h)`);
+          qParts.push(`$(dashboard-claude) ${q.claude.fiveHour.percent}% (5h)`);
         }
         if (q.antigravity && q.antigravity.available) {
           const bucket = q.antigravity.gemini || q.antigravity.thirdParty;
           if (bucket?.fiveHour && typeof bucket.fiveHour.percent === 'number') {
-            qParts.push(`$(antigravity) ${bucket.fiveHour.percent}% (5h)`);
-          } else if (q.antigravity.tokens5h) {
-            qParts.push(`$(antigravity) ~${formatTokens(q.antigravity.tokens5h)}`);
+            qParts.push(`$(dashboard-antigravity) ${bucket.fiveHour.percent}% (5h)`);
+          } else if (typeof q.antigravity.tokens5h === 'number') {
+            qParts.push(`$(dashboard-antigravity) ~${formatTokens(q.antigravity.tokens5h)}`);
           }
         }
         if (qParts.length > 0) {

@@ -83,9 +83,14 @@ npm run check
 ### Manuelle Prüfung
 1. **Extension paketieren & installieren**:
    - `npm run package`
-   - `code --install-extension session-dashboard-0.18.0.vsix --force`
+   - `code --install-extension session-dashboard-0.19.1.vsix --force`
 2. **Statusleiste prüfen**:
-   - Dauerhafte Anzeige von `Claude: 100% · AG: 65%` in der Footerbar sichtbar (ohne Hovern).
-   - Bei aktiven Tasks z. B. `🤖 1 arbeitet | Claude: 100% · AG: 65%`.
+   - Dauerhafte Anzeige von `$(dashboard-claude) 100% · $(dashboard-antigravity) 82%` in der Footerbar sichtbar (ohne Hovern).
+   - Bei aktiven Tasks z. B. `🤖 1 arbeitet | $(dashboard-claude) 100% · $(dashboard-antigravity) 82%`.
    - Hovern zeigt weiterhin ausführlichen Tooltip mit Reset-Uhrzeiten und Tokenzahlen.
    - Umschalten von `sessionDashboard.statusBarUsage` in den VS-Code-Einstellungen (z. B. auf `both` oder `5h`) aktualisiert die Leiste unmittelbar.
+
+### Hotfix v0.19.1: VS Code Icon ID Hyphen Requirement & Glyph Rescaling
+- **Ursache Icon-Fehlen**: VS Code verlangt für `contributes.icons` zwingend mindestens zwei Segmente getrennt durch Bindestrich (`^[A-Za-z0-9]+(-[A-Za-z0-9]+)+$`). Ungehyphte IDs wie `claude` und `antigravity` wurden vom internen Registry-Handler stillschweigend mit Fehler 25869 verworfen.
+- **Lösung**: Umbenennung zu `dashboard-claude` und `dashboard-antigravity`.
+- **Glyph-Skalierung**: Die Bounding Box von Antigravity im SVG-Font wurde exakt auf die Pfadgrenzen zugeschnitten, sodass das Symbol bei 16px exakt die optische Höhe und Strichstärke des Claude-Sonnenstrahls besitzt.
