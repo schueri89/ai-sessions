@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.25.0",
+  "version": "0.26.3",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -144,6 +144,12 @@
         "title": "Aktualisieren",
         "category": "Session Dashboard",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "sessionDashboard.viewTranscript",
+        "title": "Transkript ansehen (Read-Only)",
+        "category": "Session Dashboard",
+        "icon": "$(book)"
       }
     ],
     "menus": {
@@ -209,6 +215,11 @@
           "command": "sessionDashboard.open",
           "when": "view == sessionDashboard.sessions && viewItem =~ /^session/",
           "group": "1_open"
+        },
+        {
+          "command": "sessionDashboard.viewTranscript",
+          "when": "view == sessionDashboard.sessions && viewItem =~ /^session/",
+          "group": "2_view"
         }
       ],
       "commandPalette": [
@@ -305,7 +316,7 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js && node --check lib/analytics.js",
+    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js",
     "package": "vsce package --skip-license --allow-missing-repository"
   },
   "devDependencies": {

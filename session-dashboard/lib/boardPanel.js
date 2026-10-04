@@ -30,6 +30,11 @@ class BoardPanel {
     this.panel.webview.options = { enableScripts: true };
     this.panel.webview.html = this.html();
     this.panel.webview.onDidReceiveMessage((msg) => {
+      if (msg && msg.action === 'logError') {
+        vscode.window.showErrorMessage(`[Dashboard Error] ${msg.message} (Zeile ${msg.lineno || '?'})`);
+        console.error('[Dashboard Error]', msg);
+        return;
+      }
       if (msg && msg.action === 'ready') {
         this.update();
         return;
@@ -73,6 +78,10 @@ class BoardPanel {
       if (!msg || typeof msg.sessionId !== 'string') return;
       if (msg.action === 'open') {
         vscode.commands.executeCommand('sessionDashboard.open', { sessionId: msg.sessionId, provider: msg.provider });
+        return;
+      }
+      if (msg.action === 'viewTranscript') {
+        vscode.commands.executeCommand('sessionDashboard.viewTranscript', { sessionId: msg.sessionId, provider: msg.provider });
         return;
       }
       if (msg.action === 'markDone') {
@@ -314,7 +323,7 @@ class BoardPanel {
     overflow-wrap: anywhere;
     line-height: 1.4;
   }
-  .actions { margin-top: 8px; text-align: right; }
+  .actions { margin-top: 8px; display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
   button {
     background: var(--vscode-button-secondaryBackground);
     color: var(--vscode-button-secondaryForeground);
@@ -1035,11 +1044,41 @@ class BoardPanel {
 
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
+
+  window.addEventListener('error', (e) => {
+    vscode.postMessage({
+      action: 'logError',
+      message: e.message || 'Unknown error',
+      lineno: e.lineno,
+      colno: e.colno
+    });
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    vscode.postMessage({
+      action: 'logError',
+      message: 'Unhandled Promise: ' + (e.reason ? (e.reason.message || String(e.reason)) : '')
+    });
+  });
+
   const board = document.getElementById('board');
   const ICONS = ${JSON.stringify(ICONS)};
 
   let cachedColumns = [];
   let currentSearch = '';
+  let cachedQuota = null;
+  let cachedAnalytics = null;
+  let currentViewMode = 'board';
+  let currentAnalyseFilter = 'all';
+  let currentAnalyseScope = 'today';
+
+  const modeBadgeBoard = document.getElementById('mode-badge-board');
+  const btnModeBoard = document.getElementById('btn-mode-board');
+  const btnModeAnalyse = document.getElementById('btn-mode-analyse');
+  const boardEl = document.getElementById('board');
+  const analyseEl = document.getElementById('analyse-view');
+  const boardControlsWrap = document.getElementById('board-controls-wrap');
+  const analyseFilterBtns = document.querySelectorAll('.analyse-filter-btn');
+  const analyseScopeBtns = document.querySelectorAll('.analyse-scope-btn');
 
   const searchInput = document.getElementById('search-input');
   const searchClear = document.getElementById('search-clear');
@@ -1103,7 +1142,6 @@ class BoardPanel {
   }
 
   const quotaStrip = document.getElementById('quota-strip');
-  let cachedQuota = null;
 
   function updateQuotaUI(quota, filter) {
     if (!quotaStrip) return;
@@ -1613,6 +1651,15 @@ class BoardPanel {
           });
           actions.append(unpinBtn);
         }
+
+        const viewBtn = el('button', '', '👁️ Details');
+        viewBtn.title = 'Transkript & Verlauf im Read-Only Viewer ansehen';
+        viewBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          vscode.postMessage({ action: 'viewTranscript', sessionId: s.sessionId, provider: s.provider });
+        });
+        actions.append(viewBtn);
+
         const toggle = col.state === 'done'
           ? el('button', '', 'Wieder aktiv')
           : el('button', '', 'Erledigt');
@@ -1629,60 +1676,7 @@ class BoardPanel {
     }
   }
 
-  window.addEventListener('message', (ev) => {
-    if (!ev.data) return;
-    if (ev.data.type === 'render') {
-      cachedColumns = ev.data.columns || [];
-      cachedQuota = ev.data.quota || null;
-      cachedAnalytics = ev.data.analytics || null;
-      if (ev.data.analyseFilter) {
-        currentAnalyseFilter = ev.data.analyseFilter;
-        analyseFilterBtns.forEach((b) => b.classList.toggle('active', b.getAttribute('data-filter') === currentAnalyseFilter));
-      }
-      if (ev.data.analyseScope) {
-        currentAnalyseScope = ev.data.analyseScope;
-        analyseScopeBtns.forEach((b) => b.classList.toggle('active', b.getAttribute('data-scope') === currentAnalyseScope));
-      }
-      if (modeBadgeBoard) {
-        modeBadgeBoard.textContent = ev.data.counts ? (ev.data.counts.all || 0) : 0;
-      }
-      updateFilterUI(ev.data.filter, ev.data.counts);
-      updateProjectChipsUI(ev.data.projectFilter, ev.data.counts);
-      updateQuotaUI(cachedQuota, ev.data.filter);
-      if (typeof ev.data.initialSearch === 'string' && ev.data.initialSearch && !currentSearch) {
-        setSearch(ev.data.initialSearch);
-      } else {
-        applySearchAndRender();
-      }
-      if (currentViewMode === 'analyse') {
-        renderAnalyseView();
-      }
-      return;
-    }
-    if (ev.data.type === 'setViewMode') {
-      setViewMode(ev.data.mode || 'board');
-      return;
-    }
-    if (ev.data.type === 'setSearch') {
-      setSearch(ev.data.query || '');
-      searchInput.focus();
-      return;
-    }
-  });
-
   // Mode Switcher Logic
-  let currentViewMode = 'board';
-  let currentAnalyseFilter = 'all';
-  let currentAnalyseScope = 'today';
-  let cachedAnalytics = null;
-
-  const btnModeBoard = document.getElementById('btn-mode-board');
-  const btnModeAnalyse = document.getElementById('btn-mode-analyse');
-  const boardEl = document.getElementById('board');
-  const analyseEl = document.getElementById('analyse-view');
-  const boardControlsWrap = document.getElementById('board-controls-wrap');
-  const modeBadgeBoard = document.getElementById('mode-badge-board');
-
   function setViewMode(mode) {
     currentViewMode = mode === 'analyse' ? 'analyse' : 'board';
     btnModeBoard.classList.toggle('active', currentViewMode === 'board');
@@ -1699,7 +1693,6 @@ class BoardPanel {
   btnModeBoard.addEventListener('click', () => setViewMode('board'));
   btnModeAnalyse.addEventListener('click', () => setViewMode('analyse'));
 
-  const analyseFilterBtns = document.querySelectorAll('.analyse-filter-btn');
   analyseFilterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       currentAnalyseFilter = btn.getAttribute('data-filter') || 'all';
@@ -1709,7 +1702,6 @@ class BoardPanel {
     });
   });
 
-  const analyseScopeBtns = document.querySelectorAll('.analyse-scope-btn');
   analyseScopeBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       currentAnalyseScope = btn.getAttribute('data-scope') || 'today';
@@ -2021,24 +2013,25 @@ class BoardPanel {
       const activeCats = categories.filter((c) => c.count > 0);
       if (activeCats.length === 0) {
         listEl.innerHTML = '<div style="opacity: 0.6; font-style: italic; font-size: 12.5px; padding: 10px 0;">Keine Tool-Aufrufe im gewählten Zeitraum</div>';
-      const topTools = (tools && tools.topTools) || [];
-      listEl.innerHTML = activeCats.map((c) => {
-        const catTop = topTools.filter((t) => t.category === c.key);
-        const tip = catTop.length > 0
-          ? (c.label + ' (' + c.count + ' Aufrufe):\n' + catTop.map((t) => '• ' + t.name + ': ' + t.count).join('\n'))
-          : (c.label + ': ' + c.count + ' Aufrufe');
-        return '<div class="tool-row" title="' + escapeHtml(tip) + '">' +
-          '<div class="tool-meta">' +
-            '<span class="tool-name">' + c.icon + ' ' + escapeHtml(c.label) + '</span>' +
-            '<span class="tool-stat">' + c.count.toLocaleString('de-DE') + ' (' + c.percent + '%)</span>' +
-          '</div>' +
-          '<div class="tool-bar-track">' +
-            '<div class="tool-bar-fill" style="width: ' + Math.max(2, c.percent) + '%; background-color: ' + c.color + ';"></div>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+      } else {
+        const topTools = (tools && tools.topTools) || [];
+        listEl.innerHTML = activeCats.map((c) => {
+          const catTop = topTools.filter((t) => t.category === c.key);
+          const tip = catTop.length > 0
+            ? (c.label + ' (' + c.count + ' Aufrufe): ' + catTop.map((t) => t.name + ': ' + t.count).join(' · '))
+            : (c.label + ': ' + c.count + ' Aufrufe');
+          return '<div class="tool-row" title="' + escapeHtml(tip) + '">' +
+            '<div class="tool-meta">' +
+              '<span class="tool-name">' + c.icon + ' ' + escapeHtml(c.label) + '</span>' +
+              '<span class="tool-stat">' + c.count.toLocaleString('de-DE') + ' (' + c.percent + '%)</span>' +
+            '</div>' +
+            '<div class="tool-bar-track">' +
+              '<div class="tool-bar-fill" style="width: ' + Math.max(2, c.percent) + '%; background-color: ' + c.color + ';"></div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
     }
-  }
 
   if (totalEl) {
     const tot = (content && content.totalTokens) || 0;
@@ -2110,6 +2103,47 @@ function renderProjectsTable(projects) {
     '</tr>';
   }).join('');
 }
+
+  window.addEventListener('message', (ev) => {
+    if (!ev.data) return;
+    if (ev.data.type === 'render') {
+      cachedColumns = ev.data.columns || [];
+      cachedQuota = ev.data.quota || null;
+      cachedAnalytics = ev.data.analytics || null;
+      if (ev.data.analyseFilter) {
+        currentAnalyseFilter = ev.data.analyseFilter;
+        analyseFilterBtns.forEach((b) => b.classList.toggle('active', b.getAttribute('data-filter') === currentAnalyseFilter));
+      }
+      if (ev.data.analyseScope) {
+        currentAnalyseScope = ev.data.analyseScope;
+        analyseScopeBtns.forEach((b) => b.classList.toggle('active', b.getAttribute('data-scope') === currentAnalyseScope));
+      }
+      if (modeBadgeBoard) {
+        modeBadgeBoard.textContent = ev.data.counts ? (ev.data.counts.all || 0) : 0;
+      }
+      updateFilterUI(ev.data.filter, ev.data.counts);
+      updateProjectChipsUI(ev.data.projectFilter, ev.data.counts);
+      updateQuotaUI(cachedQuota, ev.data.filter);
+      if (typeof ev.data.initialSearch === 'string' && ev.data.initialSearch && !currentSearch) {
+        setSearch(ev.data.initialSearch);
+      } else {
+        applySearchAndRender();
+      }
+      if (currentViewMode === 'analyse') {
+        renderAnalyseView();
+      }
+      return;
+    }
+    if (ev.data.type === 'setViewMode') {
+      setViewMode(ev.data.mode || 'board');
+      return;
+    }
+    if (ev.data.type === 'setSearch') {
+      setSearch(ev.data.query || '');
+      searchInput.focus();
+      return;
+    }
+  });
 
   vscode.postMessage({ action: 'ready' });
 </script>

@@ -8,6 +8,7 @@ const { BookmarkStore } = require('./lib/bookmarkStore');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
+const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 
 const POLL_MS = 5000;
@@ -319,6 +320,27 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.open', (arg) => {
       const info = sessionInfoOf(arg, model);
       if (info) return openSession(info);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.viewTranscript', async (arg) => {
+      let info = sessionInfoOf(arg, model);
+      if (!info) {
+        const visible = model.visibleSessions();
+        if (visible.length === 0) {
+          vscode.window.showInformationMessage('Keine aktiven Sessions vorhanden.');
+          return;
+        }
+        const items = visible.map((s) => ({
+          label: (s.isBookmarked ? '📌 ' : '') + (s.title || s.sessionId),
+          description: (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code') + (s.project ? ` · [${s.project}]` : ''),
+          session: s
+        }));
+        const picked = await vscode.window.showQuickPick(items, {
+          placeHolder: 'Session für Read-Only Transkript-Ansicht wählen…'
+        });
+        if (!picked) return;
+        info = picked.session;
+      }
+      TranscriptViewerPanel.show(context, info);
     }),
     vscode.commands.registerCommand('sessionDashboard.markDone', async (arg) => {
       const id = sessionIdOf(arg);

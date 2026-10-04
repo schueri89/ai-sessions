@@ -3,10 +3,12 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 4: Read-Only Viewer / Session-Detailansicht)
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
+- [ ] Status Bar: ich würde gerne bei den Usage-Boxen für Werte unter 80% den Hintergrnd grün anzeigen. dann haben alle Werte eine Farbe
+- [ ] Dashboard: Ladeanimation beim Starten/Laden des Dashboards
 
 ## Erledigt
+- [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 4 v0.26.0: Read-Only Viewer / Session-Detailansicht für Claude Code & Antigravity, Turn-Verlauf mit Prompts, Thinking, Tool-Aufrufen & Antworten, Suche & Filter, Einstieg via Card-Button [👁️ Details] & TreeView-Menü) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-4.md`) — 04.10.2026
 - [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 3 v0.25.0: Tool- & Content-Breakdown nach Kategorien [Read, Edit, Bash, Search, Web, Tasks], segmentierter Token-Balken [Input, Output/Thinking, Cache Read/Write], responsives 2-Spalten-Layout + Full-Width-Tabelle für Projekte) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-3.md`) — 04.10.2026
 - [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 2 v0.24.1: 7- & 30-Tage-Historie, Scope-Umschaltung [Heute | 7 Tage | 30 Tage], CSS-Fix für Quota & Analyse-Layout, tägliches Balkendiagramm, aggregierte KPIs & File-Cache-Performance) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-2.md`) — 04.10.2026
 - [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 1 & Visual Fix v0.23.1: SVG-Skalierung/Clipping, integrierte X-Achse, Netto/Cache-Toggle, Wall-Clock-Arbeitszeit, CSP-Fix für Modellbalken) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-1.md`) — 04.10.2026
