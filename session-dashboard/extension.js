@@ -403,6 +403,26 @@ function activate(context) {
       }
       return vscode.commands.executeCommand('sessionDashboard.showBoard');
     }),
+    vscode.commands.registerCommand('sessionDashboard.claudeStatusClick', async () => {
+      const next = model.providerFilter === 'claude' ? 'all' : 'claude';
+      await model.setFilter(next);
+      await update(true);
+      const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
+      if (action === 'quickpick') {
+        return vscode.commands.executeCommand('sessionDashboard.quickMenu');
+      }
+      return vscode.commands.executeCommand('sessionDashboard.showBoard');
+    }),
+    vscode.commands.registerCommand('sessionDashboard.antigravityStatusClick', async () => {
+      const next = model.providerFilter === 'antigravity' ? 'all' : 'antigravity';
+      await model.setFilter(next);
+      await update(true);
+      const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
+      if (action === 'quickpick') {
+        return vscode.commands.executeCommand('sessionDashboard.quickMenu');
+      }
+      return vscode.commands.executeCommand('sessionDashboard.showBoard');
+    }),
     vscode.commands.registerCommand('sessionDashboard.quickMenu', async () => {
       const visible = model.visibleSessions();
       const waitingSessions = visible.filter((s) => s.displayState === 'waiting');

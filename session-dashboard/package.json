@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -121,6 +121,16 @@
       {
         "command": "sessionDashboard.statusBarClick",
         "title": "Statusleiste: Aktion ausführen",
+        "category": "Session Dashboard"
+      },
+      {
+        "command": "sessionDashboard.claudeStatusClick",
+        "title": "Claude-Code-Sessions anzeigen",
+        "category": "Session Dashboard"
+      },
+      {
+        "command": "sessionDashboard.antigravityStatusClick",
+        "title": "Google-Antigravity-Sessions anzeigen",
         "category": "Session Dashboard"
       },
       {
@@ -264,7 +274,21 @@
             "Usage in Statusleiste ausblenden (nur beim Hover)"
           ],
           "default": "compact",
-          "description": "Format der Quota-/Limit-Verbrauchsanzeige in der Statusleiste (Footerbar)."
+          "description": "Format der getrennten Quota-/Limit-Verbrauchsanzeige in der Statusleiste (Footerbar)."
+        },
+        "sessionDashboard.quotaWarningThreshold": {
+          "type": "number",
+          "default": 80,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon gelb hinterlegt wird (Warnung)."
+        },
+        "sessionDashboard.quotaErrorThreshold": {
+          "type": "number",
+          "default": 95,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon rot hinterlegt wird (Kritisch/Limit)."
         }
       }
     }
