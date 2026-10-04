@@ -15,6 +15,7 @@ Dasselbe passiert bei Antigravity, wenn die Datenbank kurz nicht lesbar ist. Au�
 Gerade wenn du alle geschlossenen Sessions einmal abhakst, tauchen sie nach so einem Aussetzer alle wieder auf. Das Problem geht auf meinen Entwurf zurück: history.js überspringt Dateien bei Lesefehlern. Behebbar ist es so: Jeder Anbieter meldet zurück, ob sein Einlesen vollständig war, und nur dann werden Markierungen verschwundener Sessions entfernt.
 
 ## Erledigt
+- [x] session-dashboard: Filter für Projekte im Dashboard (Chips) & QuickPick nach Alphabet sortieren (Plan: `.agents/plans/2026-10-04_session-dashboard-projekt-filter-alphabetisch.md`) — 04.10.2026
 - [x] session-dashboard: "Erledigt" ausschließlich durch manuelles Abhaken vergeben (kein automatisches Timeout/Schließen) (Plan: `.agents/plans/2026-10-04_session-dashboard-manuell-erledigt.md`) — 04.10.2026
 - [x] session-dashboard: Status Bar trennt Usage-Infos für Claude Code & Antigravity mit gelb/rotem Hintergrund bei Limits (Plan: `.agents/plans/2026-10-04_session-dashboard-statusbar-separate-usage.md`) — 04.10.2026
 - [x] session-dashboard: Usage von Claude Code und Antigravity in der Footerbar immer anzeigen (Plan: `.agents/plans/2026-10-04_session-dashboard-footerbar-usage.md`) — 04.10.2026

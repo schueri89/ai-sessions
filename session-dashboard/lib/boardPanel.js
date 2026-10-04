@@ -389,7 +389,7 @@ class BoardPanel {
     projectChips.replaceChildren();
 
     const byProj = (counts && counts.byProject) || {};
-    const projEntries = Object.entries(byProj).sort((a, b) => b[1] - a[1]);
+    const projEntries = Object.entries(byProj).sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base', numeric: true }) || a[0].localeCompare(b[0]));
     if (projEntries.length === 0) {
       projectChips.style.display = 'none';
       return;

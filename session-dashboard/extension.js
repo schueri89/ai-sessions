@@ -294,7 +294,7 @@ function activate(context) {
       const counts = model.counts();
       const current = model.projectFilter;
       const sortedProjects = Object.entries(counts.byProject)
-        .sort((a, b) => b[1] - a[1]);
+        .sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base', numeric: true }) || a[0].localeCompare(b[0]));
       const items = [
         {
           label: '$(list-unordered) Alle Projekte',
