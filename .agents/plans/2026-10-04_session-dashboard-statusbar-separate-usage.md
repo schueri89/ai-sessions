@@ -96,3 +96,13 @@ npm run check
    - Klick auf Claude-Item filtert Dashboard auf Claude.
    - Klick auf Antigravity-Item filtert Dashboard auf Antigravity.
    - Tooltips zeigen provider-spezifische Detail-Daten.
+
+---
+
+### Hotfix v0.21.1: Positionierung ganz rechts ohne Durchmischung mit anderen Extensions
+- **Problem**: Bei Prioritäten im positiven Bereich (100, 99, 98) mischten sich andere Extensions (wie Git, Prettier, Spracheinstellungen) zwischen die drei Elemente, und die Gruppe lag zu weit mittig.
+- **Lösung**: Umstellung auf aufeinanderfolgende negative Prioritäten:
+  - `sessionDashboard.status`: `-1000` (am weitesten links des Trios)
+  - `sessionDashboard.claude`: `-1001` (mittig)
+  - `sessionDashboard.antigravity`: `-1002` (ganz rechts)
+- Dadurch wandert das gesamte Trio an den rechten Rand der Statusleiste und bleibt lückenlos zusammenhängend.

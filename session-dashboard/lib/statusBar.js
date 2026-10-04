@@ -20,29 +20,29 @@ class StatusBarWidget {
   constructor(model) {
     this.model = model;
 
-    // 1. Sessions widget (Priority 100 -> leftmost of the group)
+    // 1. Sessions widget (Priority -1000 -> far right, leftmost of our AI trio)
     this.sessionItem = vscode.window.createStatusBarItem(
       'sessionDashboard.status',
       vscode.StatusBarAlignment.Right,
-      100
+      -1000
     );
     this.sessionItem.name = 'AI Session Dashboard';
     this.sessionItem.command = 'sessionDashboard.statusBarClick';
 
-    // 2. Claude Code Quota widget (Priority 99)
+    // 2. Claude Code Quota widget (Priority -1001 -> directly right of sessions)
     this.claudeItem = vscode.window.createStatusBarItem(
       'sessionDashboard.claude',
       vscode.StatusBarAlignment.Right,
-      99
+      -1001
     );
     this.claudeItem.name = 'Claude Code Quota';
     this.claudeItem.command = 'sessionDashboard.claudeStatusClick';
 
-    // 3. Google Antigravity Quota widget (Priority 98)
+    // 3. Google Antigravity Quota widget (Priority -1002 -> furthest right of our trio)
     this.antigravityItem = vscode.window.createStatusBarItem(
       'sessionDashboard.antigravity',
       vscode.StatusBarAlignment.Right,
-      98
+      -1002
     );
     this.antigravityItem.name = 'Google Antigravity Quota';
     this.antigravityItem.command = 'sessionDashboard.antigravityStatusClick';

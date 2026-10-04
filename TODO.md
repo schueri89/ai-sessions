@@ -5,6 +5,15 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] Übersich/Analyse analog zum VSCode Plugin "Claude Code Usage" umsetzen
 
+## Bug
+Ein echter Fehler: „Erledigt"-Markierungen können verloren gehen
+In extension.js:57 gilt als „noch vorhanden" nur, was beim aktuellen Durchlauf eingelesen wurde. Jede Markierung, deren Session darin fehlt, wird gelöscht. Das geht schief, sobald ein Einlesen fehlschlägt:
+
+Kann history.js den Transkript-Ordner einmal nicht lesen, fehlen alle 127 geschlossenen Claude-Sessions, und ihre Markierungen sind auf einen Schlag weg.
+Kann eine einzelne Transkriptdatei nicht gelesen werden, geht deren Markierung verloren.
+Dasselbe passiert bei Antigravity, wenn die Datenbank kurz nicht lesbar ist. Außerdem fallen dort Sessions jenseits des Abfrage-Limits von 250 heraus.
+Gerade wenn du alle geschlossenen Sessions einmal abhakst, tauchen sie nach so einem Aussetzer alle wieder auf. Das Problem geht auf meinen Entwurf zurück: history.js überspringt Dateien bei Lesefehlern. Behebbar ist es so: Jeder Anbieter meldet zurück, ob sein Einlesen vollständig war, und nur dann werden Markierungen verschwundener Sessions entfernt.
+
 ## Erledigt
 - [x] session-dashboard: "Erledigt" ausschließlich durch manuelles Abhaken vergeben (kein automatisches Timeout/Schließen) (Plan: `.agents/plans/2026-10-04_session-dashboard-manuell-erledigt.md`) — 04.10.2026
 - [x] session-dashboard: Status Bar trennt Usage-Infos für Claude Code & Antigravity mit gelb/rotem Hintergrund bei Limits (Plan: `.agents/plans/2026-10-04_session-dashboard-statusbar-separate-usage.md`) — 04.10.2026
