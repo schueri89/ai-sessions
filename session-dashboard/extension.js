@@ -107,7 +107,11 @@ class SessionModel {
       this.projectFilter,
       this.quota ? [
         this.quota.claude ? [this.quota.claude.fiveHour?.percent, this.quota.claude.sevenDay?.percent] : null,
-        this.quota.antigravity ? [this.quota.antigravity.tokens5h, this.quota.antigravity.isRateLimited] : null
+        this.quota.antigravity ? [
+          this.quota.antigravity.tokens5h,
+          this.quota.antigravity.isRateLimited,
+          this.quota.antigravity.gemini ? [this.quota.antigravity.gemini.fiveHour?.percent, this.quota.antigravity.gemini.weekly?.percent] : null
+        ] : null
       ] : null,
       this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
     ]);
@@ -245,6 +249,13 @@ function activate(context) {
   const timer = setInterval(update, POLL_MS);
   context.subscriptions.push({ dispose: () => clearInterval(timer) });
   context.subscriptions.push({ dispose: () => clearTimeout(debounce) });
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('sessionDashboard')) {
+        statusBar.update();
+      }
+    })
+  );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('sessionDashboard.filter', async () => {
@@ -258,13 +269,13 @@ function activate(context) {
           filter: 'all'
         },
         {
-          label: '$(sparkle) Claude Code',
+          label: '$(claude) Claude Code',
           description: `${counts.claude}`,
           detail: current === 'claude' ? '✓ Aktiver Filter' : '',
           filter: 'claude'
         },
         {
-          label: '$(rocket) Google Antigravity',
+          label: '$(antigravity) Google Antigravity',
           description: `${counts.antigravity}`,
           detail: current === 'antigravity' ? '✓ Aktiver Filter' : '',
           filter: 'antigravity'
@@ -405,6 +416,29 @@ function activate(context) {
           action: 'board'
         }
       ];
+
+      const q = model.quota;
+      if (q && ((q.claude && q.claude.available) || (q.antigravity && q.antigravity.available))) {
+        const qParts = [];
+        if (q.claude && q.claude.available && q.claude.fiveHour && typeof q.claude.fiveHour.percent === 'number') {
+          qParts.push(`$(claude) ${q.claude.fiveHour.percent}% (5h)`);
+        }
+        if (q.antigravity && q.antigravity.available) {
+          const bucket = q.antigravity.gemini || q.antigravity.thirdParty;
+          if (bucket?.fiveHour && typeof bucket.fiveHour.percent === 'number') {
+            qParts.push(`$(antigravity) ${bucket.fiveHour.percent}% (5h)`);
+          } else if (q.antigravity.tokens5h) {
+            qParts.push(`$(antigravity) ~${formatTokens(q.antigravity.tokens5h)}`);
+          }
+        }
+        if (qParts.length > 0) {
+          items.push({
+            label: `$(dashboard) Quota: ${qParts.join(' · ')}`,
+            description: 'Übersicht anzeigen',
+            action: 'board'
+          });
+        }
+      }
 
       if (waitingSessions.length > 0) {
         items.push({ label: 'Wartet auf dich', kind: vscode.QuickPickItemKind.Separator });

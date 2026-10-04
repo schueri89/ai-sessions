@@ -23,6 +23,68 @@ class StatusBarWidget {
     this.item.dispose();
   }
 
+  formatUsage(format) {
+    if (format === 'off') return '';
+    const q = this.model.quota;
+    if (!q) return '';
+
+    const parts = [];
+    const useIcons = format !== 'text';
+    const claudePrefix = useIcons ? '$(claude) ' : 'Claude: ';
+    const agPrefix = useIcons ? '$(antigravity) ' : 'AG: ';
+
+    // 1. Claude Code
+    if (q.claude && q.claude.available) {
+      const c5 = (q.claude.fiveHour && typeof q.claude.fiveHour.percent === 'number') ? q.claude.fiveHour.percent : null;
+      const c7 = (q.claude.sevenDay && typeof q.claude.sevenDay.percent === 'number') ? q.claude.sevenDay.percent : null;
+
+      if (c5 !== null) {
+        if (format === 'both' && c7 !== null) {
+          parts.push(`${claudePrefix}${c5}%/${c7}%`);
+        } else if (format === 'detailed' && c7 !== null) {
+          parts.push(`${claudePrefix}${c5}% (5h) · ${c7}% (7d)`);
+        } else if (format === '5h') {
+          parts.push(`${claudePrefix}${c5}% (5h)`);
+        } else {
+          // 'compact' (default) or 'text'
+          parts.push(`${claudePrefix}${c5}%`);
+        }
+      } else if (c7 !== null) {
+        parts.push(`${claudePrefix}${c7}% (7d)`);
+      }
+    }
+
+    // 2. Google Antigravity
+    if (q.antigravity && q.antigravity.available) {
+      if (q.antigravity.isRateLimited) {
+        parts.push(`${agPrefix}⚠️ Limit`);
+      } else if (q.antigravity.hasLiveQuota && (q.antigravity.gemini || q.antigravity.thirdParty)) {
+        const bucket = q.antigravity.gemini || q.antigravity.thirdParty;
+        const a5 = (bucket.fiveHour && typeof bucket.fiveHour.percent === 'number') ? bucket.fiveHour.percent : null;
+        const a7 = (bucket.weekly && typeof bucket.weekly.percent === 'number') ? bucket.weekly.percent : null;
+
+        if (a5 !== null) {
+          if (format === 'both' && a7 !== null) {
+            parts.push(`${agPrefix}${a5}%/${a7}%`);
+          } else if (format === 'detailed' && a7 !== null) {
+            parts.push(`${agPrefix}${a5}% (5h) · ${a7}% (7d)`);
+          } else if (format === '5h') {
+            parts.push(`${agPrefix}${a5}% (5h)`);
+          } else {
+            // 'compact' (default) or 'text'
+            parts.push(`${agPrefix}${a5}%`);
+          }
+        } else if (a7 !== null) {
+          parts.push(`${agPrefix}${a7}% (7d)`);
+        }
+      } else if (q.antigravity.tokens5h) {
+        parts.push(`${agPrefix}~${formatTokens(q.antigravity.tokens5h)}`);
+      }
+    }
+
+    return parts.join(' · ');
+  }
+
   update() {
     let busy = 0;
     let waiting = 0;
@@ -41,16 +103,24 @@ class StatusBarWidget {
     if (waiting > 0) parts.push(`${waiting} wartet`);
     if (idle > 0) parts.push(`${idle} fertig`);
 
-    let text = '';
+    let sessionText = '';
     if (parts.length > 0) {
-      text = `🤖 ${parts.join(' · ')}`;
+      sessionText = `🤖 ${parts.join(' · ')}`;
     } else if (bookmarked > 0) {
-      text = `🤖 ${bookmarked} gemerkt`;
+      sessionText = `🤖 ${bookmarked} gemerkt`;
     } else {
-      text = '🤖 KI bereit';
+      sessionText = '🤖 KI bereit';
     }
 
-    this.item.text = text;
+    const config = vscode.workspace.getConfiguration('sessionDashboard');
+    const format = config.get('statusBarUsage', 'compact');
+    const usageText = this.formatUsage(format);
+
+    if (usageText) {
+      this.item.text = `${sessionText} | ${usageText}`;
+    } else {
+      this.item.text = sessionText;
+    }
 
     if (waiting > 0) {
       this.item.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
@@ -74,7 +144,7 @@ class StatusBarWidget {
     const q = this.model.quota;
     if (q) {
       if (q.claude && q.claude.available) {
-        md.appendMarkdown('---\n**Claude Code Limits:**\n\n');
+        md.appendMarkdown('---\n$(claude) **Claude Code Limits:**\n\n');
         if (q.claude.fiveHour && q.claude.fiveHour.percent !== null) {
           const r5 = q.claude.fiveHour.resetLabel ? ` (Reset ${q.claude.fiveHour.resetLabel})` : '';
           md.appendMarkdown(`⚡ **5-Std.-Limit:** ${q.claude.fiveHour.percent}%${r5}\n\n`);
@@ -85,7 +155,7 @@ class StatusBarWidget {
         }
       }
       if (q.antigravity && q.antigravity.available) {
-        md.appendMarkdown('---\n**Google Antigravity:**\n\n');
+        md.appendMarkdown('---\n$(antigravity) **Google Antigravity:**\n\n');
         if (q.antigravity.isRateLimited) {
           md.appendMarkdown(`⚠️ **Status:** ${q.antigravity.rateLimitMessage || 'Rate-Limit aktiv (429)'}\n\n`);
         }

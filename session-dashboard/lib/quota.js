@@ -34,6 +34,8 @@ function formatResetTime(target) {
   return `${days[d.getDay()]} ${time}`;
 }
 
+let lastSuccessfulClaude = null;
+
 async function fetchClaudeQuota() {
   const credPath = path.join(claudeDir(), '.credentials.json');
   if (!fs.existsSync(credPath)) {
@@ -65,7 +67,10 @@ async function fetchClaudeQuota() {
         // Attempt refresh
         const refreshResp = await fetch('https://console.anthropic.com/v1/oauth/token', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'claude-code/0.2.29'
+          },
           body: JSON.stringify({
             refresh_token: creds.claudeAiOauth.refreshToken,
             grant_type: 'refresh_token'
@@ -94,6 +99,7 @@ async function fetchClaudeQuota() {
       headers: {
         'Authorization': `Bearer ${token}`,
         'anthropic-beta': 'oauth-2025-04-20',
+        'User-Agent': 'claude-code/0.2.29',
         'Content-Type': 'application/json'
       },
       signal: AbortSignal.timeout(5000)
@@ -112,17 +118,24 @@ async function fetchClaudeQuota() {
         'https://api.anthropic.com/api/oauth/usage',
         '-H', `Authorization: Bearer ${token}`,
         '-H', 'anthropic-beta: oauth-2025-04-20',
+        '-H', 'User-Agent: claude-code/0.2.29',
         '-H', 'Content-Type: application/json'
       ], { encoding: 'utf8', timeout: 5000 });
     } catch {}
   }
 
   if (!rawBody) {
+    if (lastSuccessfulClaude) return lastSuccessfulClaude;
     return { available: false, error: 'API nicht erreichbar' };
   }
 
   try {
     const data = JSON.parse(rawBody);
+    if (data.error) {
+      if (lastSuccessfulClaude) return lastSuccessfulClaude;
+      return { available: false, error: data.error.message || 'API Fehler' };
+    }
+
     const fiveHour = data.five_hour || {};
     const sevenDay = data.seven_day || {};
 
@@ -132,7 +145,7 @@ async function fetchClaudeQuota() {
     const fiveHourReset = fiveHour.resets_at ? new Date(fiveHour.resets_at).getTime() : 0;
     const sevenDayReset = sevenDay.resets_at ? new Date(sevenDay.resets_at).getTime() : 0;
 
-    return {
+    const result = {
       available: true,
       subscriptionType: creds.claudeAiOauth.subscriptionType || 'Pro',
       fiveHour: {
@@ -146,7 +159,10 @@ async function fetchClaudeQuota() {
         resetLabel: formatResetTime(sevenDayReset)
       }
     };
+    lastSuccessfulClaude = result;
+    return result;
   } catch (err) {
+    if (lastSuccessfulClaude) return lastSuccessfulClaude;
     return { available: false, error: err.message };
   }
 }
