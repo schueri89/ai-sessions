@@ -764,9 +764,16 @@ class BoardPanel {
   .bar-group { cursor: pointer; }
   .bar-group:hover rect { filter: brightness(1.25); }
 
-  /* Details Grid (Models & Projects) */
+  /* Details Grid (Models & Tools) */
   .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
   .detail-card {
+    background: var(--vscode-editorWidget-background);
+    border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2));
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow: hidden;
+  }
+  .full-card {
     background: var(--vscode-editorWidget-background);
     border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2));
     border-radius: 6px;
@@ -787,11 +794,47 @@ class BoardPanel {
   .model-bar-fill { height: 100%; border-radius: 3.5px; transition: width 0.25s ease; }
   .model-bar-fill.claude { background-color: #f26522; }
   .model-bar-fill.antigravity { background-color: #4285f4; }
-  .proj-table-wrap { overflow-x: auto; max-height: 240px; }
+
+  /* Tool & Content Distribution */
+  .tool-content-wrap { display: flex; flex-direction: column; gap: 14px; }
+  .tool-list { display: flex; flex-direction: column; gap: 9px; }
+  .tool-row { display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
+  .tool-meta { display: flex; justify-content: space-between; align-items: center; }
+  .tool-name { font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+  .tool-stat { opacity: 0.9; font-family: var(--vscode-editor-font-family, monospace); font-size: 12.5px; }
+  .tool-bar-track { width: 100%; height: 7px; border-radius: 3.5px; background: rgba(128, 128, 128, 0.2); overflow: hidden; margin-top: 2px; }
+  .tool-bar-fill { height: 100%; border-radius: 3.5px; transition: width 0.25s ease; }
+
+  .token-comp-wrap {
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .token-comp-header { display: flex; justify-content: space-between; align-items: center; }
+  .token-comp-title { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; opacity: 0.85; }
+  .token-comp-sub { font-size: 12.5px; opacity: 0.75; font-family: var(--vscode-editor-font-family, monospace); }
+  .token-comp-track {
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    background: rgba(128, 128, 128, 0.18);
+    display: flex;
+    overflow: hidden;
+  }
+  .token-comp-seg { height: 100%; transition: width 0.25s ease; }
+  .token-comp-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12.5px; margin-top: 2px; }
+  .token-comp-item { display: inline-flex; align-items: center; gap: 5px; opacity: 0.9; }
+  .token-comp-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+  /* Project Table */
+  .proj-table-wrap { overflow-x: auto; }
   .proj-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .proj-table th {
     text-align: left;
-    padding: 7px 10px;
+    padding: 8px 12px;
     opacity: 0.8;
     border-bottom: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
     font-weight: 600;
@@ -799,8 +842,9 @@ class BoardPanel {
     position: sticky;
     top: 0;
     background: var(--vscode-editorWidget-background);
+    z-index: 1;
   }
-  .proj-table td { padding: 7px 10px; border-bottom: 1px solid rgba(128, 128, 128, 0.08); font-size: 13px; }
+  .proj-table td { padding: 8px 12px; border-bottom: 1px solid rgba(128, 128, 128, 0.08); font-size: 13px; }
   .proj-table tr:hover td { background: var(--vscode-list-hoverBackground); }
   .font-mono { font-family: var(--vscode-editor-font-family, monospace); }
 </style>
@@ -950,23 +994,41 @@ class BoardPanel {
     </div>
     <div class="detail-card">
       <div class="detail-card-header">
-        <span class="detail-card-title">Projekt-Verbrauch</span>
-        <span class="detail-card-sub" id="proj-count-label">Heute</span>
+        <span class="detail-card-title">Tool- & Content-Verteilung</span>
+        <span class="detail-card-sub" id="tools-count-label">Heute</span>
       </div>
-      <div class="proj-table-wrap">
-        <table class="proj-table">
-          <thead>
-            <tr>
-              <th>Projekt</th>
-              <th>Sessions</th>
-              <th>Turns</th>
-              <th>Tokens</th>
-              <th>Gesch. Kosten</th>
-            </tr>
-          </thead>
-          <tbody id="proj-table-body"></tbody>
-        </table>
+      <div class="tool-content-wrap">
+        <div class="tool-list" id="tool-list"></div>
+        <div class="token-comp-wrap">
+          <div class="token-comp-header">
+            <span class="token-comp-title">Token-Zusammensetzung</span>
+            <span class="token-comp-sub" id="token-comp-total">0 Tokens</span>
+          </div>
+          <div class="token-comp-track" id="token-comp-track"></div>
+          <div class="token-comp-legend" id="token-comp-legend"></div>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <div class="full-card">
+    <div class="detail-card-header">
+      <span class="detail-card-title" id="proj-card-title">Projekt-Verbrauch Heute</span>
+      <span class="detail-card-sub" id="proj-count-label">Heute</span>
+    </div>
+    <div class="proj-table-wrap">
+      <table class="proj-table">
+        <thead>
+          <tr>
+            <th>Projekt</th>
+            <th>Sessions</th>
+            <th>Turns</th>
+            <th>Tokens</th>
+            <th>Gesch. Kosten</th>
+          </tr>
+        </thead>
+        <tbody id="proj-table-body"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -1747,8 +1809,22 @@ class BoardPanel {
       elProjCount.textContent = (data.projects || []).length + ' aktiv';
     }
 
+    const elProjTitle = document.getElementById('proj-card-title');
+    if (elProjTitle) {
+      if (currentAnalyseScope === 'today') elProjTitle.textContent = 'Projekt-Verbrauch Heute';
+      else if (currentAnalyseScope === '7d') elProjTitle.textContent = 'Projekt-Verbrauch (Letzte 7 Tage)';
+      else if (currentAnalyseScope === '30d') elProjTitle.textContent = 'Projekt-Verbrauch (Letzte 30 Tage)';
+    }
+
+    const elToolsCount = document.getElementById('tools-count-label');
+    if (elToolsCount) {
+      const calls = (data.tools && data.tools.totalCalls) || 0;
+      elToolsCount.textContent = calls > 0 ? (calls.toLocaleString('de-DE') + ' Tool-Aufrufe') : 'Keine Aufrufe';
+    }
+
     renderTimelineChart(data.timeline || [], data.maxTimelineTokens || 1, data.timelineType || 'hourly', currentAnalyseScope);
     renderModelsList(data.models || []);
+    renderToolsAndContent(data.tools || {}, data.content || {}, currentAnalyseScope);
     renderProjectsTable(data.projects || []);
   }
 
@@ -1934,23 +2010,106 @@ class BoardPanel {
     }).join('');
   }
 
-  function renderProjectsTable(projects) {
-    const tbody = document.getElementById('proj-table-body');
-    if (!tbody) return;
-    if (!projects || projects.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="opacity: 0.6; font-style: italic; padding: 12px 0;">Keine Projekt-Aktivität im gewählten Zeitraum</td></tr>';
-      return;
+  function renderToolsAndContent(tools, content, scope) {
+    const listEl = document.getElementById('tool-list');
+    const trackEl = document.getElementById('token-comp-track');
+    const legendEl = document.getElementById('token-comp-legend');
+    const totalEl = document.getElementById('token-comp-total');
+
+    if (listEl) {
+      const categories = (tools && tools.categories) || [];
+      const activeCats = categories.filter((c) => c.count > 0);
+      if (activeCats.length === 0) {
+        listEl.innerHTML = '<div style="opacity: 0.6; font-style: italic; font-size: 12.5px; padding: 10px 0;">Keine Tool-Aufrufe im gewählten Zeitraum</div>';
+      const topTools = (tools && tools.topTools) || [];
+      listEl.innerHTML = activeCats.map((c) => {
+        const catTop = topTools.filter((t) => t.category === c.key);
+        const tip = catTop.length > 0
+          ? (c.label + ' (' + c.count + ' Aufrufe):\n' + catTop.map((t) => '• ' + t.name + ': ' + t.count).join('\n'))
+          : (c.label + ': ' + c.count + ' Aufrufe');
+        return '<div class="tool-row" title="' + escapeHtml(tip) + '">' +
+          '<div class="tool-meta">' +
+            '<span class="tool-name">' + c.icon + ' ' + escapeHtml(c.label) + '</span>' +
+            '<span class="tool-stat">' + c.count.toLocaleString('de-DE') + ' (' + c.percent + '%)</span>' +
+          '</div>' +
+          '<div class="tool-bar-track">' +
+            '<div class="tool-bar-fill" style="width: ' + Math.max(2, c.percent) + '%; background-color: ' + c.color + ';"></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
     }
-    tbody.innerHTML = projects.slice(0, 15).map((p) => {
-      return '<tr>' +
-        '<td><span class="project-badge" style="font-size: 12.5px; padding: 2px 8px;">📁 ' + escapeHtml(p.name) + '</span></td>' +
-        '<td>' + p.sessionsCount + '</td>' +
-        '<td>' + p.turns + '</td>' +
-        '<td class="font-mono">' + formatTokens(p.tokens) + '</td>' +
-        '<td class="font-mono" style="color: #4ec9b0; font-weight: 600;">' + formatCurrency(p.cost) + '</td>' +
-      '</tr>';
-    }).join('');
   }
+
+  if (totalEl) {
+    const tot = (content && content.totalTokens) || 0;
+    totalEl.textContent = formatTokens(tot) + ' Gesamt';
+  }
+
+  if (trackEl && legendEl) {
+    const inTok = (content && content.inputTokens) || 0;
+    const outTok = (content && content.outputTokens) || 0;
+    const cacheReadTok = (content && content.cacheReadTokens) || 0;
+    const cacheWriteTok = (content && content.cacheWriteTokens) || 0;
+    const totTok = (content && content.totalTokens) || 0;
+
+    if (totTok === 0) {
+      trackEl.innerHTML = '<div style="width: 100%; height: 100%; background: rgba(128,128,128,0.15); border-radius: 6px;"></div>';
+      legendEl.innerHTML = '<span style="opacity: 0.6; font-style: italic; font-size: 12px;">Keine Token-Aktivität</span>';
+    } else {
+      const pctIn = content.inputPercent || 0;
+      const pctOut = content.outputPercent || 0;
+      const pctCacheRead = content.cacheReadPercent || 0;
+      const pctCacheWrite = content.cacheWritePercent || 0;
+
+      let segsHtml = '';
+      if (pctIn > 0) {
+        segsHtml += '<div class="token-comp-seg" style="width: ' + pctIn + '%; background: var(--vscode-charts-blue, #70a9ff);" title="Input: ' + formatTokens(inTok) + ' (' + pctIn + '%)"></div>';
+      }
+      if (pctCacheRead > 0) {
+        segsHtml += '<div class="token-comp-seg" style="width: ' + pctCacheRead + '%; background: #10b981;" title="Cache Read: ' + formatTokens(cacheReadTok) + ' (' + pctCacheRead + '%)"></div>';
+      }
+      if (pctCacheWrite > 0) {
+        segsHtml += '<div class="token-comp-seg" style="width: ' + pctCacheWrite + '%; background: #8b5cf6;" title="Cache Write: ' + formatTokens(cacheWriteTok) + ' (' + pctCacheWrite + '%)"></div>';
+      }
+      if (pctOut > 0) {
+        segsHtml += '<div class="token-comp-seg" style="width: ' + pctOut + '%; background: #f26522;" title="Output / Thinking: ' + formatTokens(outTok) + ' (' + pctOut + '%)"></div>';
+      }
+      trackEl.innerHTML = segsHtml;
+
+      let legendHtml = '';
+      legendHtml += '<span class="token-comp-item"><span class="token-comp-dot" style="background: var(--vscode-charts-blue, #70a9ff);"></span> Input: ' + pctIn + '% (' + formatTokens(inTok) + ')</span>';
+      legendHtml += '<span class="token-comp-item"><span class="token-comp-dot" style="background: #f26522;"></span> Output: ' + pctOut + '% (' + formatTokens(outTok) + ')</span>';
+      if (cacheReadTok > 0) {
+        legendHtml += '<span class="token-comp-item"><span class="token-comp-dot" style="background: #10b981;"></span> Cache Read: ' + pctCacheRead + '% (' + formatTokens(cacheReadTok) + ')</span>';
+      }
+      if (cacheWriteTok > 0) {
+        legendHtml += '<span class="token-comp-item"><span class="token-comp-dot" style="background: #8b5cf6;"></span> Cache Write: ' + pctCacheWrite + '% (' + formatTokens(cacheWriteTok) + ')</span>';
+      }
+      if (content && content.thinkingTurns > 0) {
+        legendHtml += '<span class="token-comp-item" style="color: #e5c07b; font-weight: 500;">⚡ ' + content.thinkingTurns + ' Turns mit Thinking</span>';
+      }
+      legendEl.innerHTML = legendHtml;
+    }
+  }
+}
+
+function renderProjectsTable(projects) {
+  const tbody = document.getElementById('proj-table-body');
+  if (!tbody) return;
+  if (!projects || projects.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="opacity: 0.6; font-style: italic; padding: 12px 0;">Keine Projekt-Aktivität im gewählten Zeitraum</td></tr>';
+    return;
+  }
+  tbody.innerHTML = (projects || []).map((p) => {
+    return '<tr>' +
+      '<td><span class="project-badge" style="font-size: 12.5px; padding: 2px 8px;">📁 ' + escapeHtml(p.name) + '</span></td>' +
+      '<td>' + p.sessionsCount + '</td>' +
+      '<td>' + p.turns + '</td>' +
+      '<td class="font-mono">' + formatTokens(p.tokens) + '</td>' +
+      '<td class="font-mono" style="color: #4ec9b0; font-weight: 600;">' + formatCurrency(p.cost) + '</td>' +
+    '</tr>';
+  }).join('');
+}
 
   vscode.postMessage({ action: 'ready' });
 </script>

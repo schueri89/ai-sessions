@@ -1,7 +1,7 @@
 'use strict';
 
-// Aggregation and metrics for token usage, costs and timelines (today, 7d, 30d)
-// for Claude Code and Google Antigravity.
+// Aggregation and metrics for token usage, costs, timelines (today, 7d, 30d)
+// and Tool & Content Breakdown for Claude Code and Google Antigravity.
 
 const fs = require('fs');
 const path = require('path');
@@ -81,6 +81,66 @@ function toDateKey(date) {
   return `${y}-${m}-${d}`;
 }
 
+const TOOL_CATEGORIES = {
+  read: {
+    key: 'read',
+    label: 'Dateien lesen (Read)',
+    icon: '📖',
+    color: '#06b6d4'
+  },
+  edit: {
+    key: 'edit',
+    label: 'Code schreiben & anpassen (Edit)',
+    icon: '✏️',
+    color: '#f59e0b'
+  },
+  terminal: {
+    key: 'terminal',
+    label: 'Terminal & Shell-Befehle (Bash)',
+    icon: '🛠️',
+    color: '#10b981'
+  },
+  search: {
+    key: 'search',
+    label: 'Suche & Verzeichnis-Scans',
+    icon: '🔍',
+    color: '#3b82f6'
+  },
+  web: {
+    key: 'web',
+    label: 'Browser & Web-Tools',
+    icon: '🌐',
+    color: '#a855f7'
+  },
+  tasks: {
+    key: 'tasks',
+    label: 'Tasks & Orchestrierung',
+    icon: '⚙️',
+    color: '#64748b'
+  }
+};
+
+function categorizeTool(toolName) {
+  if (!toolName) return 'tasks';
+  const name = String(toolName).toLowerCase();
+  if (name.startsWith('mcp__') || name.includes('browser') || name.includes('url') || name.includes('webfetch') || name.includes('fetchurl') || name.includes('read_url')) {
+    return 'web';
+  }
+  if (name === 'read' || name === 'view_file' || name.includes('view') || name.includes('read_file')) {
+    return 'read';
+  }
+  if (name === 'edit' || name === 'write' || name === 'replace_file_content' || name === 'write_to_file' || name.includes('edit') || name.includes('patch')) {
+    return 'edit';
+  }
+  if (name === 'bash' || name === 'powershell' || name === 'run_command' || name === 'manage_task' || name.includes('exec') || name.includes('command')) {
+    return 'terminal';
+  }
+  if (name === 'grep' || name === 'glob' || name === 'grep_search' || name === 'list_dir' || name === 'file_search' || name === 'toolsearch' || name.includes('search') || name.includes('find')) {
+    return 'search';
+  }
+  return 'tasks';
+}
+
 function loadAntigravityWorkspaceMap() {
   const map = new Map();
   const dbPath = path.join(antigravityDir(), 'conversations.db');
@@ -127,7 +187,7 @@ function collectRawTurns(thirtyDaysStartMs) {
           if (stat.mtimeMs < thirtyDaysStartMs) continue;
 
           let cached = fileTurnCache.get(filePath);
-          if (!cached || cached.mtimeMs !== stat.mtimeMs || cached.size !== stat.size) {
+          if (!cached || cached.mtimeMs !== stat.mtimeMs || cached.size !== stat.size || (cached.turns.length > 0 && cached.turns[0].tools === undefined)) {
             const fileTurns = [];
             const content = fs.readFileSync(filePath, 'utf8');
             const lines = content.split('\n');
@@ -166,6 +226,19 @@ function collectRawTurns(thirtyDaysStartMs) {
                 hintProject: detectedProject
               });
 
+              const toolCalls = [];
+              let hasThinking = false;
+              if (rec.message && Array.isArray(rec.message.content)) {
+                for (const c of rec.message.content) {
+                  if (c.type === 'tool_use' && c.name) {
+                    toolCalls.push(c.name);
+                  }
+                  if (c.type === 'thinking') {
+                    hasThinking = true;
+                  }
+                }
+              }
+
               fileTurns.push({
                 provider: 'claude',
                 timestamp: ts,
@@ -178,6 +251,8 @@ function collectRawTurns(thirtyDaysStartMs) {
                 output,
                 cacheWrite,
                 cacheRead,
+                tools: toolCalls,
+                thinking: hasThinking,
                 cost: calculateTurnCost({ input, output, cacheRead, cacheWrite }, model, 'claude')
               });
             }
@@ -212,7 +287,7 @@ function collectRawTurns(thirtyDaysStartMs) {
         if (stat.mtimeMs < thirtyDaysStartMs) continue;
 
         let cached = fileTurnCache.get(transcriptFile);
-        if (!cached || cached.mtimeMs !== stat.mtimeMs || cached.size !== stat.size) {
+        if (!cached || cached.mtimeMs !== stat.mtimeMs || cached.size !== stat.size || (cached.turns.length > 0 && cached.turns[0].tools === undefined)) {
           const fileTurns = [];
           const content = fs.readFileSync(transcriptFile, 'utf8');
           const lines = content.split('\n');
@@ -236,6 +311,15 @@ function collectRawTurns(thirtyDaysStartMs) {
             const cacheWrite = 0;
             const model = rec.model || 'Gemini 2.5 Flash';
 
+            const toolCalls = [];
+            let hasThinking = Boolean(rec.thinking);
+            if (Array.isArray(rec.tool_calls)) {
+              for (const tc of rec.tool_calls) {
+                const name = tc.name || (tc.function && tc.function.name);
+                if (name) toolCalls.push(name);
+              }
+            }
+
             fileTurns.push({
               provider: 'antigravity',
               timestamp: ts,
@@ -248,6 +332,8 @@ function collectRawTurns(thirtyDaysStartMs) {
               output,
               cacheWrite,
               cacheRead,
+              tools: toolCalls,
+              thinking: hasThinking,
               cost: calculateTurnCost({ input, output, cacheRead, cacheWrite }, model, 'antigravity')
             });
           }
@@ -436,6 +522,74 @@ function aggregateScope(rawTurns, scope = 'today', filterProvider = 'all') {
     }))
     .sort((a, b) => b.tokens - a.tokens);
 
+  // 5. Tool & Content Breakdown
+  let totalToolCalls = 0;
+  const toolCountMap = new Map();
+  const categoryCountMap = {
+    read: 0,
+    edit: 0,
+    terminal: 0,
+    search: 0,
+    web: 0,
+    tasks: 0
+  };
+  let thinkingTurnsCount = 0;
+
+  for (const t of filtered) {
+    if (t.thinking) thinkingTurnsCount++;
+    if (Array.isArray(t.tools)) {
+      for (const toolName of t.tools) {
+        totalToolCalls++;
+        toolCountMap.set(toolName, (toolCountMap.get(toolName) || 0) + 1);
+        const catKey = categorizeTool(toolName);
+        categoryCountMap[catKey] = (categoryCountMap[catKey] || 0) + 1;
+      }
+    }
+  }
+
+  const toolCategories = [
+    { key: 'read', label: 'Dateien lesen (Read)', icon: '📖', color: '#06b6d4', count: categoryCountMap.read },
+    { key: 'edit', label: 'Code schreiben & anpassen (Edit)', icon: '✏️', color: '#f59e0b', count: categoryCountMap.edit },
+    { key: 'terminal', label: 'Terminal & Shell-Befehle (Bash)', icon: '🛠️', color: '#10b981', count: categoryCountMap.terminal },
+    { key: 'search', label: 'Suche & Verzeichnis-Scans', icon: '🔍', color: '#3b82f6', count: categoryCountMap.search },
+    { key: 'web', label: 'Browser & Web-Tools', icon: '🌐', color: '#a855f7', count: categoryCountMap.web },
+    { key: 'tasks', label: 'Tasks & Orchestrierung', icon: '⚙️', color: '#64748b', count: categoryCountMap.tasks }
+  ]
+    .map((c) => ({
+      ...c,
+      percent: totalToolCalls > 0 ? Math.round((c.count / totalToolCalls) * 100) : 0
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const topTools = Array.from(toolCountMap.entries())
+    .map(([name, count]) => ({
+      name,
+      category: categorizeTool(name),
+      count,
+      percent: totalToolCalls > 0 ? Math.round((count / totalToolCalls) * 100) : 0
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  const content = {
+    inputTokens,
+    outputTokens,
+    cacheReadTokens,
+    cacheWriteTokens,
+    totalTokens,
+    thinkingTurns: thinkingTurnsCount,
+    inputPercent: totalTokens > 0 ? Math.round((inputTokens / totalTokens) * 100) : 0,
+    outputPercent: totalTokens > 0 ? Math.round((outputTokens / totalTokens) * 100) : 0,
+    cacheReadPercent: totalTokens > 0 ? Math.round((cacheReadTokens / totalTokens) * 100) : 0,
+    cacheWritePercent: totalTokens > 0 ? Math.round((cacheWriteTokens / totalTokens) * 100) : 0
+  };
+
+  const tools = {
+    totalCalls: totalToolCalls,
+    categories: toolCategories,
+    topTools
+  };
+
   return {
     scope,
     filterProvider,
@@ -460,7 +614,9 @@ function aggregateScope(rawTurns, scope = 'today', filterProvider = 'all') {
     timelineType: scope === 'today' ? 'hourly' : 'daily',
     maxTimelineTokens,
     models,
-    projects
+    projects,
+    tools,
+    content
   };
 }
 
@@ -511,5 +667,7 @@ module.exports = {
   getAllAnalytics,
   getScopeMetrics,
   getTodayMetrics,
-  calculateTurnCost
+  calculateTurnCost,
+  TOOL_CATEGORIES,
+  categorizeTool
 };
