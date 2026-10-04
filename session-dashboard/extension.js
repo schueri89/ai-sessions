@@ -93,7 +93,7 @@ class SessionModel {
         } else if (isBookmarked) {
           displayState = 'bookmarked';
         } else if (s.state === 'closed') {
-          displayState = 'done';
+          displayState = 'idle';
         }
         return {
           ...s,

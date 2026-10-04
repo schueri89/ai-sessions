@@ -130,7 +130,7 @@ async function readSessions() {
       registryName: h.title,
       rawStatus: 'closed',
       waitingFor: '',
-      state: 'closed',
+      state: 'idle',
       startedAt: h.startedAt || 0,
       statusUpdatedAt: h.lastActivity,
       title: h.title,

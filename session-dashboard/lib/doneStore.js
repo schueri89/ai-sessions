@@ -45,7 +45,7 @@ class DoneStore {
     let changed = false;
     for (const [id, mark] of Object.entries(marks)) {
       const s = liveById.get(id);
-      const reactivated = s && s.state === 'busy' && s.statusUpdatedAt > mark.markedAt;
+      const reactivated = s && (s.state === 'busy' || s.state === 'waiting' || (s.startedAt && s.startedAt > mark.markedAt)) && s.statusUpdatedAt > mark.markedAt;
       const vanished = !s && knownIds && !knownIds.has(id);
       if (reactivated || vanished) {
         delete marks[id];

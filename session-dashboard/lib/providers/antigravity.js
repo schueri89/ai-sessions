@@ -9,7 +9,6 @@ const { DatabaseSync } = require('node:sqlite');
 const { resolveProject } = require('../project');
 const { resolveMaxContext } = require('../format');
 
-const RECENT_IDLE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours for idle vs closed
 const TRANSCRIPT_TAIL_BYTES = 64 * 1024;
 
 let cachedDb = null;
@@ -246,16 +245,11 @@ async function readSessions() {
       rawLines = info.rawLines || [];
       tokens = info.tokens || null;
     } else {
-      if ((now - statusUpdatedAt) > RECENT_IDLE_WINDOW_MS) {
-        state = 'closed';
-      }
-      // For recent idle sessions, check transcript for prompt; for older ones preview is enough
-      if (state === 'idle') {
-        const info = readTranscriptTail(sessionId);
-        lastPrompt = info.lastPrompt;
-        rawLines = info.rawLines || [];
-        tokens = info.tokens || null;
-      }
+      state = 'idle';
+      const info = readTranscriptTail(sessionId);
+      lastPrompt = info.lastPrompt;
+      rawLines = info.rawLines || [];
+      tokens = info.tokens || null;
     }
 
     if (!lastPrompt && r.preview) {
