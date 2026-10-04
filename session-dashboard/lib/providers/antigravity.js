@@ -206,7 +206,6 @@ async function readSessions() {
       FROM conversation_summaries
       WHERE killed = 0
       ORDER BY last_modified_time DESC
-      LIMIT 250
     `);
     rows = stmt.all();
   } catch {

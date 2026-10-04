@@ -36,18 +36,18 @@ class DoneStore {
     await this.memento.update(KEY, marks);
   }
 
-  // live: running sessions. knownIds: every session that still has a
-  // transcript, or null if that is unknown (scan failed) — then nothing is
-  // dropped for being unknown. Returns true if a mark was removed.
-  async reconcile(live, knownIds) {
+  // live: sessions currently read from providers.
+  // A mark is cleared ONLY when a session becomes active again (busy or waiting
+  // for input), never simply because a scan was incomplete or failed.
+  // Returns true if a mark was removed.
+  async reconcile(live) {
     const marks = { ...this.all() };
     const liveById = new Map(live.map((s) => [s.sessionId, s]));
     let changed = false;
     for (const [id, mark] of Object.entries(marks)) {
       const s = liveById.get(id);
       const reactivated = s && (s.state === 'busy' || s.state === 'waiting' || (s.startedAt && s.startedAt > mark.markedAt)) && s.statusUpdatedAt > mark.markedAt;
-      const vanished = !s && knownIds && !knownIds.has(id);
-      if (reactivated || vanished) {
+      if (reactivated) {
         delete marks[id];
         changed = true;
       }

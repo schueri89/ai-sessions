@@ -45,18 +45,11 @@ class BookmarkStore {
     return true;
   }
 
-  async reconcile(live, knownIds) {
-    const marks = { ...this.all() };
-    let changed = false;
-    for (const id of Object.keys(marks)) {
-      const vanished = knownIds && !knownIds.has(id);
-      if (vanished) {
-        delete marks[id];
-        changed = true;
-      }
-    }
-    if (changed) await this.memento.update(KEY, marks);
-    return changed;
+  // Bookmarks are persistent user pins and are only removed explicitly
+  // (via toggle/unmark, unmarkMany, or when marked done).
+  // Reconcile is retained for interface compatibility.
+  async reconcile() {
+    return false;
   }
 }
 

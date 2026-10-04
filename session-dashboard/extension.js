@@ -73,9 +73,8 @@ class SessionModel {
       getQuotaSummary().catch(() => null)
     ]);
     this.quota = quota;
-    const knownIds = new Set(live.map((s) => s.sessionId));
-    await this.done.reconcile(live, knownIds);
-    await this.bookmarks.reconcile(live, knownIds);
+    await this.done.reconcile(live);
+    await this.bookmarks.reconcile(live);
     const now = Date.now();
     this.sessions = live
       .map((s) => {
