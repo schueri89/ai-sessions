@@ -20,25 +20,10 @@ class BoardPanel {
     this.pendingSearch = '';
   }
 
-  show(query) {
-    if (typeof query === 'string') {
-      this.pendingSearch = query;
-    }
-    if (this.panel) {
-      this.panel.reveal();
-      if (this.pendingSearch) {
-        this.panel.webview.postMessage({ type: 'setSearch', query: this.pendingSearch });
-        this.pendingSearch = '';
-      }
-      return;
-    }
-    this.panel = vscode.window.createWebviewPanel(
-      'sessionDashboard.board',
-      'AI Sessions',
-      vscode.ViewColumn.Active,
-      { enableScripts: true, retainContextWhenHidden: true }
-    );
+  attach(panel) {
+    this.panel = panel;
     this.panel.iconPath = vscode.Uri.joinPath(this.model.extensionUri, 'resources', 'icon.svg');
+    this.panel.webview.options = { enableScripts: true };
     this.panel.webview.html = this.html();
     this.panel.webview.onDidReceiveMessage((msg) => {
       if (msg && msg.action === 'ready') {
@@ -86,6 +71,52 @@ class BoardPanel {
     this.panel.onDidDispose(() => {
       this.panel = null;
     });
+  }
+
+  ensurePinned() {
+    const config = vscode.workspace.getConfiguration('sessionDashboard');
+    if (!config.get('autoPinTab', true)) return;
+
+    setTimeout(async () => {
+      try {
+        if (vscode.window.tabGroups && vscode.window.tabGroups.all) {
+          for (const group of vscode.window.tabGroups.all) {
+            for (const tab of group.tabs) {
+              const viewType = tab.input && tab.input.viewType;
+              if (viewType && (viewType === 'sessionDashboard.board' || viewType.endsWith('sessionDashboard.board'))) {
+                if (tab.isPinned) return;
+              }
+            }
+          }
+        }
+        await vscode.commands.executeCommand('workbench.action.pinEditor');
+      } catch {
+        // Non-critical if pinning fails
+      }
+    }, 150);
+  }
+
+  show(query) {
+    if (typeof query === 'string') {
+      this.pendingSearch = query;
+    }
+    if (this.panel) {
+      this.panel.reveal();
+      if (this.pendingSearch) {
+        this.panel.webview.postMessage({ type: 'setSearch', query: this.pendingSearch });
+        this.pendingSearch = '';
+      }
+      this.ensurePinned();
+      return;
+    }
+    const panel = vscode.window.createWebviewPanel(
+      'sessionDashboard.board',
+      'AI Sessions',
+      vscode.ViewColumn.Active,
+      { enableScripts: true, retainContextWhenHidden: true }
+    );
+    this.attach(panel);
+    this.ensurePinned();
   }
 
   update() {

@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code- und Antigravity-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -14,7 +14,8 @@
   ],
   "main": "./extension.js",
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onWebviewPanel:sessionDashboard.board"
   ],
   "contributes": {
     "viewsContainers": {
@@ -217,6 +218,16 @@
           ],
           "default": "board",
           "description": "Aktion beim Klick auf das Statusleisten-Widget."
+        },
+        "sessionDashboard.autoPinTab": {
+          "type": "boolean",
+          "default": true,
+          "description": "Dashboard-Tab beim Öffnen automatisch anpinnen."
+        },
+        "sessionDashboard.openOnStartup": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dashboard beim Starten von VS Code automatisch im Editor öffnen."
         }
       }
     }

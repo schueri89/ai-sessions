@@ -3,9 +3,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] kann der Tab mit dem Dashboard irgendwie immer angepinnt geladen werden?
+- [ ] bitte zeige die Usage von Claude Code und Antigravity in der Footerbar immer an
 
 ## Erledigt
+- [x] session-dashboard: Dashboard-Tab dauerhaft angepinnt laden (WebviewPanelSerializer, autoPinTab & openOnStartup) (Plan: `.agents/plans/2026-10-04_session-dashboard-pinned-tab.md`) — 04.10.2026
 - [x] session-dashboard: Antigravity Live-Quota & Limit-Tracking via Language Server Hub (Plan: `.agents/plans/2026-10-04_session-dashboard-antigravity-usage-tracking.md`) — 04.10.2026
 - [x] session-dashboard: Footerbar zeigt neben den aktiven ("arbeitet") auch fertige ("fertig") Sessions an (Plan: `.agents/plans/2026-10-04_session-dashboard-footerbar-fertig-sessions.md`) — 04.10.2026
 - [x] session-dashboard: Context-Window pro Modell dynamisch auflösen (1M für Opus 5.5 etc.) (Plan: `.agents/plans/2026-10-04_session-dashboard-model-context-window.md`) — 04.10.2026

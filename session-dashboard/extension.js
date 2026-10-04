@@ -166,7 +166,15 @@ function activate(context) {
   const board = new BoardPanel(model);
   const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
-  context.subscriptions.push(view, statusBar);
+  context.subscriptions.push(
+    view,
+    statusBar,
+    vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
+      async deserializeWebviewPanel(webviewPanel) {
+        board.attach(webviewPanel);
+      }
+    })
+  );
   statusBar.show();
 
   let running = false;
@@ -484,6 +492,15 @@ function activate(context) {
   );
 
   update(true);
+
+  const config = vscode.workspace.getConfiguration('sessionDashboard');
+  if (config.get('openOnStartup', false)) {
+    setTimeout(() => {
+      if (!board.panel) {
+        board.show();
+      }
+    }, 500);
+  }
 }
 
 function deactivate() {}
