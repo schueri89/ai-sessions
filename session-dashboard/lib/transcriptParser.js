@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { calculateTurnCost } = require('./analytics');
+const { workspaceStorageDir } = require('./providers/copilot');
 
 function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -14,7 +15,7 @@ function antigravityDir() {
 }
 
 function findClaudeTranscript(sessionId) {
-  if (!sessionId) return null;
+  if (!sessionId || typeof sessionId !== 'string') return null;
   const root = path.join(claudeDir(), 'projects');
   if (!fs.existsSync(root)) return null;
   try {
@@ -28,7 +29,7 @@ function findClaudeTranscript(sessionId) {
 }
 
 function findAntigravityTranscript(sessionId) {
-  if (!sessionId) return null;
+  if (!sessionId || typeof sessionId !== 'string') return null;
   const base = path.join(antigravityDir(), 'brain', sessionId, '.system_generated', 'logs');
   const full = path.join(base, 'transcript_full.jsonl');
   if (fs.existsSync(full)) return full;
@@ -37,17 +38,47 @@ function findAntigravityTranscript(sessionId) {
   return null;
 }
 
+function findCopilotTranscript(sessionId) {
+  if (!sessionId || typeof sessionId !== 'string') return null;
+  const wsDir = workspaceStorageDir();
+  if (!fs.existsSync(wsDir)) return null;
+  try {
+    const hashes = fs.readdirSync(wsDir);
+    for (const h of hashes) {
+      const file = path.join(wsDir, h, 'chatSessions', `${sessionId}.jsonl`);
+      if (fs.existsSync(file)) return file;
+    }
+  } catch {}
+  return null;
+}
+
 function findTranscriptFile(sessionId, provider) {
-  if (provider === 'antigravity') {
+  if (sessionId && typeof sessionId === 'object') {
+    provider = sessionId.provider || provider;
+    sessionId = sessionId.sessionId;
+  }
+  if (!sessionId || typeof sessionId !== 'string') return null;
+  if (provider === 'copilot') {
+    const copilot = findCopilotTranscript(sessionId);
+    if (copilot) return { file: copilot, provider: 'copilot' };
+    const claude = findClaudeTranscript(sessionId);
+    if (claude) return { file: claude, provider: 'claude' };
+    const agy = findAntigravityTranscript(sessionId);
+    if (agy) return { file: agy, provider: 'antigravity' };
+  } else if (provider === 'antigravity') {
     const agy = findAntigravityTranscript(sessionId);
     if (agy) return { file: agy, provider: 'antigravity' };
     const claude = findClaudeTranscript(sessionId);
     if (claude) return { file: claude, provider: 'claude' };
+    const copilot = findCopilotTranscript(sessionId);
+    if (copilot) return { file: copilot, provider: 'copilot' };
   } else {
     const claude = findClaudeTranscript(sessionId);
     if (claude) return { file: claude, provider: 'claude' };
     const agy = findAntigravityTranscript(sessionId);
     if (agy) return { file: agy, provider: 'antigravity' };
+    const copilot = findCopilotTranscript(sessionId);
+    if (copilot) return { file: copilot, provider: 'copilot' };
   }
   return null;
 }
@@ -382,18 +413,195 @@ function parseAntigravityTranscript(filePath, sessionId) {
   };
 }
 
+function parseCopilotTranscript(filePath, sessionId) {
+  if (!fs.existsSync(filePath)) return null;
+  const content = fs.readFileSync(filePath, 'utf8');
+  const lines = content.split('\n').filter(Boolean);
+
+  let sessionObj = null;
+  let customTitle = '';
+
+  for (const line of lines) {
+    try {
+      const parsed = JSON.parse(line);
+      if (parsed.kind === 0 && parsed.v) {
+        sessionObj = parsed.v;
+      } else if (parsed.kind === 1 && parsed.k && parsed.k[0] === 'customTitle') {
+        customTitle = parsed.v;
+      } else if (parsed.kind === 2 && parsed.k && parsed.k[0] === 'requests' && sessionObj) {
+        if (!sessionObj.requests) sessionObj.requests = [];
+        sessionObj.requests = sessionObj.requests.concat(parsed.v);
+      }
+    } catch {}
+  }
+
+  if (!sessionObj) return null;
+
+  let title = customTitle || sessionObj.customTitle || '';
+  let project = '';
+  let model = 'Copilot';
+  let startedAt = sessionObj.creationDate || 0;
+  let lastActivity = startedAt;
+  const activeMinutesSet = new Set();
+
+  const requests = sessionObj.requests || [];
+  const turns = [];
+
+  for (let idx = 0; idx < requests.length; idx++) {
+    const req = requests[idx];
+    const ts = Number(req.timestamp) || sessionObj.creationDate || 0;
+    if (ts > 0) {
+      if (!startedAt) startedAt = ts;
+      lastActivity = Math.max(lastActivity, ts);
+      activeMinutesSet.add(Math.floor(ts / 60000));
+    }
+
+    const meta = req.result?.metadata;
+    const resolved = meta?.resolvedModel || req.modelId;
+    if (resolved) model = resolved;
+
+    const userPrompt = req.message?.text || '';
+    if (!title && userPrompt) {
+      title = userPrompt.slice(0, 60);
+    }
+
+    let assistantResponse = '';
+    const tools = [];
+    let thinking = '';
+
+    if (Array.isArray(req.response)) {
+      for (const p of req.response) {
+        if (typeof p.value === 'string') {
+          assistantResponse += p.value + '\n\n';
+        } else if (p.content?.value) {
+          assistantResponse += p.content.value + '\n\n';
+        } else if (p.kind === 'toolInvocationSerialized') {
+          const tName = p.toolId || p.name || 'tool';
+          const tSummary = p.toolInvocationMessage?.value || p.pastTenseMessage?.value || p.toolId || 'Tool ausgeführt';
+          tools.push({
+            name: tName,
+            summary: tSummary,
+            input: p.parameters || {}
+          });
+        } else if (p.kind === 'progressTaskSerialized' || p.kind === 'thinking') {
+          const txt = p.content?.value || p.message || '';
+          if (txt) thinking += (thinking ? '\n' : '') + txt;
+        }
+      }
+    }
+
+    if (meta?.toolCallResults) {
+      for (const [callId, callData] of Object.entries(meta.toolCallResults)) {
+        if (!tools.some((t) => t.name === callId)) {
+          tools.push({
+            name: callData?.name || callId,
+            summary: callData?.summary || 'Tool Call',
+            input: callData?.args || {}
+          });
+        }
+      }
+    }
+
+    const inputTokens = Number(meta?.promptTokens) || 0;
+    const outputTokens = Number(meta?.outputTokens) || 0;
+    const elapsedMs = req.elapsedMs || (req.modelState?.completedAt && ts ? (req.modelState.completedAt - ts) : 0);
+    const endTs = req.modelState?.completedAt || (ts + elapsedMs);
+
+    const turnCost = calculateTurnCost(
+      { input: inputTokens, output: outputTokens, cacheRead: 0, cacheWrite: 0 },
+      model,
+      'copilot'
+    );
+
+    turns.push({
+      index: idx + 1,
+      turnIndex: idx + 1,
+      timestamp: ts,
+      startTimestamp: ts,
+      endTimestamp: endTs,
+      durationMs: elapsedMs,
+      userPrompt,
+      thinking: thinking ? [thinking.trim()] : [],
+      response: assistantResponse.trim(),
+      assistantResponse: assistantResponse.trim(),
+      tools,
+      inputTokens,
+      outputTokens,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      cost: turnCost,
+      model
+    });
+  }
+
+  let totalTokens = 0;
+  let totalCost = 0;
+  let toolsCount = 0;
+
+  for (const t of turns) {
+    totalTokens += (t.inputTokens + t.outputTokens);
+    totalCost += t.cost;
+    toolsCount += t.tools.length;
+  }
+
+  // Detect project from filePath or workspace
+  const m = filePath.match(/[\\\/]workspaceStorage[\\\/]([a-zA-Z0-9_\-]+)/);
+  if (m) {
+    try {
+      const wsFile = path.join(filePath.split('chatSessions')[0], 'workspace.json');
+      if (fs.existsSync(wsFile)) {
+        const j = JSON.parse(fs.readFileSync(wsFile, 'utf8'));
+        const pStr = j.folder || j.workspace || '';
+        const pm = pStr.match(/ROOT[\\\/]([a-zA-Z0-9_\-\.]+)/i);
+        if (pm && !['WEB-INF', 'META-INF', 'lucee.code-workspace'].includes(pm[1])) {
+          project = pm[1];
+        }
+      }
+    } catch {}
+  }
+
+  return {
+    sessionId,
+    provider: 'copilot',
+    title: title || 'Copilot Session',
+    project: project || 'ROOT',
+    model,
+    filePath,
+    startedAt,
+    lastActivity,
+    activeMinutes: activeMinutesSet.size,
+    spanMs: (lastActivity && startedAt && lastActivity >= startedAt) ? (lastActivity - startedAt) : 0,
+    turnsCount: turns.length,
+    toolsCount,
+    totalTokens,
+    cost: totalCost,
+    turns
+  };
+}
+
 function getSessionTranscript(sessionId, provider) {
-  const found = findTranscriptFile(sessionId, provider);
+  let sid = sessionId;
+  let prov = provider;
+  if (sessionId && typeof sessionId === 'object') {
+    prov = sessionId.provider || provider;
+    sid = sessionId.sessionId;
+  }
+  const found = findTranscriptFile(sid, prov);
   if (!found) return null;
   if (found.provider === 'claude') {
-    return parseClaudeTranscript(found.file, sessionId);
+    return parseClaudeTranscript(found.file, sid);
   }
-  return parseAntigravityTranscript(found.file, sessionId);
+  if (found.provider === 'copilot') {
+    return parseCopilotTranscript(found.file, sid);
+  }
+  return parseAntigravityTranscript(found.file, sid);
 }
 
 module.exports = {
   findTranscriptFile,
+  findCopilotTranscript,
   parseClaudeTranscript,
   parseAntigravityTranscript,
+  parseCopilotTranscript,
   getSessionTranscript
 };

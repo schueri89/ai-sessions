@@ -142,6 +142,11 @@ function friendlyModel(m) {
   if (lower.includes('gemini-2.0-flash') || lower.includes('gemini-2-flash')) return 'Gemini 2.0 Flash';
   if (lower.includes('gemini-1.5-pro')) return 'Gemini 1.5 Pro';
   if (lower.includes('gemini')) return 'Gemini';
+  if (lower.includes('gpt-4o-mini')) return 'GPT-4o mini';
+  if (lower.includes('gpt-4o')) return 'GPT-4o';
+  if (lower.includes('o3-mini')) return 'o3-mini';
+  if (lower.includes('o1')) return 'o1';
+  if (lower.includes('copilot') || lower.includes('oswe')) return 'Copilot';
   return m.replace(/^claude-/, '');
 }
 

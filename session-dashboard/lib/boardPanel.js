@@ -10,6 +10,7 @@ const { getAllAnalytics } = require('./analytics');
 const ICONS = {
   claude: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z"/></svg>',
   antigravity: '<svg viewBox="0 0 113 113" width="14" height="14" fill="currentColor"><path d="M89.6992 93.695C94.3659 97.195 101.366 94.8617 94.9492 88.445C75.6992 69.7783 79.7825 18.445 55.8659 18.445C31.9492 18.445 36.0325 69.7783 16.7825 88.445C9.78251 95.445 17.3658 97.195 22.0325 93.695C40.1159 81.445 38.9492 59.8617 55.8659 59.8617C72.7825 59.8617 71.6159 81.445 89.6992 93.695Z"/></svg>',
+  copilot: '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>',
   pin: '<svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.923-1.414.728-.195-.195.533-1.22.728-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146z"/></svg>',
   search: '<svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>'
 };
@@ -311,6 +312,7 @@ class BoardPanel {
   .provider-icon svg { width: 15px; height: 15px; display: block; }
   .provider-icon.claude { color: #ff9e79; background: rgba(242, 101, 34, 0.18); border: 1px solid rgba(255, 158, 121, 0.35); }
   .provider-icon.antigravity { color: #70a9ff; background: rgba(66, 133, 244, 0.18); border: 1px solid rgba(112, 169, 255, 0.35); }
+  .provider-icon.copilot { color: #34d399; background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(52, 211, 153, 0.35); }
   .detail { font-size: 12.5px; opacity: 0.8; }
   .prompt {
     font-size: 12.5px;
@@ -373,6 +375,7 @@ class BoardPanel {
   .filter-btn.active[data-filter="all"] { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
   .filter-btn.active.filter-claude { background: rgba(242, 101, 34, 0.25); color: #ff9e79; border-color: rgba(255, 158, 121, 0.5); }
   .filter-btn.active.filter-antigravity { background: rgba(66, 133, 244, 0.25); color: #70a9ff; border-color: rgba(112, 169, 255, 0.5); }
+  .filter-btn.active.filter-copilot { background: rgba(16, 185, 129, 0.25); color: #34d399; border-color: rgba(52, 211, 153, 0.5); }
   .project-chips-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%; padding-top: 4px; }
   .project-chips-label { font-size: 12.5px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-right: 4px; }
   .project-chip {
@@ -653,6 +656,7 @@ class BoardPanel {
   .analyse-filter-btn.active { font-weight: 600; background: var(--vscode-button-background); color: var(--vscode-button-foreground); border-color: transparent; }
   .analyse-filter-btn.active.filter-claude { background: rgba(242, 101, 34, 0.25); color: #ff9e79; border-color: rgba(255, 158, 121, 0.5); }
   .analyse-filter-btn.active.filter-antigravity { background: rgba(66, 133, 244, 0.25); color: #70a9ff; border-color: rgba(112, 169, 255, 0.5); }
+  .analyse-filter-btn.active.filter-copilot { background: rgba(16, 185, 129, 0.25); color: #34d399; border-color: rgba(52, 211, 153, 0.5); }
   .analyse-scope-tabs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .analyse-scope-label { font-size: 12.5px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-right: 2px; }
   .analyse-scope-btn {
@@ -803,6 +807,7 @@ class BoardPanel {
   .model-bar-fill { height: 100%; border-radius: 3.5px; transition: width 0.25s ease; }
   .model-bar-fill.claude { background-color: #f26522; }
   .model-bar-fill.antigravity { background-color: #4285f4; }
+  .model-bar-fill.copilot { background-color: #10b981; }
 
   /* Tool & Content Distribution */
   .tool-content-wrap { display: flex; flex-direction: column; gap: 14px; }
@@ -883,6 +888,9 @@ class BoardPanel {
         <button class="filter-btn filter-antigravity" data-filter="antigravity" id="btn-antigravity">
           ${ICONS.antigravity} Antigravity <span class="count" id="count-antigravity">0</span>
         </button>
+        <button class="filter-btn filter-copilot" data-filter="copilot" id="btn-copilot">
+          ${ICONS.copilot} Copilot <span class="count" id="count-copilot">0</span>
+        </button>
       </div>
       <div class="search-group">
         <div class="search-box">
@@ -908,6 +916,7 @@ class BoardPanel {
       <button class="analyse-filter-btn active" data-filter="all" id="af-all">Alle</button>
       <button class="analyse-filter-btn filter-claude" data-filter="claude" id="af-claude">${ICONS.claude} Claude Code</button>
       <button class="analyse-filter-btn filter-antigravity" data-filter="antigravity" id="af-antigravity">${ICONS.antigravity} Antigravity</button>
+      <button class="analyse-filter-btn filter-copilot" data-filter="copilot" id="af-copilot">${ICONS.copilot} Copilot</button>
     </div>
     <div class="analyse-scope-tabs">
       <span class="analyse-scope-label">Zeitraum:</span>
@@ -940,6 +949,7 @@ class BoardPanel {
       <div class="kpi-rows">
         <div class="kpi-row"><span>Claude Code:</span><span id="kpi-claude-cost" class="kpi-num">$0.00</span></div>
         <div class="kpi-row"><span>Antigravity:</span><span id="kpi-agy-cost" class="kpi-num">$0.00</span></div>
+        <div class="kpi-row"><span>Copilot:</span><span id="kpi-copilot-cost" class="kpi-num">$0.00</span></div>
         <div class="kpi-row" style="opacity: 0.6; font-size: 0.9em;"><span>Keine offizielle Rechnung</span></div>
       </div>
     </div>
@@ -1098,6 +1108,8 @@ class BoardPanel {
       document.getElementById('count-all').textContent = counts.all || 0;
       document.getElementById('count-claude').textContent = counts.claude || 0;
       document.getElementById('count-antigravity').textContent = counts.antigravity || 0;
+      const copilotCnt = document.getElementById('count-copilot');
+      if (copilotCnt) copilotCnt.textContent = counts.copilot || 0;
     }
     filterBtns.forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-filter') === (filter || 'all'));
@@ -1448,6 +1460,12 @@ class BoardPanel {
     if (lower.includes('gemini-2.0-flash') || lower.includes('gemini-2-flash')) return 'Gemini 2.0 Flash';
     if (lower.includes('gemini-1.5-pro')) return 'Gemini 1.5 Pro';
     if (lower.includes('gemini-1.5-flash')) return 'Gemini 1.5 Flash';
+    if (lower.includes('gpt-4o-mini')) return 'GPT-4o mini';
+    if (lower.includes('gpt-4o')) return 'GPT-4o';
+    if (lower.includes('o3-mini')) return 'o3-mini';
+    if (lower.includes('o1')) return 'o1';
+    if (lower.includes('raptor')) return 'Raptor';
+    if (lower.includes('copilot')) return 'Copilot';
     if (lower.includes('gemini-ultra')) return 'Gemini Ultra';
     if (lower.includes('gemini')) return 'Gemini';
     return m.replace(/^claude-/, '');
@@ -1569,7 +1587,7 @@ class BoardPanel {
         });
         badges.append(pinBtn);
         const icon = el('span', 'provider-icon ' + (s.provider || 'claude'));
-        icon.title = s.provider === 'antigravity' ? 'Google Antigravity' : 'Claude Code';
+        icon.title = s.provider === 'copilot' ? 'GitHub Copilot' : (s.provider === 'antigravity' ? 'Google Antigravity' : 'Claude Code');
         icon.innerHTML = ICONS[s.provider] || ICONS.claude;
         badges.append(icon);
         cardHeader.append(badges);
@@ -1740,6 +1758,8 @@ class BoardPanel {
     document.getElementById('kpi-cost').textContent = formatCurrency(s.estimatedCost);
     document.getElementById('kpi-claude-cost').textContent = formatCurrency(s.claudeCost);
     document.getElementById('kpi-agy-cost').textContent = formatCurrency(s.antigravityCost);
+    const copilotCostEl = document.getElementById('kpi-copilot-cost');
+    if (copilotCostEl) copilotCostEl.textContent = formatCurrency(s.copilotCost || 0);
 
     document.getElementById('kpi-cache-rate').textContent = (s.cacheHitRate || 0) + '%';
     document.getElementById('kpi-cache-reads').textContent = formatTokens(s.cacheReadTokens);
@@ -1987,8 +2007,9 @@ class BoardPanel {
     }
     container.innerHTML = validModels.map((m) => {
       const isClaude = m.provider === 'claude';
-      const color = isClaude ? '#f26522' : '#4285f4';
-      const icon = isClaude ? ICONS.claude : ICONS.antigravity;
+      const isCopilot = m.provider === 'copilot';
+      const color = isClaude ? '#f26522' : (isCopilot ? '#10b981' : '#4285f4');
+      const icon = isClaude ? ICONS.claude : (isCopilot ? ICONS.copilot : ICONS.antigravity);
       const displayName = friendlyModel(m.name) || m.name;
       return '<div class="model-row">' +
         '<div class="model-meta">' +

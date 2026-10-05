@@ -8,6 +8,7 @@ const path = require('path');
 const os = require('os');
 const { DatabaseSync } = require('node:sqlite');
 const { resolveProject } = require('./project');
+const { workspaceStorageDir } = require('./providers/copilot');
 
 const BUNDLE_CACHE_TTL_MS = 20 * 1000;
 let cachedAnalyticsBundle = null;
@@ -22,6 +23,17 @@ function claudeDir() {
 
 function antigravityDir() {
   return process.env.ANTIGRAVITY_APP_DATA_DIR || path.join(os.homedir(), '.gemini', 'antigravity');
+}
+
+function decodeWorkspaceUri(uri) {
+  if (!uri) return '';
+  try {
+    let p = uri.replace(/^file:\/\/\/?/, '');
+    p = decodeURIComponent(p);
+    return path.normalize(p);
+  } catch {
+    return uri;
+  }
 }
 
 // Rates per 1,000,000 tokens in USD
@@ -39,12 +51,20 @@ const MODEL_PRICING = {
   'gemini-1.5-flash': { input: 0.075, output: 0.30, cacheRead: 0.01875, cacheWrite: 0.075 },
   'gemini-2.5-pro': { input: 1.25, output: 5.0, cacheRead: 0.3125, cacheWrite: 1.25 },
   'gemini-1.5-pro': { input: 1.25, output: 5.0, cacheRead: 0.3125, cacheWrite: 1.25 },
-  'gemini-ultra': { input: 5.0, output: 20.0, cacheRead: 1.25, cacheWrite: 5.0 }
+  'gemini-ultra': { input: 5.0, output: 20.0, cacheRead: 1.25, cacheWrite: 5.0 },
+  'gpt-4o': { input: 2.50, output: 10.0, cacheRead: 1.25, cacheWrite: 2.50 },
+  'gpt-4o-mini': { input: 0.15, output: 0.60, cacheRead: 0.075, cacheWrite: 0.15 },
+  'o1': { input: 15.0, output: 60.0, cacheRead: 7.50, cacheWrite: 15.0 },
+  'o3-mini': { input: 1.10, output: 4.40, cacheRead: 0.55, cacheWrite: 1.10 },
+  'raptor': { input: 0.15, output: 0.60, cacheRead: 0.075, cacheWrite: 0.15 },
+  'copilot': { input: 2.50, output: 10.0, cacheRead: 1.25, cacheWrite: 2.50 }
 };
 
 function getModelPricing(modelName, provider = 'claude') {
   if (!modelName) {
-    return provider === 'antigravity' ? MODEL_PRICING['gemini-2.5-flash'] : MODEL_PRICING['claude-3-7-sonnet'];
+    if (provider === 'antigravity') return MODEL_PRICING['gemini-2.5-flash'];
+    if (provider === 'copilot') return MODEL_PRICING['gpt-4o'];
+    return MODEL_PRICING['claude-3-7-sonnet'];
   }
   const m = String(modelName).toLowerCase();
   for (const [key, p] of Object.entries(MODEL_PRICING)) {
@@ -55,6 +75,12 @@ function getModelPricing(modelName, provider = 'claude') {
   if (m.includes('sonnet')) return MODEL_PRICING['claude-3-7-sonnet'];
   if (m.includes('flash')) return MODEL_PRICING['gemini-2.5-flash'];
   if (m.includes('pro')) return MODEL_PRICING['gemini-2.5-pro'];
+  if (m.includes('gpt-4o-mini')) return MODEL_PRICING['gpt-4o-mini'];
+  if (m.includes('gpt-4o')) return MODEL_PRICING['gpt-4o'];
+  if (m.includes('o3-mini')) return MODEL_PRICING['o3-mini'];
+  if (m.includes('o1')) return MODEL_PRICING['o1'];
+  if (m.includes('raptor')) return MODEL_PRICING['raptor'];
+  if (provider === 'copilot') return MODEL_PRICING['gpt-4o'];
   return provider === 'antigravity' ? MODEL_PRICING['gemini-2.5-flash'] : MODEL_PRICING['claude-3-7-sonnet'];
 }
 
@@ -349,6 +375,126 @@ function collectRawTurns(thirtyDaysStartMs) {
     }
   }
 
+  // 3. Collect GitHub Copilot turns
+  const copilotStorage = workspaceStorageDir();
+  if (fs.existsSync(copilotStorage)) {
+    let wsFolders = [];
+    try {
+      wsFolders = fs.readdirSync(copilotStorage, { withFileTypes: true }).filter((d) => d.isDirectory());
+    } catch {}
+
+    for (const d of wsFolders) {
+      const wsFolder = path.join(copilotStorage, d.name);
+      const csDir = path.join(wsFolder, 'chatSessions');
+      if (!fs.existsSync(csDir)) continue;
+
+      let wsPath = '';
+      const wsFile = path.join(wsFolder, 'workspace.json');
+      if (fs.existsSync(wsFile)) {
+        try {
+          const json = JSON.parse(fs.readFileSync(wsFile, 'utf8'));
+          wsPath = decodeWorkspaceUri(json.folder || json.workspace || '');
+        } catch {}
+      }
+
+      let files = [];
+      try {
+        files = fs.readdirSync(csDir).filter((f) => f.endsWith('.jsonl'));
+      } catch {}
+
+      for (const f of files) {
+        const filePath = path.join(csDir, f);
+        try {
+          const stat = fs.statSync(filePath);
+          if (stat.mtimeMs < thirtyDaysStartMs) continue;
+
+          let cached = fileTurnCache.get(filePath);
+          if (!cached || cached.mtimeMs !== stat.mtimeMs || cached.size !== stat.size) {
+            const fileTurns = [];
+            const content = fs.readFileSync(filePath, 'utf8');
+            const lines = content.split('\n').filter(Boolean);
+            const sessionId = path.basename(f, '.jsonl');
+
+            let sessionObj = null;
+            let customTitle = '';
+            for (const line of lines) {
+              try {
+                const parsed = JSON.parse(line);
+                if (parsed.kind === 0 && parsed.v) {
+                  sessionObj = parsed.v;
+                } else if (parsed.kind === 1 && parsed.k && parsed.k[0] === 'customTitle') {
+                  customTitle = parsed.v;
+                } else if (parsed.kind === 2 && parsed.k && parsed.k[0] === 'requests' && sessionObj) {
+                  if (!sessionObj.requests) sessionObj.requests = [];
+                  sessionObj.requests = sessionObj.requests.concat(parsed.v);
+                }
+              } catch {}
+            }
+
+            if (sessionObj && Array.isArray(sessionObj.requests)) {
+              const project = resolveProject({
+                cwd: wsPath,
+                title: customTitle || sessionObj.customTitle || ''
+              });
+
+              for (const req of sessionObj.requests) {
+                const ts = Number(req.timestamp) || sessionObj.creationDate || stat.mtimeMs;
+                if (!ts || isNaN(ts)) continue;
+
+                const meta = req.result?.metadata;
+                const input = Number(meta?.promptTokens) || 0;
+                const output = Number(meta?.outputTokens) || 0;
+                const model = meta?.resolvedModel || req.modelId || 'copilot';
+
+                const toolCalls = [];
+                let hasThinking = false;
+                if (Array.isArray(req.response)) {
+                  for (const p of req.response) {
+                    if (p.kind === 'toolInvocationSerialized' && (p.toolId || p.name)) {
+                      toolCalls.push(p.toolId || p.name);
+                    }
+                    if (p.kind === 'progressTaskSerialized' || p.kind === 'thinking') {
+                      hasThinking = true;
+                    }
+                  }
+                }
+                if (meta?.toolCallResults) {
+                  for (const callId of Object.keys(meta.toolCallResults)) {
+                    if (!toolCalls.includes(callId)) toolCalls.push('tool_call');
+                  }
+                }
+
+                fileTurns.push({
+                  provider: 'copilot',
+                  timestamp: ts,
+                  dateKey: toDateKey(new Date(ts)),
+                  hour: new Date(ts).getHours(),
+                  sessionId,
+                  project,
+                  model,
+                  input,
+                  output,
+                  cacheWrite: 0,
+                  cacheRead: 0,
+                  tools: toolCalls,
+                  thinking: hasThinking,
+                  cost: calculateTurnCost({ input, output, cacheRead: 0, cacheWrite: 0 }, model, 'copilot')
+                });
+              }
+            }
+
+            cached = { mtimeMs: stat.mtimeMs, size: stat.size, turns: fileTurns };
+            fileTurnCache.set(filePath, cached);
+          }
+
+          for (const t of cached.turns) {
+            if (t.timestamp >= thirtyDaysStartMs) turns.push(t);
+          }
+        } catch {}
+      }
+    }
+  }
+
   return turns;
 }
 
@@ -368,6 +514,7 @@ function aggregateScope(rawTurns, scope = 'today', filterProvider = 'all') {
   let estimatedCost = 0;
   let claudeCost = 0;
   let antigravityCost = 0;
+  let copilotCost = 0;
   const uniqueSessions = new Set();
   const activeMinutesSet = new Set();
   const activeDaysSet = new Set();
@@ -379,7 +526,8 @@ function aggregateScope(rawTurns, scope = 'today', filterProvider = 'all') {
     cacheWriteTokens += t.cacheWrite;
     estimatedCost += t.cost;
     if (t.provider === 'claude') claudeCost += t.cost;
-    else antigravityCost += t.cost;
+    else if (t.provider === 'antigravity') antigravityCost += t.cost;
+    else if (t.provider === 'copilot') copilotCost += t.cost;
     uniqueSessions.add(t.sessionId);
     if (t.timestamp) activeMinutesSet.add(Math.floor(t.timestamp / 60000));
     if (t.dateKey) activeDaysSet.add(t.dateKey);
@@ -603,6 +751,7 @@ function aggregateScope(rawTurns, scope = 'today', filterProvider = 'all') {
       estimatedCost,
       claudeCost,
       antigravityCost,
+      copilotCost,
       turnsCount: filtered.length,
       sessionsCount: uniqueSessions.size,
       activeMinutes: activeMinutesSet.size,
@@ -644,6 +793,11 @@ function getAllAnalytics() {
       today: aggregateScope(rawTurns, 'today', 'antigravity'),
       '7d': aggregateScope(rawTurns, '7d', 'antigravity'),
       '30d': aggregateScope(rawTurns, '30d', 'antigravity')
+    },
+    copilot: {
+      today: aggregateScope(rawTurns, 'today', 'copilot'),
+      '7d': aggregateScope(rawTurns, '7d', 'copilot'),
+      '30d': aggregateScope(rawTurns, '30d', 'copilot')
     }
   };
 

@@ -79,7 +79,7 @@ class TranscriptViewerPanel {
       return;
     }
 
-    const titlePrefix = provider === 'claude' ? '🟣 ' : '🔷 ';
+    const titlePrefix = provider === 'claude' ? '🟣 ' : (provider === 'copilot' ? '🤖 ' : '🔷 ');
     const tabTitle = `${titlePrefix}${transcript.title.slice(0, 24) || 'Session'} (Read-Only)`;
 
     const panel = vscode.window.createWebviewPanel(
@@ -133,8 +133,10 @@ class TranscriptViewerPanel {
   getHtml() {
     const t = this.transcript;
     const isClaude = t.provider === 'claude';
-    const provName = isClaude ? 'Claude Code' : 'Antigravity';
-    const provColor = isClaude ? '#f26522' : '#4285f4';
+    const isCopilot = t.provider === 'copilot';
+    const provName = isClaude ? 'Claude Code' : (isCopilot ? 'GitHub Copilot' : 'Antigravity');
+    const provColor = isClaude ? '#f26522' : (isCopilot ? '#10b981' : '#4285f4');
+    const provIcon = isClaude ? '🟣' : (isCopilot ? '🤖' : '🔷');
 
     return `<!DOCTYPE html>
 <html lang="de">
@@ -582,7 +584,7 @@ class TranscriptViewerPanel {
     <div class="title-left">
       <h1 class="title-heading">
         <span class="prov-badge" style="border-left: 3px solid ${provColor};">
-          ${isClaude ? '🟣' : '🔷'} ${provName}
+          ${provIcon} ${provName}
         </span>
         ${escapeHtml(t.title)}
       </h1>
@@ -809,7 +811,7 @@ class TranscriptViewerPanel {
       assistantHtml = `
         <div class="assistant-box">
           <div class="box-label">
-            <span>🤖 Antwort (${this.transcript.provider === 'claude' ? 'Claude' : 'Antigravity'})</span>
+            <span>🤖 Antwort (${this.transcript.provider === 'claude' ? 'Claude' : (this.transcript.provider === 'copilot' ? 'Copilot' : 'Antigravity')})</span>
             <button class="copy-btn" data-copy="${escapeHtml(turn.response)}">Kopieren</button>
           </div>
           <div class="assistant-content">
