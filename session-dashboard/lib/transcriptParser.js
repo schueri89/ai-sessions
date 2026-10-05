@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { calculateTurnCost } = require('./analytics');
-const { workspaceStorageDir } = require('./providers/copilot');
+const { workspaceStorageDir, parseJsonlChatSession } = require('./providers/copilot');
 
 function claudeDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -418,22 +418,7 @@ function parseCopilotTranscript(filePath, sessionId) {
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n').filter(Boolean);
 
-  let sessionObj = null;
-  let customTitle = '';
-
-  for (const line of lines) {
-    try {
-      const parsed = JSON.parse(line);
-      if (parsed.kind === 0 && parsed.v) {
-        sessionObj = parsed.v;
-      } else if (parsed.kind === 1 && parsed.k && parsed.k[0] === 'customTitle') {
-        customTitle = parsed.v;
-      } else if (parsed.kind === 2 && parsed.k && parsed.k[0] === 'requests' && sessionObj) {
-        if (!sessionObj.requests) sessionObj.requests = [];
-        sessionObj.requests = sessionObj.requests.concat(parsed.v);
-      }
-    } catch {}
-  }
+  const { sessionObj, customTitle } = parseJsonlChatSession(lines);
 
   if (!sessionObj) return null;
 

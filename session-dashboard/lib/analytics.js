@@ -6,9 +6,14 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { DatabaseSync } = require('node:sqlite');
+let DatabaseSync = null;
+try {
+  DatabaseSync = require('node:sqlite').DatabaseSync;
+} catch {
+  DatabaseSync = null;
+}
 const { resolveProject } = require('./project');
-const { workspaceStorageDir } = require('./providers/copilot');
+const { workspaceStorageDir, parseJsonlChatSession } = require('./providers/copilot');
 
 const BUNDLE_CACHE_TTL_MS = 20 * 1000;
 let cachedAnalyticsBundle = null;
@@ -169,6 +174,7 @@ function categorizeTool(toolName) {
 
 function loadAntigravityWorkspaceMap() {
   const map = new Map();
+  if (!DatabaseSync) return map;
   const dbPath = path.join(antigravityDir(), 'conversations.db');
   if (!fs.existsSync(dbPath)) return map;
   try {
@@ -415,21 +421,7 @@ function collectRawTurns(thirtyDaysStartMs) {
             const lines = content.split('\n').filter(Boolean);
             const sessionId = path.basename(f, '.jsonl');
 
-            let sessionObj = null;
-            let customTitle = '';
-            for (const line of lines) {
-              try {
-                const parsed = JSON.parse(line);
-                if (parsed.kind === 0 && parsed.v) {
-                  sessionObj = parsed.v;
-                } else if (parsed.kind === 1 && parsed.k && parsed.k[0] === 'customTitle') {
-                  customTitle = parsed.v;
-                } else if (parsed.kind === 2 && parsed.k && parsed.k[0] === 'requests' && sessionObj) {
-                  if (!sessionObj.requests) sessionObj.requests = [];
-                  sessionObj.requests = sessionObj.requests.concat(parsed.v);
-                }
-              } catch {}
-            }
+            const { sessionObj, customTitle } = parseJsonlChatSession(lines);
 
             if (sessionObj && Array.isArray(sessionObj.requests)) {
               const project = resolveProject({

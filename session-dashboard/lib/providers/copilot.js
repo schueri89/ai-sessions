@@ -90,6 +90,37 @@ function getWorkspacePath(hash, wsFolder) {
   workspacePathCache.set(hash, wsPath);
   return wsPath;
 }
+function parseJsonlChatSession(lines) {
+  let sessionObj = null;
+  let customTitle = '';
+  for (const line of lines) {
+    try {
+      const p = JSON.parse(line);
+      if (p.kind === 0 && p.v) {
+        sessionObj = p.v;
+      } else if (p.kind === 1 && p.k) {
+        if (p.k.length === 1 && p.k[0] === 'customTitle') {
+          customTitle = p.v;
+        } else if (p.k[0] === 'requests' && typeof p.k[1] === 'number' && sessionObj?.requests?.[p.k[1]]) {
+          const req = sessionObj.requests[p.k[1]];
+          if (p.k.length === 3) {
+            req[p.k[2]] = p.v;
+          }
+        }
+      } else if (p.kind === 2 && p.k) {
+        if (p.k.length === 1 && p.k[0] === 'requests' && sessionObj) {
+          if (!sessionObj.requests) sessionObj.requests = [];
+          sessionObj.requests = sessionObj.requests.concat(p.v);
+        } else if (p.k[0] === 'requests' && typeof p.k[1] === 'number' && p.k[2] === 'response' && sessionObj?.requests?.[p.k[1]]) {
+          const req = sessionObj.requests[p.k[1]];
+          if (!req.response) req.response = [];
+          req.response = req.response.concat(p.v);
+        }
+      }
+    } catch {}
+  }
+  return { sessionObj, customTitle };
+}
 
 function readJsonlSession(filePath, sessionId, wsPath) {
   try {
@@ -103,41 +134,44 @@ function readJsonlSession(filePath, sessionId, wsPath) {
     const lines = content.split('\n').filter(Boolean);
     if (lines.length === 0) return null;
 
-    let sessionObj = null;
-    let customTitle = '';
-
-    for (const line of lines) {
-      try {
-        const parsed = JSON.parse(line);
-        if (parsed.kind === 0 && parsed.v) {
-          sessionObj = parsed.v;
-        } else if (parsed.kind === 1 && parsed.k && parsed.k[0] === 'customTitle') {
-          customTitle = parsed.v;
-        } else if (parsed.kind === 2 && parsed.k && parsed.k[0] === 'requests' && sessionObj) {
-          if (!sessionObj.requests) sessionObj.requests = [];
-          sessionObj.requests = sessionObj.requests.concat(parsed.v);
-        }
-      } catch {}
-    }
-
+    const { sessionObj, customTitle } = parseJsonlChatSession(lines);
     if (!sessionObj) return null;
 
     const requests = sessionObj.requests || [];
+    const isPending = (sessionObj.pendingRequests && sessionObj.pendingRequests.length > 0);
+
+    // Filter empty sessions (e.g. simply switched to Copilot chat pane without interaction)
+    if (requests.length === 0 && !isPending) {
+      return null;
+    }
+
+    let lastPrompt = '';
+    for (let i = requests.length - 1; i >= 0; i--) {
+      const t = requests[i]?.message?.text;
+      if (t && cleanPrompt(t)) {
+        lastPrompt = cleanPrompt(t);
+        break;
+      }
+    }
+
+    // If there is no prompt, no custom title, and no pending work, skip empty session
+    if (!lastPrompt && !customTitle && !sessionObj.customTitle && !isPending) {
+      return null;
+    }
+
     const lastReq = requests.length > 0 ? requests[requests.length - 1] : null;
-    const lastPrompt = lastReq?.message?.text ? cleanPrompt(lastReq.message.text) : '';
     const title = customTitle || sessionObj.customTitle || (lastPrompt ? lastPrompt.slice(0, 50) : 'Copilot Chat');
     const cwd = wsPath || '';
     const project = resolveProject({ cwd, title, lastPrompt });
 
-    const isPending = (sessionObj.pendingRequests && sessionObj.pendingRequests.length > 0) ||
-                      (lastReq && lastReq.modelState && lastReq.modelState.completedAt === undefined);
+    const isRunning = isPending || (lastReq && lastReq.modelState && lastReq.modelState.completedAt === undefined);
     const hasPendingEdits = sessionObj.hasPendingEdits === true;
 
     let state = 'idle';
     let waitingFor = '';
     let activity = '';
 
-    if (isPending) {
+    if (isRunning) {
       state = 'busy';
       activity = 'Arbeitet…';
     } else if (hasPendingEdits) {
@@ -151,12 +185,14 @@ function readJsonlSession(filePath, sessionId, wsPath) {
     // Tokens & Model if available from last request metadata
     let tokens = null;
     let model = 'copilot';
-    if (lastReq) {
-      const meta = lastReq.result?.metadata;
-      if (meta?.resolvedModel) model = meta.resolvedModel;
-      else if (lastReq.modelId) model = lastReq.modelId;
-
-      if (meta?.promptTokens !== undefined || meta?.outputTokens !== undefined) {
+    for (let i = requests.length - 1; i >= 0; i--) {
+      const req = requests[i];
+      const meta = req.result?.metadata;
+      if (!model || model === 'copilot') {
+        if (meta?.resolvedModel) model = meta.resolvedModel;
+        else if (req.modelId) model = req.modelId;
+      }
+      if (!tokens && (meta?.promptTokens !== undefined || meta?.outputTokens !== undefined)) {
         const promptTok = Number(meta.promptTokens) || 0;
         const outTok = Number(meta.outputTokens) || 0;
         const total = promptTok + outTok;
@@ -167,6 +203,7 @@ function readJsonlSession(filePath, sessionId, wsPath) {
           percent: maxCtx > 0 ? Math.round((total / maxCtx) * 100) : 0
         };
       }
+      if (tokens && model !== 'copilot') break;
     }
 
     const session = {
@@ -207,10 +244,12 @@ async function readSessions() {
       const rows = db.prepare('SELECT * FROM sessions ORDER BY updated_at DESC').all();
       for (const r of rows) {
         if (!r.id) continue;
+        const summary = r.summary ? cleanPrompt(r.summary) : '';
+        if (!summary) continue; // Skip empty sessions in SQLite
         const sessionId = r.id;
         const cwd = r.cwd || '';
-        const title = r.summary ? cleanPrompt(r.summary).slice(0, 60) : 'Copilot Chat';
-        const lastPrompt = r.summary ? cleanPrompt(r.summary) : '';
+        const title = summary.slice(0, 60);
+        const lastPrompt = summary;
         const project = resolveProject({ cwd, title, lastPrompt });
         const updatedAt = r.updated_at ? new Date(r.updated_at).getTime() : 0;
         const createdAt = r.created_at ? new Date(r.created_at).getTime() : updatedAt;
@@ -287,5 +326,6 @@ module.exports = {
   copilotDir,
   dbPath,
   workspaceStorageDir,
+  parseJsonlChatSession,
   readSessions
 };

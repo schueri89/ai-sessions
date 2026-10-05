@@ -76,36 +76,42 @@ function readLiveSessions() {
   const live = [...bySession.values()];
   pruneTranscripts(new Set(live.map((s) => s.sessionId)));
 
-  return live.map((s) => {
-    const info = readTranscriptInfo(s.sessionId);
-    const title = info.title || s.registryName || s.sessionId.slice(0, 8);
-    const project = resolveProject({
-      cwd: s.cwd,
-      title,
-      lastPrompt: info.lastPrompt,
-      hintProject: info.project
-    });
-    return {
-      provider: 'claude',
-      sessionId: s.sessionId,
-      pid: s.pid,
-      cwd: s.cwd,
-      project,
-      registryName: s.registryName,
-      rawStatus: s.rawStatus,
-      waitingFor: s.waitingFor,
-      state: s.state,
-      startedAt: info.startedAt || s.startedAt,
-      statusUpdatedAt: s.state === 'busy' || s.state === 'waiting'
-        ? s.statusUpdatedAt
-        : (info.lastActivity || s.statusUpdatedAt),
-      title,
-      lastPrompt: info.lastPrompt,
-      rateLimit: info.rateLimit || null,
-      tokens: info.tokens || null,
-      activity: s.state === 'busy' ? (info.activity || 'Arbeitet…') : ''
-    };
-  });
+  return live
+    .map((s) => {
+      const info = readTranscriptInfo(s.sessionId);
+      // Filter out empty idle sessions (e.g. freshly opened terminal sitting idle without any prompt)
+      if (s.state === 'idle' && !info.lastPrompt && !info.title) {
+        return null;
+      }
+      const title = info.title || s.registryName || s.sessionId.slice(0, 8);
+      const project = resolveProject({
+        cwd: s.cwd,
+        title,
+        lastPrompt: info.lastPrompt,
+        hintProject: info.project
+      });
+      return {
+        provider: 'claude',
+        sessionId: s.sessionId,
+        pid: s.pid,
+        cwd: s.cwd,
+        project,
+        registryName: s.registryName,
+        rawStatus: s.rawStatus,
+        waitingFor: s.waitingFor,
+        state: s.state,
+        startedAt: info.startedAt || s.startedAt,
+        statusUpdatedAt: s.state === 'busy' || s.state === 'waiting'
+          ? s.statusUpdatedAt
+          : (info.lastActivity || s.statusUpdatedAt),
+        title,
+        lastPrompt: info.lastPrompt,
+        rateLimit: info.rateLimit || null,
+        tokens: info.tokens || null,
+        activity: s.state === 'busy' ? (info.activity || 'Arbeitet…') : ''
+      };
+    })
+    .filter(Boolean);
 }
 
 // Returns both live running sessions and historical/closed sessions.
@@ -121,6 +127,7 @@ async function readSessions() {
 
   const closed = historyEntries
     .filter((h) => !liveIds.has(h.sessionId))
+    .filter((h) => h.lastPrompt || h.title)
     .map((h) => ({
       provider: 'claude',
       sessionId: h.sessionId,
