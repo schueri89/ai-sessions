@@ -10,6 +10,9 @@ function applyThresholdBackground(item, percent, warnThresh, errThresh) {
   } else if (typeof percent === 'number' && percent >= warnThresh) {
     item.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
     item.color = new vscode.ThemeColor('statusBarItem.warningForeground');
+  } else if (typeof percent === 'number') {
+    item.backgroundColor = undefined;
+    item.color = new vscode.ThemeColor('charts.green');
   } else {
     item.backgroundColor = undefined;
     item.color = undefined;

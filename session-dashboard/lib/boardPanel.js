@@ -217,6 +217,35 @@ class BoardPanel {
     line-height: 1.4;
     box-sizing: border-box;
   }
+  #dashboard-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 70px 20px;
+    gap: 16px;
+    color: var(--vscode-descriptionForeground);
+  }
+  #dashboard-loader.hidden {
+    display: none !important;
+  }
+  .loader-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(128, 128, 128, 0.2);
+    border-top-color: var(--vscode-progressBar-background, #007acc);
+    border-radius: 50%;
+    animation: dashboard-spin 0.8s linear infinite;
+  }
+  @keyframes dashboard-spin {
+    to { transform: rotate(360deg); }
+  }
+  .loader-text {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--vscode-foreground);
+    opacity: 0.85;
+  }
   .board {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -258,6 +287,31 @@ class BoardPanel {
   .bookmarked .card { border-left-color: var(--vscode-charts-yellow, #e5c07b); }
   .idle .card { border-left-color: var(--vscode-charts-green); }
   .done .card { opacity: 0.6; }
+  .load-more-wrap {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .load-more-btn {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.3));
+    background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.15));
+    color: var(--vscode-button-secondaryForeground, inherit);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .load-more-btn:hover {
+    background: var(--vscode-button-secondaryHoverBackground, rgba(128, 128, 128, 0.25));
+    border-color: var(--vscode-focusBorder, #007acc);
+  }
   .mark-all-btn { float: right; font-size: 12px; padding: 2px 7px; }
   .card-header {
     display: flex;
@@ -394,6 +448,24 @@ class BoardPanel {
   .project-chip:hover { background: var(--vscode-button-secondaryHoverBackground, rgba(128, 128, 128, 0.2)); }
   .project-chip.active { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border-color: transparent; font-weight: 600; }
   .project-chip .count { opacity: 0.8; font-size: 12px; font-weight: 600; }
+  .project-chip-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    padding: 3px 9px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px dashed var(--vscode-widget-border, rgba(128, 128, 128, 0.4));
+    background: transparent;
+    color: var(--vscode-textLink-foreground, #3794ff);
+    transition: all 0.15s ease;
+    font-weight: 500;
+  }
+  .project-chip-more:hover {
+    background: var(--vscode-button-secondaryHoverBackground, rgba(128, 128, 128, 0.2));
+    border-style: solid;
+  }
   .card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 4px 0 5px; }
   .project-badge {
     display: inline-flex;
@@ -907,6 +979,11 @@ class BoardPanel {
   <div class="quota-strip" id="quota-strip" style="display: none;"></div>
 </header>
 
+<div id="dashboard-loader">
+  <div class="loader-spinner"></div>
+  <div class="loader-text">Lade Sessions & Quotas...</div>
+</div>
+
 <div class="board" id="board"></div>
 
 <div class="analyse-view" id="analyse-view" style="display: none;">
@@ -1080,6 +1157,7 @@ class BoardPanel {
   let currentViewMode = 'board';
   let currentAnalyseFilter = 'all';
   let currentAnalyseScope = 'today';
+  const expandedColumns = new Set();
 
   const modeBadgeBoard = document.getElementById('mode-badge-board');
   const btnModeBoard = document.getElementById('btn-mode-board');
@@ -1117,13 +1195,14 @@ class BoardPanel {
   }
 
   const projectChips = document.getElementById('project-chips');
+  let isProjectChipsExpanded = false;
   function updateProjectChipsUI(currentProjectFilter, counts) {
     if (!projectChips) return;
     projectChips.replaceChildren();
 
     const byProj = (counts && counts.byProject) || {};
-    const projEntries = Object.entries(byProj).sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base', numeric: true }) || a[0].localeCompare(b[0]));
-    if (projEntries.length === 0) {
+    const allEntries = Object.entries(byProj);
+    if (allEntries.length === 0) {
       projectChips.style.display = 'none';
       return;
     }
@@ -1140,7 +1219,38 @@ class BoardPanel {
     });
     projectChips.append(allChip);
 
-    for (const [proj, cnt] of projEntries) {
+    const sortAlpha = (entries) => {
+      return entries.slice().sort((a, b) =>
+        a[0].localeCompare(b[0], undefined, { sensitivity: 'base', numeric: true }) || a[0].localeCompare(b[0])
+      );
+    };
+
+    const maxVisible = 5;
+    const hasMore = allEntries.length > maxVisible;
+    let visibleEntries;
+
+    if (hasMore && !isProjectChipsExpanded) {
+      // Top 5 nach Session-Anzahl auswählen, aktive Auswahl ggf. ergänzen
+      const byCount = allEntries.slice().sort((a, b) => {
+        const countDiff = b[1] - a[1];
+        if (countDiff !== 0) return countDiff;
+        return a[0].localeCompare(b[0], undefined, { sensitivity: 'base', numeric: true }) || a[0].localeCompare(b[0]);
+      });
+      const topProjects = byCount.slice(0, maxVisible);
+      if (currentProjectFilter && currentProjectFilter !== 'all' && !topProjects.some(([p]) => p === currentProjectFilter)) {
+        const found = allEntries.find(([p]) => p === currentProjectFilter);
+        if (found) {
+          topProjects.push(found);
+        }
+      }
+      // Top 5 auch in eingeklapptem Zustand alphabetisch sortieren
+      visibleEntries = sortAlpha(topProjects);
+    } else {
+      // Ausgeklappt (oder <= 5): Alle Projekte komplett alphabetisch A-Z sortieren
+      visibleEntries = sortAlpha(allEntries);
+    }
+
+    for (const [proj, cnt] of visibleEntries) {
       const isActive = currentProjectFilter === proj;
       const chip = el('button', 'project-chip' + (isActive ? ' active' : ''));
       chip.append(proj + ' ', el('span', 'count', String(cnt)));
@@ -1150,6 +1260,22 @@ class BoardPanel {
         vscode.postMessage({ action: 'setProjectFilter', filter: nextFilter });
       });
       projectChips.append(chip);
+    }
+
+    if (hasMore) {
+      const hiddenCount = allEntries.length - visibleEntries.length;
+      const moreBtn = el(
+        'button',
+        'project-chip-more',
+        isProjectChipsExpanded ? 'weniger ▴' : ('+' + (hiddenCount > 0 ? hiddenCount : (allEntries.length - maxVisible)) + ' mehr ▾')
+      );
+      moreBtn.title = isProjectChipsExpanded ? 'Projekt-Filter einklappen' : 'Alle weiteren Projekt-Filter anzeigen';
+      moreBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        isProjectChipsExpanded = !isProjectChipsExpanded;
+        updateProjectChipsUI(currentProjectFilter, counts);
+      });
+      projectChips.append(moreBtn);
     }
   }
 
@@ -1560,7 +1686,13 @@ class BoardPanel {
       if (col.sessions.length === 0) {
         column.append(el('div', 'empty', terms && terms.length > 0 ? 'keine Treffer' : 'keine'));
       }
-      for (const s of col.sessions) {
+
+      const isExpanded = expandedColumns.has(col.state);
+      const limit = isExpanded ? Infinity : 20;
+      const visibleSessions = col.sessions.slice(0, limit);
+      const remainingCount = col.sessions.length - visibleSessions.length;
+
+      for (const s of visibleSessions) {
         const card = el('div', 'card' + (s.rateLimit ? ' rate-limited' : ''));
         card.title = 'Chat öffnen';
         const cardHeader = el('div', 'card-header');
@@ -1690,6 +1822,20 @@ class BoardPanel {
         card.addEventListener('click', () => vscode.postMessage({ action: 'open', sessionId: s.sessionId, provider: s.provider }));
         column.append(card);
       }
+
+      if (remainingCount > 0) {
+        const loadMoreWrap = el('div', 'load-more-wrap');
+        const loadMoreBtn = el('button', 'load-more-btn', 'Alle restlichen ' + remainingCount + ' Sessions laden');
+        loadMoreBtn.title = 'Alle ' + remainingCount + ' weiteren Sessions in „' + col.label + '“ sofort laden';
+        loadMoreBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          expandedColumns.add(col.state);
+          applySearchAndRender();
+        });
+        loadMoreWrap.append(loadMoreBtn);
+        column.append(loadMoreWrap);
+      }
+
       board.append(column);
     }
   }
@@ -2128,6 +2274,10 @@ function renderProjectsTable(projects) {
   window.addEventListener('message', (ev) => {
     if (!ev.data) return;
     if (ev.data.type === 'render') {
+      const loader = document.getElementById('dashboard-loader');
+      if (loader && !loader.classList.contains('hidden')) {
+        loader.classList.add('hidden');
+      }
       cachedColumns = ev.data.columns || [];
       cachedQuota = ev.data.quota || null;
       cachedAnalytics = ev.data.analytics || null;

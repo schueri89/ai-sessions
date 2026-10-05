@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",

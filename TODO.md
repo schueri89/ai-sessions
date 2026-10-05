@@ -5,13 +5,9 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] 3.Tab für Historie aller Sessions mit mehr Infos in Form einer Tabelle (analog zum anderen Plugin)
-- [ ] Status Bar: ich würde gerne bei den Usage-Boxen für Werte unter 80% den Hintergrnd grün anzeigen. dann haben alle Werte eine Farbe
-- [ ] Dashboard: Ladeanimation beim Starten/Laden des Dashboards
-- [ ] Dashboard: bei der Kachel mit aktivem Limit sollte der Text "Limit bis XX Uhr" so gebaut sein, dass nur die uhrzeit kommt, wenn das Limit innerhalb von 24 Stunden abläuft. bei mehr als 24 Stunden sollte noch der Wochenag (in Kurzform) genannt werden
-- [ ] Dashboard: Filter nach Projekt so umbauen, dass nur 4-5 Badges (mit den meisten Sessions?) sichtbar sind, alle weiteren können per Klick auf "mehr" aufgeklappt werden
-- [ ] Dashboard: max. 20 Sessions pro Spalte laden, alle weiteren erst mit Klick auf einen Button laden
 
 ## Erledigt
+- [x] session-dashboard: UI-Polish v0.28.0 (Status Bar: grüne Quota-Schrift < 80%; Dashboard: Ladeanimation beim Starten; Limit-Text: Wochentag bei > 24h; Projekt-Filter: Top 5 Badges + Ausklappen; Spalten-Pagination: max. 20 Sessions initial + Button zum sofortigen Laden aller restlichen) (Plan: `.agents/plans/2026-10-05_session-dashboard-ui-polish-loading-limits-pagination.md`) — 05.10.2026
 - [x] session-dashboard: GitHub Copilot Integration v0.27.0 (Chat- & Agent-Sessions aus workspaceStorage & session-store.db, Stufe 1–4 Analytics, Timeline, Tool-Breakdown, Read-Only Transcript Viewer, Status Bar & Filter) (Plan: `.agents/plans/2026-10-04_session-dashboard-copilot-integration.md`) — 05.10.2026
 - [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 4 v0.26.0: Read-Only Viewer / Session-Detailansicht für Claude Code & Antigravity, Turn-Verlauf mit Prompts, Thinking, Tool-Aufrufen & Antworten, Suche & Filter, Einstieg via Card-Button [👁️ Details] & TreeView-Menü) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-4.md`) — 04.10.2026
 - [x] session-dashboard: Analyse & Verbrauchsübersicht (Stufe 3 v0.25.0: Tool- & Content-Breakdown nach Kategorien [Read, Edit, Bash, Search, Web, Tasks], segmentierter Token-Balken [Input, Output/Thinking, Cache Read/Write], responsives 2-Spalten-Layout + Full-Width-Tabelle für Projekte) (Plan: `.agents/plans/2026-10-04_session-dashboard-analyse-stufe-3.md`) — 04.10.2026

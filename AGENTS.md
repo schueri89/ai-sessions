@@ -17,3 +17,5 @@ Alle fachlichen Regeln, Datenstrukturen und Architekturvorgaben stehen in
 - **Commit & Push**: Niemals eigenmächtig committen oder pushen! Vor jedem `git commit` und vor
   jedem `git push` zwingend die explizite Freigabe des Benutzers einholen. Änderungen
   ausschließlich in diesem Projektverzeichnis ausführen und pro Projekt separat committen.
+- **Dateierstellung & Race-Condition-Schutz**: Neue Dateien immer strikt synchron mit sofortigem
+  Dateigrößen-Check schreiben. Tabs/Links erst öffnen, wenn der Dateiinhalt stabil persistiert ist.

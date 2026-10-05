@@ -40,6 +40,19 @@ function formatTime(ms) {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())} Uhr`;
 }
 
+function formatLimitReset(ms, now = Date.now()) {
+  if (!ms) return '';
+  const d = new Date(ms);
+  if (isNaN(d.getTime())) return '';
+  const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())} Uhr`;
+  const diff = ms - now;
+  if (diff <= 24 * 60 * 60 * 1000) {
+    return time;
+  }
+  const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  return `${days[d.getDay()]} ${time}`;
+}
+
 function relativeTime(ms, now = Date.now()) {
   if (!ms) return '';
   const minutes = Math.floor((now - ms) / 60000);
@@ -67,7 +80,7 @@ function describe(session, now = Date.now()) {
       return '⚠️ Limit vorbei · Bereit zum Fortsetzen';
     }
     if (session.rateLimit.resetsAt) {
-      return `⏳ Limit bis ${formatTime(session.rateLimit.resetsAt)}`;
+      return `⏳ Limit bis ${formatLimitReset(session.rateLimit.resetsAt, now)}`;
     }
     return '⏳ Session-Limit erreicht';
   }
@@ -150,4 +163,4 @@ function friendlyModel(m) {
   return m.replace(/^claude-/, '');
 }
 
-module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, formatTime, relativeTime, describe, formatTokens, friendlyModel, resolveMaxContext };
+module.exports = { STATES, STATE_ORDER, waitingReason, formatDateTime, formatTime, formatLimitReset, relativeTime, describe, formatTokens, friendlyModel, resolveMaxContext };
