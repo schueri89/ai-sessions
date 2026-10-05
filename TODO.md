@@ -5,12 +5,13 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] 3.Tab für Historie aller Sessions mit mehr Infos in Form einer Tabelle (analog zum anderen Plugin)
-- [ ] Sound abspielen, wenn Session fertig, Rückfrage besteht oder Limit wieder verfügbar ist - analog zum jetzigen Plugin "Ckaude Notifier". für Antigravity gibt es sogar eine Extra Lösung mit Hook o.ä. (Plan: `.agents/plans/2026-10-05_session-dashboard-sound-notifications.md`)
 - [ ] Dashboard: Usage Card für Copilot möglich?
 - [ ] Dashboard: Copilot Kachel -> Klick darauf öffnet nicht den Chat direkt in Copilot!
 - [ ] Bugfix: ich kann auf dem Dashboard die Copilot Session nicht als erledigt markieren
+- [ ] Antigravity Sound-Hooks in .agents/hooks.json und .agents/tools/notify-sound.ps1 komplett löschen (aktuell temporär deaktiviert mit "enabled": false)
 
 ## Erledigt
+- [x] session-dashboard: Sound-Benachrichtigungen v0.29.0 (Akustische Benachrichtigungen bei Session fertig [tada], Rückfrage [chimes] und Limit wieder verfügbar [chimes]; native Windows/macOS/Linux Audioausgabe; Master-Schalter & Provider-Schalter; WAL-Dateiwächter für Subsekunden-Latenz; Mute-Icon in Dashboard-Toolbar; Befehle zum Vorhören und Umschalten) (Plan: `.agents/plans/2026-10-05_session-dashboard-sound-notifications.md`) — 05.10.2026
 - [x] session-dashboard: Leere Chats für Copilot, Claude Code & Antigravity filtern v0.28.1 (Leere Idle-Sessions wie "root-3d" ohne Prompts/Turns automatisch ignorieren; saubere Delta-Rekonstruktion für Copilot) — 05.10.2026
 - [x] session-dashboard: UI-Polish v0.28.0 (Status Bar: grüne Quota-Schrift < 80%; Dashboard: Ladeanimation beim Starten; Limit-Text: Wochentag bei > 24h; Projekt-Filter: Top 5 Badges + Ausklappen; Spalten-Pagination: max. 20 Sessions initial + Button zum sofortigen Laden aller restlichen) (Plan: `.agents/plans/2026-10-05_session-dashboard-ui-polish-loading-limits-pagination.md`) — 05.10.2026
 - [x] session-dashboard: GitHub Copilot Integration v0.27.0 (Chat- & Agent-Sessions aus workspaceStorage & session-store.db, Stufe 1–4 Analytics, Timeline, Tool-Breakdown, Read-Only Transcript Viewer, Status Bar & Filter) (Plan: `.agents/plans/2026-10-04_session-dashboard-copilot-integration.md`) — 05.10.2026
