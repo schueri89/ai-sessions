@@ -2,7 +2,7 @@
   "name": "session-dashboard",
   "displayName": "AI Session Dashboard",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -150,6 +150,18 @@
         "title": "Transkript ansehen (Read-Only)",
         "category": "Session Dashboard",
         "icon": "$(book)"
+      },
+      {
+        "command": "sessionDashboard.toggleSound",
+        "title": "Sounds ein-/ausschalten",
+        "category": "Session Dashboard",
+        "icon": "$(unmute)"
+      },
+      {
+        "command": "sessionDashboard.previewSound",
+        "title": "Sound vorhören...",
+        "category": "Session Dashboard",
+        "icon": "$(megaphone)"
       }
     ],
     "menus": {
@@ -311,12 +323,62 @@
           "minimum": 1,
           "maximum": 100,
           "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon rot hinterlegt wird (Kritisch/Limit)."
+        },
+        "sessionDashboard.sound.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Akustische Benachrichtigungen für Session-Ereignisse aktivieren."
+        },
+        "sessionDashboard.sound.providers.claude": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sounds für Claude-Code-Sessions abspielen."
+        },
+        "sessionDashboard.sound.providers.antigravity": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sounds für Google-Antigravity-Sessions abspielen."
+        },
+        "sessionDashboard.sound.providers.copilot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sounds für GitHub-Copilot-Sessions abspielen."
+        },
+        "sessionDashboard.sound.taskCompleted.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sound abspielen, wenn eine Session eine Aufgabe beendet hat."
+        },
+        "sessionDashboard.sound.taskCompleted.sound": {
+          "type": "string",
+          "default": "tada",
+          "description": "Sound beim Beenden einer Aufgabe (Windows: tada, notify etc. / macOS: Hero, Glass etc.)."
+        },
+        "sessionDashboard.sound.needsInput.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sound abspielen, wenn eine Session auf Benutzereingabe oder Rückfrage wartet."
+        },
+        "sessionDashboard.sound.needsInput.sound": {
+          "type": "string",
+          "default": "chimes",
+          "description": "Sound bei Rückfrage / benötigter Zustimmung."
+        },
+        "sessionDashboard.sound.limitAvailable.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sound abspielen, wenn ein Rate-Limit abgelaufen ist oder Kontingent wieder verfügbar ist."
+        },
+        "sessionDashboard.sound.limitAvailable.sound": {
+          "type": "string",
+          "default": "chimes",
+          "description": "Sound wenn Kontingent/Limit wieder frei ist (Standard: chimes, wie bei Rückfrage)."
         }
       }
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js",
+    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js",
     "package": "vsce package --skip-license --allow-missing-repository"
   },
   "devDependencies": {

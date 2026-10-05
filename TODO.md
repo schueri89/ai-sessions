@@ -7,7 +7,6 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] 3.Tab für Historie aller Sessions mit mehr Infos in Form einer Tabelle (analog zum anderen Plugin)
 - [ ] Sound abspielen, wenn Session fertig, Rückfrage besteht oder Limit wieder verfügbar ist - analog zum jetzigen Plugin "Ckaude Notifier". für Antigravity gibt es sogar eine Extra Lösung mit Hook o.ä. (Plan: `.agents/plans/2026-10-05_session-dashboard-sound-notifications.md`)
 - [ ] Dashboard: Usage Card für Copilot möglich?
-- [ ] Dashboard: Icon Stummschaltung (verschiedene Icons oder andere Button-Farbe für stumm/nicht stumm!)
 - [ ] Dashboard: Copilot Kachel -> Klick darauf öffnet nicht den Chat direkt in Copilot!
 - [ ] Bugfix: ich kann auf dem Dashboard die Copilot Session nicht als erledigt markieren
 

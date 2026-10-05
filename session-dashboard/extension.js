@@ -9,6 +9,7 @@ const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
 const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
+const { SoundNotifier } = require('./lib/soundNotifier');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 
 const POLL_MS = 5000;
@@ -181,6 +182,8 @@ async function openSession(info) {
 
 function activate(context) {
   const model = new SessionModel(context);
+  const soundNotifier = new SoundNotifier(context);
+  model.soundNotifier = soundNotifier;
   const tree = new SessionTreeProvider(model);
   const board = new BoardPanel(model);
   const statusBar = new StatusBarWidget(model);
@@ -208,6 +211,7 @@ function activate(context) {
     running = true;
     try {
       const changed = await model.refresh();
+      soundNotifier.evaluate(model.sessions, model.quota);
       if (changed || force === true) {
         tree.refresh();
         board.update();
@@ -270,6 +274,9 @@ function activate(context) {
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('sessionDashboard')) {
         statusBar.update();
+      }
+      if (e.affectsConfiguration('sessionDashboard.sound')) {
+        board.update();
       }
     })
   );
@@ -586,7 +593,21 @@ function activate(context) {
         }
       }
     }),
-    vscode.commands.registerCommand('sessionDashboard.refresh', () => update(true))
+    vscode.commands.registerCommand('sessionDashboard.refresh', () => update(true)),
+    vscode.commands.registerCommand('sessionDashboard.toggleSound', async () => {
+      await soundNotifier.toggleSound();
+      board.update();
+    }),
+    vscode.commands.registerCommand('sessionDashboard.previewSound', async () => {
+      const pick = await vscode.window.showQuickPick([
+        { label: '$(check) Session fertig (taskCompleted)', eventType: 'taskCompleted', description: 'Standard: tada' },
+        { label: '$(question) Rückfrage besteht (needsInput)', eventType: 'needsInput', description: 'Standard: chimes' },
+        { label: '$(zap) Limit wieder verfügbar (limitAvailable)', eventType: 'limitAvailable', description: 'Standard: chimes' }
+      ], { placeHolder: 'Sound auswählen zum Vorhören' });
+      if (pick) {
+        soundNotifier.previewSound(pick.eventType);
+      }
+    })
   );
 
   update(true);

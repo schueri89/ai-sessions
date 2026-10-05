@@ -2,6 +2,8 @@
 
 // Aggregator for all session providers (Claude Code, Google Antigravity).
 
+const fs = require('fs');
+const path = require('path');
 const claude = require('./providers/claude');
 const antigravity = require('./providers/antigravity');
 const copilot = require('./providers/copilot');
@@ -23,9 +25,13 @@ function watchTargets() {
   } catch {}
   try {
     targets.push(antigravity.dbPath());
+    const agWal = path.join(antigravity.antigravityDir(), 'conversation_summaries.db-wal');
+    if (fs.existsSync(agWal)) targets.push(agWal);
   } catch {}
   try {
     targets.push(copilot.dbPath());
+    const cpWal = path.join(copilot.copilotDir(), 'session-store.db-wal');
+    if (fs.existsSync(cpWal)) targets.push(cpWal);
   } catch {}
   return targets;
 }

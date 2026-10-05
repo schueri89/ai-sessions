@@ -64,6 +64,10 @@ class BoardPanel {
         });
         return;
       }
+      if (msg && msg.action === 'toggleSound') {
+        vscode.commands.executeCommand('sessionDashboard.toggleSound');
+        return;
+      }
       if (msg && msg.action === 'toggleBookmark') {
         vscode.commands.executeCommand('sessionDashboard.toggleBookmark', msg.sessionId);
         return;
@@ -195,7 +199,8 @@ class BoardPanel {
       viewMode: this.viewMode,
       analyseFilter: this.analyseFilter,
       analyseScope: this.analyseScope,
-      analytics
+      analytics,
+      soundEnabled: vscode.workspace.getConfiguration('sessionDashboard.sound').get('enabled', true)
     });
   }
 
@@ -695,6 +700,22 @@ class BoardPanel {
   .mode-tab-btn:hover { opacity: 1; background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.15)); }
   .mode-tab-btn.active { opacity: 1; font-weight: 600; background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
   .mode-badge { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: rgba(128, 128, 128, 0.25); color: inherit; font-weight: 600; }
+  .toolbar-actions { display: inline-flex; align-items: center; gap: 8px; }
+  .sound-toggle-btn {
+    background: rgba(128, 128, 128, 0.12);
+    border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.25));
+    border-radius: 4px;
+    padding: 6px 11px;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .sound-toggle-btn:hover { background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2)); }
+  .sound-toggle-btn.muted { opacity: 0.7; background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.3); }
 
   /* Analyse View Styles */
   .analyse-view { display: flex; flex-direction: column; gap: 16px; width: 100%; }
@@ -946,6 +967,9 @@ class BoardPanel {
         📊 Analyse & Verbrauch <span class="mode-badge" style="background: rgba(0, 122, 204, 0.35); color: #70a9ff;">Neu</span>
       </button>
     </div>
+    <div class="toolbar-actions">
+      <button class="sound-toggle-btn" id="btn-sound-toggle" title="Sounds aktiv (Klicken zum Stummschalten)">🔊</button>
+    </div>
   </div>
 
   <div id="board-controls-wrap">
@@ -1171,6 +1195,13 @@ class BoardPanel {
   const searchInput = document.getElementById('search-input');
   const searchClear = document.getElementById('search-clear');
   const searchStatus = document.getElementById('search-status');
+
+  const btnSoundToggle = document.getElementById('btn-sound-toggle');
+  if (btnSoundToggle) {
+    btnSoundToggle.addEventListener('click', () => {
+      vscode.postMessage({ action: 'toggleSound' });
+    });
+  }
 
   const filterBtns = document.querySelectorAll('.filter-btn');
   filterBtns.forEach((btn) => {
@@ -2291,6 +2322,13 @@ function renderProjectsTable(projects) {
       }
       if (modeBadgeBoard) {
         modeBadgeBoard.textContent = ev.data.counts ? (ev.data.counts.all || 0) : 0;
+      }
+      if (btnSoundToggle && typeof ev.data.soundEnabled === 'boolean') {
+        btnSoundToggle.textContent = ev.data.soundEnabled ? '🔊' : '🔇';
+        btnSoundToggle.classList.toggle('muted', !ev.data.soundEnabled);
+        btnSoundToggle.title = ev.data.soundEnabled
+          ? 'Sounds aktiv (Klicken zum Stummschalten)'
+          : 'Sounds stummgeschaltet (Klicken zum Aktivieren)';
       }
       updateFilterUI(ev.data.filter, ev.data.counts);
       updateProjectChipsUI(ev.data.projectFilter, ev.data.counts);
