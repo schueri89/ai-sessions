@@ -9,8 +9,11 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Dashboard: Copilot Kachel -> Klick darauf öffnet nicht den Chat direkt in Copilot!
 - [ ] Bugfix: ich kann auf dem Dashboard die Copilot Session nicht als erledigt markieren
 - [ ] Antigravity Sound-Hooks in .agents/hooks.json und .agents/tools/notify-sound.ps1 komplett löschen (aktuell temporär deaktiviert mit "enabled": false)
+- [ ] vsix Dateien in einen Unterordner packen
+- [ ] Dashboard Erledigt Spalte: bei mehr als 5 Einträgen, "Alles erledigen" Button integrieren
 
 ## Erledigt
+- [x] session-dashboard: Geister-Zustände & Tool-Freigaben für Copilot korrigiert v0.29.1 (Alte unvollständige Sessions > 30 Min automatisch idle statt dauerhaft "Arbeitet…"; modelState 4 als "Wartet auf dich" / Rückfrage erkannt inkl. Needs-Input-Sound; Frische-Prüfung applyFreshness) — 06.10.2026
 - [x] session-dashboard: Sound-Benachrichtigungen v0.29.0 (Akustische Benachrichtigungen bei Session fertig [tada], Rückfrage [chimes] und Limit wieder verfügbar [chimes]; native Windows/macOS/Linux Audioausgabe; Master-Schalter & Provider-Schalter; WAL-Dateiwächter für Subsekunden-Latenz; Mute-Icon in Dashboard-Toolbar; Befehle zum Vorhören und Umschalten) (Plan: `.agents/plans/2026-10-05_session-dashboard-sound-notifications.md`) — 05.10.2026
 - [x] session-dashboard: Leere Chats für Copilot, Claude Code & Antigravity filtern v0.28.1 (Leere Idle-Sessions wie "root-3d" ohne Prompts/Turns automatisch ignorieren; saubere Delta-Rekonstruktion für Copilot) — 05.10.2026
 - [x] session-dashboard: UI-Polish v0.28.0 (Status Bar: grüne Quota-Schrift < 80%; Dashboard: Ladeanimation beim Starten; Limit-Text: Wochentag bei > 24h; Projekt-Filter: Top 5 Badges + Ausklappen; Spalten-Pagination: max. 20 Sessions initial + Button zum sofortigen Laden aller restlichen) (Plan: `.agents/plans/2026-10-05_session-dashboard-ui-polish-loading-limits-pagination.md`) — 05.10.2026

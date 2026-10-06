@@ -18,6 +18,52 @@ const workspacePathCache = new Map();
 let cachedDb = null;
 let lastDbMtime = 0;
 
+const BUSY_MAX_AGE_MS = 30 * 60 * 1000;
+const WAITING_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+
+function applyFreshness(session) {
+  if (!session) return session;
+  const age = Date.now() - (session.lastActivityAt || 0);
+
+  if (session.liveState === 'needsInput' && age <= WAITING_MAX_AGE_MS) {
+    return {
+      ...session,
+      state: 'waiting',
+      rawStatus: 'waiting',
+      waitingFor: 'Rückfrage',
+      activity: ''
+    };
+  }
+
+  if (session.liveState === 'busy' && age <= BUSY_MAX_AGE_MS) {
+    return {
+      ...session,
+      state: 'busy',
+      rawStatus: 'busy',
+      waitingFor: '',
+      activity: 'Arbeitet…'
+    };
+  }
+
+  if (session.hasPendingEdits) {
+    return {
+      ...session,
+      state: 'waiting',
+      rawStatus: 'waiting',
+      waitingFor: 'Review/Freigabe',
+      activity: ''
+    };
+  }
+
+  return {
+    ...session,
+    state: 'idle',
+    rawStatus: 'idle',
+    waitingFor: '',
+    activity: ''
+  };
+}
+
 function codeUserDataDir() {
   if (process.platform === 'win32') {
     return process.env.APPDATA ? path.join(process.env.APPDATA, 'Code', 'User') : path.join(os.homedir(), 'AppData', 'Roaming', 'Code', 'User');
@@ -127,7 +173,7 @@ function readJsonlSession(filePath, sessionId, wsPath) {
     const st = fs.statSync(filePath);
     const cached = sessionFileCache.get(filePath);
     if (cached && cached.mtimeMs === st.mtimeMs) {
-      return cached.session;
+      return applyFreshness(cached.session);
     }
 
     const content = fs.readFileSync(filePath, 'utf8');
@@ -164,20 +210,27 @@ function readJsonlSession(filePath, sessionId, wsPath) {
     const cwd = wsPath || '';
     const project = resolveProject({ cwd, title, lastPrompt });
 
-    const isRunning = isPending || (lastReq && lastReq.modelState && lastReq.modelState.completedAt === undefined);
-    const hasPendingEdits = sessionObj.hasPendingEdits === true;
+    // Determine potential live state:
+    // modelState.value: 0=pending, 1=completed, 2=cancelled, 3=failed, 4=needsInput
+    const isNeedsInput = Boolean(
+      lastReq &&
+      lastReq.modelState &&
+      lastReq.modelState.value === 4 &&
+      lastReq.modelState.completedAt === undefined
+    );
 
-    let state = 'idle';
-    let waitingFor = '';
-    let activity = '';
+    const isRunning = !isNeedsInput && Boolean(
+      isPending || (lastReq && lastReq.modelState && lastReq.modelState.completedAt === undefined)
+    );
 
-    if (isRunning) {
-      state = 'busy';
-      activity = 'Arbeitet…';
-    } else if (hasPendingEdits) {
-      state = 'waiting';
-      waitingFor = 'Review/Freigabe';
+    let liveState = '';
+    if (isNeedsInput) {
+      liveState = 'needsInput';
+    } else if (isRunning) {
+      liveState = 'busy';
     }
+
+    const hasPendingEdits = sessionObj.hasPendingEdits === true;
 
     const startedAt = sessionObj.creationDate || st.birthtimeMs || st.mtimeMs;
     const statusUpdatedAt = lastReq?.modelState?.completedAt || st.mtimeMs;
@@ -213,22 +266,25 @@ function readJsonlSession(filePath, sessionId, wsPath) {
       cwd,
       project,
       registryName: sessionObj.responderUsername || 'GitHub Copilot',
-      rawStatus: state,
-      waitingFor,
-      state,
+      rawStatus: 'idle',
+      waitingFor: '',
+      state: 'idle',
       startedAt,
       statusUpdatedAt,
       title,
       lastPrompt,
-      activity,
+      activity: '',
       workspaces: cwd ? [cwd] : [],
       rateLimit: null,
       tokens,
-      filePath
+      filePath,
+      liveState,
+      lastActivityAt: st.mtimeMs,
+      hasPendingEdits
     };
 
     sessionFileCache.set(filePath, { mtimeMs: st.mtimeMs, session });
-    return session;
+    return applyFreshness(session);
   } catch {
     return null;
   }
@@ -327,5 +383,9 @@ module.exports = {
   dbPath,
   workspaceStorageDir,
   parseJsonlChatSession,
-  readSessions
+  readSessions,
+  readJsonlSession,
+  applyFreshness,
+  BUSY_MAX_AGE_MS,
+  WAITING_MAX_AGE_MS
 };
