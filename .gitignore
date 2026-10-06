@@ -6,3 +6,4 @@
 # Build-Ausgaben der VS-Code-Extensions (session-dashboard u. a.).
 node_modules/
 *.vsix
+vsix/

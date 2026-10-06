@@ -1,5 +1,7 @@
 node_modules/**
+vsix/**
 *.vsix
+**/*.vsix
 package-lock.json
 scratch/**
 *.png

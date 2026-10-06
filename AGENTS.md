@@ -19,3 +19,8 @@ Alle fachlichen Regeln, Datenstrukturen und Architekturvorgaben stehen in
   ausschließlich in diesem Projektverzeichnis ausführen und pro Projekt separat committen.
 - **Dateierstellung & Race-Condition-Schutz**: Neue Dateien immer strikt synchron mit sofortigem
   Dateigrößen-Check schreiben. Tabs/Links erst öffnen, wenn der Dateiinhalt stabil persistiert ist.
+- **VSIX-Dateien & Unterordner**: VSIX-Pakete von VS-Code-Extensions (`session-dashboard` etc.)
+  gehören ausnahmslos in den Unterordner `vsix/` und niemals in das Hauptverzeichnis der Extension.
+  Paketierung erfolgt über `npm run package` (bzw. `vsce package ... --out vsix/`). Bei Installation
+  oder Verweisen ist entsprechend der Pfad `vsix/<dateiname>.vsix` zu nutzen. In `.vscodeignore`
+  und `.gitignore` sind `vsix/` sowie `**/*.vsix` stets ausgeschlossen.
