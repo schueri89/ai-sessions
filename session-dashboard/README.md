@@ -1,6 +1,6 @@
-# AI Session Dashboard (Claude Code & Antigravity)
+# AI Session Dashboard (Claude Code, Antigravity & GitHub Copilot)
 
-VS-Code-Extension, die alle laufenden Claude-Code- und Antigravity-Sessions
+VS-Code-Extension, die alle laufenden Sessions von Claude Code, Antigravity und GitHub Copilot
 auf einen Blick zeigt:
 
 | Gruppe | Bedeutung |
@@ -38,7 +38,13 @@ Nur lesend, aus den lokalen Konfigurations- und Datenordnern:
   und Erkennung offener Rückfragen (`ask_question`).
 - Geöffnet wird der Chat über den Befehl `antigravity.openConversation` der Antigravity-Erweiterung.
 
-Beide Schnittstellen nutzen interne, undokumentierte Wege. Hintergrund und Belege:
+### GitHub Copilot (VS-Code-Benutzerdaten):
+- `globalStorage/github.copilot-chat/session-store.db` — SQLite-Sessionspeicher der Copilot-Chats.
+- `workspaceStorage/<hash>/chatSessions/` — Chat- und Agent-Sessions je Workspace, für Live-Zustand
+  und Verlauf.
+- Hintergrund: `../.agents/plans/2026-10-04_session-dashboard-copilot-integration.md`.
+
+Alle drei Schnittstellen nutzen interne, undokumentierte Wege. Hintergrund und Belege:
 `../.agents/plans/2026-10-03_session-dashboard.md` und `../.agents/plans/2026-10-03_session-dashboard-antigravity.md`.
 
 ## Bauen und installieren
@@ -47,8 +53,8 @@ Beide Schnittstellen nutzen interne, undokumentierte Wege. Hintergrund und Beleg
 cd tools/session-dashboard
 npm install
 npm run check      # Syntaxprüfung
-npm run package    # erzeugt session-dashboard-<version>.vsix
-code --install-extension session-dashboard-<version>.vsix
+npm run package    # erzeugt vsix/session-dashboard-<version>.vsix
+code --install-extension vsix/session-dashboard-<version>.vsix
 ```
 
 Danach „Developer: Reload Window". Für ein Update `version` in der `package.json` hochzählen, neu
