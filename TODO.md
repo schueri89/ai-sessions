@@ -3,6 +3,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
+- [ ] Changelog integrieren
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] 3.Tab für Historie aller Sessions mit mehr Infos in Form einer Tabelle (analog zum anderen Plugin)
 - [ ] Dashboard: Usage Card für Copilot möglich?
@@ -14,7 +15,12 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Codex ergänzen!
 - [ ] Fixes für Copilot einspielen (siehe 2 Mails)
 - [ ] aktuell wird mit jedem Start ein weiterer "AI Sessions" Tab geöffnet, anstatt das alte zu schließen - bitte prüfen, ob man das verhindern kann
-- [ ] Status Bar: unter 80% doch nicht grün anzeigen... bitte rückgängig machen
+- [ ] Status Bar: unter 80% doch nicht grün anzeigen... bitte rückgängig machen + warning ab 75%
+- [ ] Claude Code öffnet manchmal einen neuen Tab anstatt im vorhandenen Claude Code Fenster den Chat zu wechseln
+- [ ] Sidebar: Fehler bei Klick auf "Analyse"-Icon -> command 'sessionDashboard.showAnalyse' not found
+- [ ] Dahasboard: Buttons in den Kacheln um Icons ergänzen
+- [ ] Footer integrieren mit Hinweis auf tools@schüri inkl. Versionsnummer?!
+- [ ] Settings: aktivieren/deaktivieren von Claude Code, Antigravity, Copilot und Codex
 
 ## Erledigt
 - [x] session-dashboard: VSIX-Pakete in den Unterordner `vsix/`, Paketier-Skript angepasst *(06.10.2026)*
