@@ -383,10 +383,40 @@ async function getQuotaSummary(force = false) {
   return cachedSummary;
 }
 
+const AG_WINDOW_MS = { fiveHour: 5 * 3600 * 1000, weekly: 7 * 24 * 3600 * 1000 };
+const agResetCache = new Map(); // sessionId -> last resolved resetsAt
+
+// Resolves when the Antigravity limit that aborted a session at `blockedAt` lifts. The 429 carries
+// no reset time, so it comes from the exhausted live-quota bucket whose window covers `blockedAt`.
+// None covers it: the limit is already over, `blockedAt` (a past time) is returned. No live quota
+// (Antigravity not running): the last resolved value, else 0 for "unknown".
+function resolveAntigravityReset(sessionId, blockedAt, agQuota) {
+  const groups = agQuota && agQuota.available ? [agQuota.gemini, agQuota.thirdParty].filter(Boolean) : [];
+  const buckets = [];
+  for (const group of groups) {
+    for (const key of Object.keys(AG_WINDOW_MS)) {
+      if (group[key]) buckets.push({ ...group[key], windowMs: AG_WINDOW_MS[key] });
+    }
+  }
+  if (buckets.length === 0) return agResetCache.get(sessionId) || 0;
+
+  let resetsAt = 0;
+  for (const b of buckets) {
+    const exhausted = typeof b.remainingFraction === 'number' && b.remainingFraction <= 0;
+    if (exhausted && b.resetsAt && blockedAt >= b.resetsAt - b.windowMs) {
+      resetsAt = Math.max(resetsAt, b.resetsAt);
+    }
+  }
+  if (!resetsAt) resetsAt = blockedAt || 1;
+  agResetCache.set(sessionId, resetsAt);
+  return resetsAt;
+}
+
 module.exports = {
   getQuotaSummary,
   fetchClaudeQuota,
   fetchAntigravityQuota,
-  formatResetTime
+  formatResetTime,
+  resolveAntigravityReset
 };
 

@@ -10,6 +10,7 @@ const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
 const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
 const { SoundNotifier } = require('./lib/soundNotifier');
+const { resolveAntigravityReset } = require('./lib/quota');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 
 const POLL_MS = 5000;
@@ -85,6 +86,9 @@ class SessionModel {
       .map((s) => {
         const isDone = this.done.isDone(s.sessionId);
         const isBookmarked = this.bookmarks.isBookmarked(s.sessionId);
+        if (s.provider === 'antigravity' && s.rateLimit) {
+          s.rateLimit.resetsAt = resolveAntigravityReset(s.sessionId, s.rateLimit.blockedAt, quota && quota.antigravity);
+        }
         let displayState = s.state;
         if (isDone) {
           displayState = 'done';

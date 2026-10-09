@@ -10,9 +10,19 @@ const { resolveProject } = require('../project');
 const { resolveMaxContext } = require('../format');
 
 const TRANSCRIPT_TAIL_BYTES = 64 * 1024;
+// Step type of system error steps in conversations/<id>.db (transcript type "ERROR_MESSAGE").
+const ERROR_STEP_TYPE = 17;
+// How many trailing steps to inspect: a quota abort may end with retry attempts plus a final
+// "Agent execution terminated due to error" step that no longer names the cause.
+const ERROR_TAIL_STEPS = 12;
+// Only sessions touched within this span are checked for a quota abort: opening every
+// conversation database costs about a second at startup. Older aborts stay "idle" - their reset
+// lies far behind, the longest quota window is 7 days.
+const LIMIT_LOOKBACK_MS = 14 * 24 * 3600 * 1000;
 
 let cachedDb = null;
 let lastDbMtime = 0;
+const limitCache = new Map(); // sessionId -> { mtime, result }
 
 function antigravityDir() {
   return process.env.ANTIGRAVITY_APP_DATA_DIR || path.join(os.homedir(), '.gemini', 'antigravity');
@@ -194,6 +204,53 @@ function readTranscriptTail(sessionId) {
   }
 }
 
+function fileMtime(file) {
+  try {
+    return fs.statSync(file).mtimeMs;
+  } catch {
+    return 0;
+  }
+}
+
+// Detects a turn aborted by an exhausted quota (HTTP 429 RESOURCE_EXHAUSTED). Antigravity then
+// reports the conversation as idle; the error step is reliably found only in
+// conversations/<id>.db, transcript.jsonl may miss it. Returns { humanText } or null.
+function readLimitError(sessionId) {
+  const file = path.join(antigravityDir(), 'conversations', sessionId + '.db');
+  const mtime = Math.max(fileMtime(file), fileMtime(file + '-wal'));
+  if (!mtime) return null;
+  const cached = limitCache.get(sessionId);
+  if (cached && cached.mtime === mtime) return cached.result;
+
+  let result = null;
+  let db = null;
+  try {
+    db = new DatabaseSync(file, { readOnly: true });
+    const steps = db.prepare('SELECT step_type, step_payload FROM steps ORDER BY idx DESC LIMIT ?').all(ERROR_TAIL_STEPS);
+    for (const step of steps) {
+      if (Number(step.step_type) !== ERROR_STEP_TYPE) break;
+      const payload = step.step_payload ? Buffer.from(step.step_payload).toString('latin1') : '';
+      if (payload.includes('RESOURCE_EXHAUSTED')) {
+        result = {
+          humanText: payload.includes('INSUFFICIENT_G1_CREDITS_BALANCE')
+            ? 'Antigravity-Kontingent und AI-Credits aufgebraucht (429)'
+            : 'Antigravity-Kontingent erschöpft (429)'
+        };
+        break;
+      }
+    }
+  } catch {
+    // Unreadable or locked: report no limit and retry on the next change.
+    return null;
+  } finally {
+    if (db) {
+      try { db.close(); } catch {}
+    }
+  }
+  limitCache.set(sessionId, { mtime, result });
+  return result;
+}
+
 // Returns active and historical Antigravity sessions.
 async function readSessions() {
   const db = getDb();
@@ -230,6 +287,7 @@ async function readSessions() {
     let activity = '';
     let rawLines = [];
     let tokens = null;
+    let rateLimit = null;
 
     if (notFullyIdle || isRunning) {
       const info = readTranscriptTail(sessionId);
@@ -249,6 +307,11 @@ async function readSessions() {
       lastPrompt = info.lastPrompt;
       rawLines = info.rawLines || [];
       tokens = info.tokens || null;
+      const limitError = now - statusUpdatedAt < LIMIT_LOOKBACK_MS ? readLimitError(sessionId) : null;
+      if (limitError) {
+        // resetsAt is resolved later from the live quota (quota.resolveAntigravityReset).
+        rateLimit = { resetsAt: 0, humanText: limitError.humanText, blockedAt: statusUpdatedAt };
+      }
     }
 
     if (!lastPrompt && r.preview) {
@@ -286,7 +349,7 @@ async function readSessions() {
       lastPrompt: lastPrompt || '',
       activity,
       workspaces,
-      rateLimit: null,
+      rateLimit,
       tokens: tokens || null
     });
   }

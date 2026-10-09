@@ -23,6 +23,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Settings: aktivieren/deaktivieren von Claude Code, Antigravity, Copilot und Codex
 
 ## Erledigt
+- [x] session-dashboard v0.30.0: Antigravity-Sessions mit erschöpftem Kontingent bis zum Reset in „Arbeitet", danach „Wartet auf dich" *(09.10.2026, [Plan](.agents/plans/2026-10-09_session-dashboard-antigravity-rate-limit.md))*
 - [x] session-dashboard: VSIX-Pakete in den Unterordner `vsix/`, Paketier-Skript angepasst *(06.10.2026)*
 - [x] session-dashboard v0.29.1: Copilot-Geisterzustände und offene Tool-Freigaben korrekt erkannt *(06.10.2026)*
 - [x] session-dashboard v0.29.0: Sound-Benachrichtigungen bei Fertig, Rückfrage und Limit-Reset *(05.10.2026, [Plan](.agents/plans/2026-10-05_session-dashboard-sound-notifications.md))*
