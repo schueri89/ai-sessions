@@ -7,3 +7,10 @@ scratch/**
 *.png
 test_*
 build-icons.js
+.agents/**
+TODO.md
+AGENTS.md
+FEEDBACK.md
+CLAUDE.md
+.editorconfig
+.gitattributes

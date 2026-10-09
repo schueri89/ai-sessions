@@ -1,7 +1,6 @@
-# Projekt-Kontext: tools
+# Projekt-Kontext: ai-sessions
 
-Entwicklerwerkzeuge als VS-Code- und Chrome-Extensions, je Werkzeug ein Unterordner. Keine
-Lucee-App, wird nie deployt.
+VS-Code-Extension „AI Sessions". Keine Lucee-App, wird nie deployt.
 
 ## Verbindlicher Projektkontext
 

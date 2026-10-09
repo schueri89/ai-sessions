@@ -1,4 +1,4 @@
-# Projekt ToDo-Liste: tools
+# Projekt ToDo-Liste: ai-sessions
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
