@@ -336,11 +336,21 @@ async function openAntigravitySession(info) {
     logDebug(`[Antigravity] antigravity.panel.focus fehlgeschlagen oder nicht registriert: ${err.message}`);
   }
 
-  // 2. Führe Navigation via openConversation aus (dieser Befehl existiert im Antigravity-Plugin)
-  const targetPath = `/c/${info.sessionId}`;
+  // Antigravity's Webview verwendet Memory-History und prüft beim internen Navigate-RPC:
+  // "window.location.pathname !== h && router.navigate({to: h})"
+  // Wurde der Iframe beim Start mit genau dieser Session-URL (/c/<id>) geladen,
+  // bleibt window.location.pathname statisch auf diesem Wert stehen. Jeder spätere
+  // Aufruf von /c/<id> wird daher stumm verworfen, weil window.location.pathname === h ist.
+  // Durch den Cache-Bust (?open=...) ist window.location.pathname !== h IMMER true,
+  // und TanStack Router übernimmt die Navigation zuverlässig.
+  const now = Date.now();
+  const targetPathWithQuery = `/c/${info.sessionId}?open=${now}`;
+  const canonicalPath = `/c/${info.sessionId}`;
+
+  // 2. Führe Navigation via openConversation aus (mit Cache-Bust)
   try {
-    logDebug(`[Antigravity] 2. Rufe antigravity.openConversation auf (cascadeId: ${info.sessionId}, path: ${targetPath})...`);
-    await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId, targetPath);
+    logDebug(`[Antigravity] 2. Rufe antigravity.openConversation auf (cascadeId: ${info.sessionId}, path: ${targetPathWithQuery})...`);
+    await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId, targetPathWithQuery);
     logDebug(`[Antigravity] antigravity.openConversation erfolgreich abgesetzt.`);
   } catch (err) {
     logDebug(`[Antigravity] Fehler bei antigravity.openConversation: ${err.message}`, err);
@@ -354,22 +364,32 @@ async function openAntigravitySession(info) {
     });
   }
 
-  // 3. Asynchroner Retry nach 250ms (stellt sicher, dass die Webview-Bridge bereit ist falls das Panel erst geladen wurde)
+  // 3. Asynchroner Retry nach 250ms mit Canonical Path und zweiter Ping nach 450ms
   setTimeout(async () => {
     try {
-      logDebug(`[Antigravity] 3. Retry-Navigation nach 250ms...`);
-      await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId, targetPath);
+      logDebug(`[Antigravity] 3. Retry-Navigation nach 250ms (canonical: ${canonicalPath})...`);
+      await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId, canonicalPath);
     } catch (err) {
       logDebug(`[Antigravity] Retry fehlgeschlagen: ${err.message}`);
     }
   }, 250);
+
+  setTimeout(async () => {
+    try {
+      const secondRetry = `/c/${info.sessionId}?open=${Date.now()}`;
+      logDebug(`[Antigravity] 3b. Zweiter Navigations-Ping nach 450ms (path: ${secondRetry})...`);
+      await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId, secondRetry);
+    } catch (err) {
+      logDebug(`[Antigravity] Zweiter Ping fehlgeschlagen: ${err.message}`);
+    }
+  }, 450);
 
   // 4. Falls die Session zu einem anderen Projekt gehört oder als Fallback nach 600ms: Deep-Link auslösen
   if (isDifferentWorkspace) {
     setTimeout(async () => {
       try {
         const uriScheme = vscode.env.uriScheme || 'vscode';
-        const deepLink = vscode.Uri.parse(`${uriScheme}://google.google-antigravity/open-conversation?cascadeId=${encodeURIComponent(info.sessionId)}&path=${encodeURIComponent(targetPath)}`);
+        const deepLink = vscode.Uri.parse(`${uriScheme}://google.google-antigravity/open-conversation?cascadeId=${encodeURIComponent(info.sessionId)}&path=${encodeURIComponent(canonicalPath)}`);
         logDebug(`[Antigravity] 4. Trigger Deep-Link für Projektwechsel: ${deepLink.toString()}`);
         await vscode.env.openExternal(deepLink);
       } catch (err) {
