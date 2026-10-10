@@ -197,7 +197,13 @@ function activate(context) {
     statusBar,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
+        if (board.panel) {
+          try { webviewPanel.dispose(); } catch {}
+          return;
+        }
         board.attach(webviewPanel);
+        board.ensurePinned();
+        board.closeDuplicateTabs();
       }
     })
   );
@@ -414,7 +420,8 @@ function activate(context) {
         await update(true);
       }
     }),
-    vscode.commands.registerCommand('sessionDashboard.showBoard', (query) => board.show(query)),
+    vscode.commands.registerCommand('sessionDashboard.showBoard', (query) => board.show(typeof query === 'string' ? query : undefined, 'board')),
+    vscode.commands.registerCommand('sessionDashboard.showAnalyse', () => board.show(undefined, 'analyse')),
     vscode.commands.registerCommand('sessionDashboard.search', async () => {
       const visible = model.visibleSessions();
       const now = Date.now();
@@ -569,6 +576,10 @@ function activate(context) {
         action: 'search'
       });
       items.push({
+        label: '$(graph) Analyse & Verbrauch öffnen',
+        action: 'analyse'
+      });
+      items.push({
         label: '$(folder) Nach Projekt filtern...',
         description: model.projectFilter !== 'all' ? `Aktiv: ${model.projectFilter}` : 'Alle',
         action: 'filterProject'
@@ -588,6 +599,8 @@ function activate(context) {
           await openSession(picked.session);
         } else if (picked.action === 'board') {
           await vscode.commands.executeCommand('sessionDashboard.showBoard');
+        } else if (picked.action === 'analyse') {
+          await vscode.commands.executeCommand('sessionDashboard.showAnalyse');
         } else if (picked.action === 'search') {
           await vscode.commands.executeCommand('sessionDashboard.search');
         } else if (picked.action === 'filterProject') {
@@ -616,11 +629,16 @@ function activate(context) {
 
   update(true);
 
+  // Close any duplicate tabs restored from earlier restarts
+  board.closeDuplicateTabs();
+
   const config = vscode.workspace.getConfiguration('sessionDashboard');
   if (config.get('openOnStartup', false)) {
-    setTimeout(() => {
+    setTimeout(async () => {
       if (!board.panel) {
-        board.show();
+        await board.show();
+      } else {
+        await board.closeDuplicateTabs();
       }
     }, 500);
   }

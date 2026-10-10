@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.30.3",
+  "version": "0.30.5",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -312,7 +312,7 @@
         },
         "sessionDashboard.quotaWarningThreshold": {
           "type": "number",
-          "default": 80,
+          "default": 75,
           "minimum": 1,
           "maximum": 100,
           "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon gelb hinterlegt wird (Warnung)."
