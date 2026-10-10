@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.30.5",
+  "version": "0.31.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -323,6 +323,21 @@
           "minimum": 1,
           "maximum": 100,
           "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon rot hinterlegt wird (Kritisch/Limit)."
+        },
+        "sessionDashboard.providers.claude": {
+          "type": "boolean",
+          "default": true,
+          "description": "Claude-Code-Sessions erfassen und anzeigen."
+        },
+        "sessionDashboard.providers.antigravity": {
+          "type": "boolean",
+          "default": true,
+          "description": "Google-Antigravity-Sessions erfassen und anzeigen."
+        },
+        "sessionDashboard.providers.copilot": {
+          "type": "boolean",
+          "default": true,
+          "description": "GitHub-Copilot-Sessions erfassen und anzeigen."
         },
         "sessionDashboard.sound.enabled": {
           "type": "boolean",

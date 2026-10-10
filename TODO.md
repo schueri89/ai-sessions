@@ -4,23 +4,23 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] Changelog integrieren
+- [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
+- [ ] Ladeanimation beim Öffnen des Tabs fehlt (nach Start von VSCode und Öffen des AI Sessions Tabs)
+- [ ] wie funktioniert Zuweisung von Session zu Projekt? das aktualisiert sich teilweise durch Öffnen des Chats - manuelle Korrektur wäre gut!
+- [ ] Button für Settings auf Dashboard oben rechts integrieren und ggf. auch in die Sidebar?
+
 - [ ] 3.Tab für Historie aller Sessions mit mehr Infos in Form einer Tabelle (analog zum anderen Plugin)
+
 - [ ] Codex ergänzen! (inkl. Anpassung in Settings)
+
 - [ ] Fixes für Copilot einspielen (siehe 2 Mails)
-
-- [ ] Footer integrieren mit Hinweis auf tools@schüri inkl. Versionsnummer?!
-- [ ] Antigravity Sound-Hooks in .agents/hooks.json und .agents/tools/notify-sound.ps1 komplett löschen (aktuell temporär deaktiviert mit "enabled": false)
-- [ ] Settings: aktivieren/deaktivieren von Claude Code, Antigravity und Copilot
-
-- [ ] Dashboard: Claude Code öffnet manchmal einen neuen Tab anstatt im vorhandenen Claude Code Fenster den Chat zu wechseln
-- [ ] Dashboard: Copilot Kachel -> Klick darauf öffnet nicht den Chat direkt in Copilot!
-- [ ] Dashboard: Buttons in den Kacheln um Icons ergänzen
-- [ ] Dashboard Erledigt Spalte: bei mehr als 5 Einträgen, "Alles erledigen" Button integrieren
 - [ ] Dashboard: Usage Card für Copilot möglich?
 
-
 ## Erledigt
+- [x] session-dashboard v0.31.0: Provider-Settings zum Aktivieren/Deaktivieren (Claude Code, Antigravity, Copilot), Dashboard-Footer mit tools@schüri & Versionsnummer, Freitextsuche mit bereinigtem Placeholder & Kbd-Badge [Taste /], Antigravity Sound-Hooks (.agents/hooks.json & notify-sound.ps1) komplett gelöscht *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-provider-settings-footer-search-polish.md))*
+- [x] session-dashboard v0.30.7: Chats in Secondary Sidebar für Claude Code & Copilot (kein Mittel-Tab), Antigravity Deep-Link Fallback & Workspace-Check, AI-Sessions-Debug-Channel mit 1-Click-Toolbar-Button *(10.10.2026)*
+- [x] session-dashboard v0.30.6: Tab-Wechsel statt Neufenster für Claude Code, robuster Antigravity-Chatwechsel mit Panel-Focus & URL-Routing, direktes Öffnen von Copilot-Chatsessions via Canonical URI, SVG-Icons für Kachel-Aktionen, Button „Alles erledigt markieren" in Fertig-Spalte ab 10 Einträgen *(10.10.2026)*
 - [x] session-dashboard v0.30.5: Sidebar-Übersicht-Icon schaltet auf Board-Tab um, „Neu"-Badge am Analyse-Reiter entfernt *(10.10.2026)*
 - [x] session-dashboard v0.30.4: Status-Bar-Farben (kein Grün, Warning ab 75%), Claude-Code-OAuth-Refresh via platform.claude.com mit Client-ID & 401-Retry, Sidebar-Analyse-Icon verknüpft, Tab-Deduplizierung bei Neustart *(10.10.2026)*
 - [x] session-dashboard v0.30.0: Antigravity-Sessions mit erschöpftem Kontingent bis zum Reset in „Arbeitet", danach „Wartet auf dich" *(09.10.2026, [Plan](.agents/plans/2026-10-09_session-dashboard-antigravity-rate-limit.md))*

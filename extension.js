@@ -288,6 +288,9 @@ function activate(context) {
       if (e.affectsConfiguration('sessionDashboard.sound')) {
         board.update();
       }
+      if (e.affectsConfiguration('sessionDashboard.providers')) {
+        update(true);
+      }
     })
   );
 
@@ -295,32 +298,39 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.filter', async () => {
       const counts = model.counts();
       const current = model.providerFilter;
+      const enabled = model.getEnabledProviders();
       const items = [
         {
           label: '$(list-unordered) Alle Sessions',
           description: `${counts.all}`,
           detail: current === 'all' ? '✓ Aktiver Filter' : '',
           filter: 'all'
-        },
-        {
+        }
+      ];
+      if (enabled.claude !== false) {
+        items.push({
           label: '$(dashboard-claude) Claude Code',
           description: `${counts.claude}`,
           detail: current === 'claude' ? '✓ Aktiver Filter' : '',
           filter: 'claude'
-        },
-        {
+        });
+      }
+      if (enabled.antigravity !== false) {
+        items.push({
           label: '$(dashboard-antigravity) Google Antigravity',
           description: `${counts.antigravity}`,
           detail: current === 'antigravity' ? '✓ Aktiver Filter' : '',
           filter: 'antigravity'
-        },
-        {
+        });
+      }
+      if (enabled.copilot !== false) {
+        items.push({
           label: '$(copilot) GitHub Copilot',
           description: `${counts.copilot}`,
           detail: current === 'copilot' ? '✓ Aktiver Filter' : '',
           filter: 'copilot'
-        }
-      ];
+        });
+      }
 
       const picked = await vscode.window.showQuickPick(items, {
         placeHolder: 'Nach Provider filtern...'

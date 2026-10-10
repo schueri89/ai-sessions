@@ -21,7 +21,8 @@ weil dort alle Repos nebeneinanderliegen, und wird nie deployt.
   trägt es dort nach — sonst bleibt es ungeprüft.
 - **Versionierung:** `version` in `package.json` je Änderung hochzählen (Patch für Fixes, Minor für
   Funktionen); die Version gehört in den Erledigt-Eintrag der `TODO.md` und die Commit-Nachricht.
-- **VSIX-Pakete gehören ausnahmslos nach `vsix/`**, nie ins Hauptverzeichnis der Extension.
-  Paketiert wird über `npm run package` (legt `vsix/` an und ruft `vsce package … --out vsix/`),
-  installiert über `code --install-extension vsix/ai-sessions-<version>.vsix`. In
+- **VSIX-Paketierung & Automatische Installation:** Nach jeder Änderung (nach erfolgreichem `npm run check`)
+  immer automatisch die neue Version paketieren (`npm run package`) und direkt im Editor installieren
+  (`code --install-extension vsix/ai-sessions-<version>.vsix`), bevor der Vorgang abgeschlossen gemeldet wird.
+  VSIX-Pakete gehören ausnahmslos nach `vsix/`, nie ins Hauptverzeichnis der Extension. In
   `.gitignore` und `.vscodeignore` sind `vsix/` und `**/*.vsix` stets ausgeschlossen.
