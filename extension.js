@@ -72,11 +72,25 @@ class SessionModel {
     return { all: this.sessions.length, claude, antigravity, copilot, byProject };
   }
 
+  getEnabledProviders() {
+    const config = vscode.workspace.getConfiguration('sessionDashboard.providers');
+    return {
+      claude: config.get('claude', true),
+      antigravity: config.get('antigravity', true),
+      copilot: config.get('copilot', true)
+    };
+  }
+
   // Re-reads registry across all providers. Returns true if anything visible changed.
   async refresh() {
+    const enabled = this.getEnabledProviders();
+    if (this.providerFilter !== 'all' && enabled[this.providerFilter] === false) {
+      this.providerFilter = 'all';
+      await this.context.globalState.update('sessionDashboard.providerFilter', 'all');
+    }
     const [live, quota] = await Promise.all([
-      readSessions(),
-      getQuotaSummary().catch(() => null)
+      readSessions(enabled),
+      getQuotaSummary(false, enabled).catch(() => null)
     ]);
     this.quota = quota;
     await this.done.reconcile(live);
@@ -133,14 +147,15 @@ class SessionModel {
 function sessionInfoOf(arg, model) {
   if (!arg) return null;
   if (typeof arg === 'string') {
-    const found = model.sessions.find((s) => s.sessionId === arg);
-    return { sessionId: arg, provider: found ? found.provider : 'claude' };
+    const found = model ? model.sessions.find((s) => s.sessionId === arg) : null;
+    return { sessionId: arg, provider: found ? found.provider : 'claude', session: found };
   }
   if (arg.session) {
-    return { sessionId: arg.session.sessionId, provider: arg.session.provider };
+    return { sessionId: arg.session.sessionId, provider: arg.session.provider, session: arg.session };
   }
   if (arg.sessionId) {
-    return { sessionId: arg.sessionId, provider: arg.provider || 'claude' };
+    const found = model ? model.sessions.find((s) => s.sessionId === arg.sessionId) : null;
+    return { sessionId: arg.sessionId, provider: arg.provider || (found ? found.provider : 'claude'), session: found || arg };
   }
   return null;
 }
@@ -152,36 +167,311 @@ function sessionIdOf(arg) {
   return undefined;
 }
 
+let debugChannel = null;
+function getDebugChannel() {
+  if (!debugChannel) {
+    debugChannel = vscode.window.createOutputChannel('AI Sessions');
+  }
+  return debugChannel;
+}
+
+function logDebug(message, extra) {
+  const ch = getDebugChannel();
+  const time = new Date().toLocaleTimeString('de-DE');
+  let line = `[${time}] ${message}`;
+  if (extra !== undefined) {
+    try {
+      line += '\n' + (typeof extra === 'string' ? extra : JSON.stringify(extra, null, 2));
+    } catch {
+      line += '\n' + String(extra);
+    }
+  }
+  ch.appendLine(line);
+}
+
+function isClaudeTab(tab) {
+  if (!tab || !tab.input) return false;
+  const vt = tab.input.viewType;
+  if (typeof vt === 'string' && (vt.includes('claudeVSCodePanel') || vt.includes('claude-vscode'))) {
+    return true;
+  }
+  if (typeof tab.label === 'string' && (tab.label.includes('Claude Code') || tab.label.includes('Claude'))) {
+    return true;
+  }
+  return false;
+}
+
+function isChatSessionTab(tab) {
+  if (!tab || !tab.input) return false;
+  const constructorName = tab.input.constructor?.name || '';
+  if (constructorName === 'TabInputChat' || constructorName.includes('Chat')) {
+    return true;
+  }
+  const vt = tab.input.viewType;
+  if (typeof vt === 'string' && (vt.includes('chatSession') || vt.includes('vscode-chat-session') || vt.includes('workbench.editor.chatSession'))) {
+    return true;
+  }
+  const uri = tab.input.uri;
+  if (uri && typeof uri.scheme === 'string' && uri.scheme.includes('chat-session')) {
+    return true;
+  }
+  if (typeof tab.label === 'string' && (tab.label.includes('GitHub Copilot') || tab.label.includes('Copilot Chat'))) {
+    return true;
+  }
+  return false;
+}
+
+async function openClaudeSession(info) {
+  logDebug(`[Claude Code] Öffne Session: ${info.sessionId}`, {
+    title: info.title || info.session?.title,
+    project: info.project || info.session?.project
+  });
+
+  // 1. Schließe eventuell im mittleren Editorbereich noch offene Claude-Panels
+  try {
+    if (vscode.window.tabGroups && vscode.window.tabGroups.all) {
+      const toClose = [];
+      for (const group of vscode.window.tabGroups.all) {
+        for (const tab of group.tabs) {
+          if (isClaudeTab(tab)) {
+            toClose.push(tab);
+          }
+        }
+      }
+      if (toClose.length > 0) {
+        logDebug(`[Claude Code] Schließe ${toClose.length} offene Claude-Tabs im mittleren Bereich.`);
+        await vscode.window.tabGroups.close(toClose);
+      }
+    }
+  } catch (err) {
+    logDebug(`[Claude Code] Fehler beim Schließen vorheriger Tabs: ${err.message}`);
+  }
+
+  // 2. Stelle sicher, dass die bevorzugte Position von Claude Code auf "sidebar" steht
+  try {
+    const config = vscode.workspace.getConfiguration('claudeCode');
+    if (config.get('preferredLocation') !== 'sidebar') {
+      logDebug(`[Claude Code] Setze claudeCode.preferredLocation auf 'sidebar'`);
+      await config.update('preferredLocation', 'sidebar', vscode.ConfigurationTarget.Global);
+    }
+  } catch (err) {
+    logDebug(`[Claude Code] Konnte preferredLocation nicht aktualisieren: ${err.message}`);
+  }
+
+  // 3. Fokussiere die Claude-Code-Ansicht in der Secondary Sidebar
+  try {
+    logDebug(`[Claude Code] Fokussiere Secondary Sidebar (claudeVSCodeSidebarSecondary.focus)`);
+    await vscode.commands.executeCommand('claudeVSCodeSidebarSecondary.focus');
+  } catch {
+    try {
+      logDebug(`[Claude Code] Fallback: claude-vscode.sidebar.open`);
+      await vscode.commands.executeCommand('claude-vscode.sidebar.open');
+    } catch (err) {
+      logDebug(`[Claude Code] Sidebar-Focus fehlgeschlagen: ${err.message}`);
+    }
+  }
+
+  // 4. Öffne die Session programmatisch mit 'honor-preferred-location'
+  try {
+    logDebug(`[Claude Code] Rufe claude-vscode.editor.open auf mit programmatic: honor-preferred-location`);
+    await vscode.commands.executeCommand(
+      'claude-vscode.editor.open',
+      info.sessionId,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { programmatic: 'honor-preferred-location' }
+    );
+  } catch (err) {
+    logDebug(`[Claude Code] editor.open fehlgeschlagen: ${err.message}`);
+    try {
+      const uri = vscode.Uri.parse(`${vscode.env.uriScheme}://anthropic.claude-code/open?session=${encodeURIComponent(info.sessionId)}`);
+      await vscode.env.openExternal(uri);
+    } catch (e2) {
+      logDebug(`[Claude Code] URI openExternal fehlgeschlagen: ${e2.message}`);
+    }
+  }
+
+  // 5. Sicherheits-Bereinigung: Falls Claude Code dennoch einen Tab im Editorbereich geöffnet hat, schließen
+  setTimeout(async () => {
+    try {
+      if (!vscode.window.tabGroups || !vscode.window.tabGroups.all) return;
+      const lingering = [];
+      for (const group of vscode.window.tabGroups.all) {
+        for (const tab of group.tabs) {
+          if (isClaudeTab(tab)) lingering.push(tab);
+        }
+      }
+      if (lingering.length > 0) {
+        logDebug(`[Claude Code] Bereinige nachlaufend ${lingering.length} versehentlich geöffnete Editor-Tabs.`);
+        await vscode.window.tabGroups.close(lingering);
+      }
+    } catch {}
+  }, 350);
+}
+
+async function openAntigravitySession(info) {
+  const currentWorkspaces = (vscode.workspace.workspaceFolders || []).map((f) => f.uri.fsPath);
+  const sessionWorkspace = info.session?.cwd || (info.session?.workspaces && info.session.workspaces[0]) || '';
+  const isDifferentWorkspace = sessionWorkspace && !currentWorkspaces.some((w) => sessionWorkspace.toLowerCase().startsWith(w.toLowerCase()));
+
+  logDebug(`[Antigravity] Öffne Session: ${info.sessionId}`, {
+    title: info.title || info.session?.title,
+    project: info.project || info.session?.project,
+    sessionWorkspace,
+    currentWorkspaces,
+    isDifferentWorkspace
+  });
+
+  if (isDifferentWorkspace) {
+    logDebug(`[Antigravity] ℹ️ Hinweis: Session gehört zu einem anderen Projekt/Workspace als das aktuelle Fenster.`);
+  }
+
+  // 1. Fokussiere das Antigravity Sidebar-Panel
+  try {
+    logDebug(`[Antigravity] 1. Fokussiere Panel (antigravity.panel.focus)...`);
+    await vscode.commands.executeCommand('antigravity.panel.focus');
+  } catch (err) {
+    logDebug(`[Antigravity] antigravity.panel.focus fehlgeschlagen oder nicht registriert: ${err.message}`);
+  }
+
+  // 2. Führe Navigation via openConversation aus (dieser Befehl existiert im Antigravity-Plugin)
+  const targetPath = `/c/${info.sessionId}`;
+  try {
+    logDebug(`[Antigravity] 2. Rufe antigravity.openConversation auf (cascadeId: ${info.sessionId}, path: ${targetPath})...`);
+    await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId, targetPath);
+    logDebug(`[Antigravity] antigravity.openConversation erfolgreich abgesetzt.`);
+  } catch (err) {
+    logDebug(`[Antigravity] Fehler bei antigravity.openConversation: ${err.message}`, err);
+    vscode.window.showErrorMessage(
+      `Antigravity-Chat konnte nicht geöffnet werden: ${err.message || err}`,
+      'Debug-Log anzeigen'
+    ).then((action) => {
+      if (action === 'Debug-Log anzeigen') {
+        getDebugChannel().show(true);
+      }
+    });
+  }
+
+  // 3. Asynchroner Retry nach 250ms (stellt sicher, dass die Webview-Bridge bereit ist falls das Panel erst geladen wurde)
+  setTimeout(async () => {
+    try {
+      logDebug(`[Antigravity] 3. Retry-Navigation nach 250ms...`);
+      await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId, targetPath);
+    } catch (err) {
+      logDebug(`[Antigravity] Retry fehlgeschlagen: ${err.message}`);
+    }
+  }, 250);
+
+  // 4. Falls die Session zu einem anderen Projekt gehört oder als Fallback nach 600ms: Deep-Link auslösen
+  if (isDifferentWorkspace) {
+    setTimeout(async () => {
+      try {
+        const uriScheme = vscode.env.uriScheme || 'vscode';
+        const deepLink = vscode.Uri.parse(`${uriScheme}://google.google-antigravity/open-conversation?cascadeId=${encodeURIComponent(info.sessionId)}&path=${encodeURIComponent(targetPath)}`);
+        logDebug(`[Antigravity] 4. Trigger Deep-Link für Projektwechsel: ${deepLink.toString()}`);
+        await vscode.env.openExternal(deepLink);
+      } catch (err) {
+        logDebug(`[Antigravity] Deep-Link Trigger fehlgeschlagen: ${err.message}`);
+      }
+    }, 600);
+  }
+}
+
+async function openCopilotSession(info) {
+  const sessionId = info.sessionId;
+  if (!sessionId) return;
+
+  logDebug(`[Copilot] Öffne Session: ${sessionId}`, {
+    title: info.title || info.session?.title,
+    project: info.project || info.session?.project
+  });
+
+  const encoded = Buffer.from(sessionId, 'utf8').toString('base64url');
+  const sessionResourceUri = vscode.Uri.from({
+    scheme: 'vscode-chat-session',
+    authority: 'local',
+    path: '/' + encoded
+  });
+
+  // 1. Schließe eventuell vorhandene Chat-Session-Tabs im mittleren Editorbereich
+  try {
+    if (vscode.window.tabGroups && vscode.window.tabGroups.all) {
+      const toClose = [];
+      for (const group of vscode.window.tabGroups.all) {
+        for (const tab of group.tabs) {
+          if (isChatSessionTab(tab)) toClose.push(tab);
+        }
+      }
+      if (toClose.length > 0) {
+        logDebug(`[Copilot] Schließe ${toClose.length} offene Chat-Tabs im mittleren Editorbereich.`);
+        await vscode.window.tabGroups.close(toClose);
+      }
+    }
+  } catch (err) {
+    logDebug(`[Copilot] Fehler beim Schließen mittlerer Tabs: ${err.message}`);
+  }
+
+  // 2. Fokussiere die Copilot-Chat-Ansicht in der Secondary Sidebar
+  try {
+    logDebug(`[Copilot] Fokussiere Copilot-Ansicht in Secondary Sidebar (workbench.panel.chat.view.copilot.focus)`);
+    await vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
+  } catch {
+    try {
+      logDebug(`[Copilot] Fallback: workbench.action.chat.open`);
+      await vscode.commands.executeCommand('workbench.action.chat.open');
+    } catch (err) {
+      logDebug(`[Copilot] Chat-Fokus fehlgeschlagen: ${err.message}`);
+    }
+  }
+
+  // 3. Öffne Session und verschiebe sofort in die Sidebar
+  // Hinweis: VS Code besitzt für Extensions keine API, um eine spezifische Session direkt
+  // ohne Editor-Tab in der Sidebar zu öffnen (siehe microsoft/vscode Issue #319722).
+  // Der schnellstmögliche Weg ist das sofortige Überführen via openInSidebar mit direktem Schließen des Editor-Tabs.
+  try {
+    logDebug(`[Copilot] Öffne Session via vscode.open`);
+    await vscode.commands.executeCommand('vscode.open', sessionResourceUri);
+    logDebug(`[Copilot] Verschiebe in Sidebar (workbench.action.chat.openInSidebar)`);
+    await vscode.commands.executeCommand('workbench.action.chat.openInSidebar');
+  } catch (err) {
+    logDebug(`[Copilot] openInSidebar fehlgeschlagen: ${err.message}`);
+  }
+
+  // 4. Sofortige & nachgelagerte Bereinigung des kurz geöffneten Editor-Tabs
+  const cleanupTabs = async () => {
+    try {
+      if (!vscode.window.tabGroups || !vscode.window.tabGroups.all) return;
+      const lingering = [];
+      for (const group of vscode.window.tabGroups.all) {
+        for (const tab of group.tabs) {
+          if (isChatSessionTab(tab)) lingering.push(tab);
+        }
+      }
+      if (lingering.length > 0) {
+        logDebug(`[Copilot] Bereinige ${lingering.length} Editor-Tabs im mittleren Bereich.`);
+        await vscode.window.tabGroups.close(lingering);
+      }
+    } catch (err) {
+      logDebug(`[Copilot] Bereinigung Fehler: ${err.message}`);
+    }
+  };
+
+  await cleanupTabs();
+  setTimeout(cleanupTabs, 60);
+  setTimeout(cleanupTabs, 200);
+}
+
 async function openSession(info) {
   if (!info || !info.sessionId) return;
   if (info.provider === 'antigravity') {
-    try {
-      await vscode.commands.executeCommand('antigravity.openConversation', info.sessionId);
-    } catch (err) {
-      vscode.window.showErrorMessage(`Antigravity-Chat konnte nicht geöffnet werden: ${err.message || err}`);
-    }
-    return;
+    return openAntigravitySession(info);
   }
   if (info.provider === 'copilot') {
-    try {
-      await vscode.commands.executeCommand('workbench.action.chat.open');
-    } catch {
-      try {
-        await vscode.commands.executeCommand('github.copilot.chat.focus');
-      } catch (err) {
-        vscode.window.showErrorMessage(`Copilot-Chat konnte nicht geöffnet werden: ${err.message || err}`);
-      }
-    }
-    return;
+    return openCopilotSession(info);
   }
-  // Default: Claude Code
-  try {
-    await vscode.commands.executeCommand('claude-vscode.editor.open', info.sessionId);
-  } catch {
-    // Command missing or renamed: fall back to the extension's URI handler.
-    const uri = vscode.Uri.parse(`${vscode.env.uriScheme}://anthropic.claude-code/open?session=${encodeURIComponent(info.sessionId)}`);
-    await vscode.env.openExternal(uri);
-  }
+  return openClaudeSession(info);
 }
 
 function activate(context) {
@@ -392,12 +682,30 @@ function activate(context) {
       }
       TranscriptViewerPanel.show(context, info);
     }),
+    vscode.commands.registerCommand('sessionDashboard.showDebugLog', () => {
+      getDebugChannel().show(true);
+    }),
     vscode.commands.registerCommand('sessionDashboard.markDone', async (arg) => {
       const id = sessionIdOf(arg);
       if (!id) return;
       await model.done.mark(id);
       await model.bookmarks.unmark(id);
       await update(true);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.markAllDone', async (arg) => {
+      let ids = [];
+      if (Array.isArray(arg)) {
+        ids = arg.map(sessionIdOf).filter(Boolean);
+      } else if (arg && Array.isArray(arg.sessionIds)) {
+        ids = arg.sessionIds.filter(Boolean);
+      } else {
+        ids = model.visibleSessions().filter((s) => s.displayState === 'idle').map((s) => s.sessionId);
+      }
+      if (ids.length > 0) {
+        await model.done.markMany(ids);
+        await model.bookmarks.unmarkMany(ids);
+        await update(true);
+      }
     }),
     vscode.commands.registerCommand('sessionDashboard.unmarkDone', async (arg) => {
       const id = sessionIdOf(arg);

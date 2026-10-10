@@ -18,6 +18,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Dashboard: Usage Card für Copilot möglich?
 
 ## Erledigt
+- [x] session-dashboard v0.31.1: Copilot-Chat direkt in Secondary Sidebar ohne Verzögerung, optimierte Tab-Erkennung (TabInputChat) und sofortige Bereinigung des Übergangs-Tabs *(10.10.2026)*
 - [x] session-dashboard v0.31.0: Provider-Settings zum Aktivieren/Deaktivieren (Claude Code, Antigravity, Copilot), Dashboard-Footer mit tools@schüri & Versionsnummer, Freitextsuche mit bereinigtem Placeholder & Kbd-Badge [Taste /], Antigravity Sound-Hooks (.agents/hooks.json & notify-sound.ps1) komplett gelöscht *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-provider-settings-footer-search-polish.md))*
 - [x] session-dashboard v0.30.7: Chats in Secondary Sidebar für Claude Code & Copilot (kein Mittel-Tab), Antigravity Deep-Link Fallback & Workspace-Check, AI-Sessions-Debug-Channel mit 1-Click-Toolbar-Button *(10.10.2026)*
 - [x] session-dashboard v0.30.6: Tab-Wechsel statt Neufenster für Claude Code, robuster Antigravity-Chatwechsel mit Panel-Focus & URL-Routing, direktes Öffnen von Copilot-Chatsessions via Canonical URI, SVG-Icons für Kachel-Aktionen, Button „Alles erledigt markieren" in Fertig-Spalte ab 10 Einträgen *(10.10.2026)*

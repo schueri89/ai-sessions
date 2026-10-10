@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.31.0",
+  "version": "0.31.1",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -95,6 +95,12 @@
         "icon": "$(check)"
       },
       {
+        "command": "sessionDashboard.markAllDone",
+        "title": "Alles als erledigt markieren",
+        "category": "Session Dashboard",
+        "icon": "$(check-all)"
+      },
+      {
         "command": "sessionDashboard.unmarkDone",
         "title": "Wieder aktiv",
         "category": "Session Dashboard",
@@ -150,6 +156,12 @@
         "title": "Transkript ansehen (Read-Only)",
         "category": "Session Dashboard",
         "icon": "$(book)"
+      },
+      {
+        "command": "sessionDashboard.showDebugLog",
+        "title": "Debug-Log anzeigen",
+        "category": "Session Dashboard",
+        "icon": "$(output)"
       },
       {
         "command": "sessionDashboard.toggleSound",
@@ -253,6 +265,10 @@
         },
         {
           "command": "sessionDashboard.markDone",
+          "when": "false"
+        },
+        {
+          "command": "sessionDashboard.markAllDone",
           "when": "false"
         },
         {
