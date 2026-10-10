@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.32.0",
+  "version": "0.32.1",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -185,9 +185,29 @@
     "menus": {
       "view/title": [
         {
+          "command": "sessionDashboard.filter",
+          "when": "view == sessionDashboard.sessions",
+          "group": "navigation@1"
+        },
+        {
+          "command": "sessionDashboard.filterProject",
+          "when": "view == sessionDashboard.sessions",
+          "group": "navigation@1.2"
+        },
+        {
+          "command": "sessionDashboard.search",
+          "when": "view == sessionDashboard.sessions",
+          "group": "navigation@1.5"
+        },
+        {
           "command": "sessionDashboard.showBoard",
           "when": "view == sessionDashboard.sessions",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "sessionDashboard.refresh",
+          "when": "view == sessionDashboard.sessions",
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [

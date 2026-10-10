@@ -17,7 +17,8 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Dashboard: Usage Card für Copilot möglich?
 
 ## Erledigt
-- [x] session-dashboard v0.32.0: Ladeanimation beim Tab-Öffnen/VSCode-Start stabilisiert (Initial-Load-Gate), Settings-Button ⚙️ oben rechts auf dem Dashboard, Lazy-Loading für Analyse-Tab (Preload entfällt), Sidebar-Header bereinigt (nur noch Übersicht-Icon) *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-loading-settings-lazyloading-sidebar.md))*
+- [x] session-dashboard v0.32.1: Sidebar-Header Icons wiederhergestellt (Filter, Projekt, Suche, Refresh), nur Analyse-Icon entfernt *(10.10.2026)*
+- [x] session-dashboard v0.32.0: Ladeanimation beim Tab-Öffnen/VSCode-Start stabilisiert (Initial-Load-Gate), Settings-Button ⚙️ oben rechts auf dem Dashboard, Lazy-Loading für Analyse-Tab (Preload entfällt) *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-loading-settings-lazyloading-sidebar.md))*
 - [x] session-dashboard v0.31.2: Antigravity-Navigation gegen statische window.location.pathname-Sperre im Webview-Iframe gehärtet (Cache-Bust-Query & Dual-Ping-Retry) *(10.10.2026)*
 - [x] session-dashboard v0.31.1: Copilot-Chat direkt in Secondary Sidebar ohne Verzögerung, optimierte Tab-Erkennung (TabInputChat) und sofortige Bereinigung des Übergangs-Tabs *(10.10.2026)*
 - [x] session-dashboard v0.31.0: Provider-Settings zum Aktivieren/Deaktivieren (Claude Code, Antigravity, Copilot), Dashboard-Footer mit tools@schüri & Versionsnummer, Freitextsuche mit bereinigtem Placeholder & Kbd-Badge [Taste /], Antigravity Sound-Hooks (.agents/hooks.json & notify-sound.ps1) komplett gelöscht *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-provider-settings-footer-search-polish.md))*
