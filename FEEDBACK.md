@@ -1,4 +1,4 @@
-# Projekt-Feedback: tools
+# Projekt-Feedback: ai-sessions
 Postfach für kleinere Rückmeldungen zur laufenden Umsetzung — ein Stichpunkt je Rückmeldung,
 knapp genügt. Größere Vorhaben gehören nach `TODO.md`, Hintergründe und Entscheidungen nach
 `.agents/plans/`.
