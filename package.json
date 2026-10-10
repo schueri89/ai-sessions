@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.31.2",
+  "version": "0.32.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -174,39 +174,20 @@
         "title": "Sound vorhören...",
         "category": "Session Dashboard",
         "icon": "$(megaphone)"
+      },
+      {
+        "command": "sessionDashboard.openSettings",
+        "title": "Einstellungen öffnen",
+        "category": "Session Dashboard",
+        "icon": "$(gear)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "sessionDashboard.filter",
-          "when": "view == sessionDashboard.sessions",
-          "group": "navigation@1"
-        },
-        {
-          "command": "sessionDashboard.filterProject",
-          "when": "view == sessionDashboard.sessions",
-          "group": "navigation@1.2"
-        },
-        {
-          "command": "sessionDashboard.search",
-          "when": "view == sessionDashboard.sessions",
-          "group": "navigation@1.5"
-        },
-        {
           "command": "sessionDashboard.showBoard",
           "when": "view == sessionDashboard.sessions",
-          "group": "navigation@2"
-        },
-        {
-          "command": "sessionDashboard.showAnalyse",
-          "when": "view == sessionDashboard.sessions",
-          "group": "navigation@2.1"
-        },
-        {
-          "command": "sessionDashboard.refresh",
-          "when": "view == sessionDashboard.sessions",
-          "group": "navigation@3"
+          "group": "navigation"
         }
       ],
       "view/item/context": [

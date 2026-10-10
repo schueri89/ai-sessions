@@ -33,6 +33,7 @@ class SessionModel {
     this.sessions = [];
     this.quota = null;
     this.signature = '';
+    this.isInitialLoaded = false;
   }
 
   async setFilter(filter) {
@@ -139,6 +140,7 @@ class SessionModel {
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;
+    this.isInitialLoaded = true;
     return changed;
   }
 }
@@ -962,6 +964,9 @@ function activate(context) {
       if (pick) {
         soundNotifier.previewSound(pick.eventType);
       }
+    }),
+    vscode.commands.registerCommand('sessionDashboard.openSettings', () => {
+      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:schueri.ai-sessions');
     })
   );
 
