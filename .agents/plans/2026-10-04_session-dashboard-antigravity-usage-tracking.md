@@ -40,26 +40,26 @@ Ziel ist es, den Antigravity-Hub direkt abzufragen und die Quota-Anzeige im Dash
 
 ### [Quota-Modul]
 
-#### [MODIFY] [lib/quota.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/quota.js)
+#### [MODIFY] [lib/quota.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/quota.js)
 - `detectAgyHub()`: Ermittelt Port und CSRF-Token des laufenden `agy.exe`-Prozesses mit Caching.
 - `fetchLiveAntigravityQuota()`: Ruft `POST /exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary` mit 3s-Timeout ab und extrahiert `Gemini`- und `Claude/GPT`-Buckets (5h & Weekly) inklusive `remainingFraction`, `percent` genutzt, `resetsAt`, `resetLabel` und `description`.
 - `fetchAntigravityQuota()`: Kombiniert die Live-Quota mit den SQLite/Transkript-Tokenmetriken (`tokens5h`, `tokens7d`).
 
 ### [UI-Erweiterungen]
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - `updateQuotaUI`:
   - Erkennt `hasLiveQuota` für Antigravity.
   - Rendert für Gemini-Modelle Fortschrittsbalken mit Auslastungsstufe (`low`, `medium`, `high`), Prozentanzeige (`XX%`), Reset-Subtext (`Reset HH:MM`) und Tooltip mit Restzeit und aggregiertem Tokenvolumen.
   - Dynamischer Status-Pill: `Normal` / `Erhöht` / `Fast voll` basierend auf dem maximalen Auslastungsgrad (bzw. `Limit (429)` bei Rate-Limit).
   - Graceful Fallback auf reine Tokenzahlen, falls kein Hub läuft.
 
-#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/statusBar.js)
+#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/statusBar.js)
 - Ergänzung des Tooltips:
   - Bei Live-Quota: `⚡ Gemini 5-Std.-Limit: XX% (Reset HH:MM)` und `📅 Gemini 7-Tage-Limit: YY% (Reset Tag HH:MM)` sowie `*(Rolling Tokens: ~XX in 5h · ~YY in 7d)*`.
   - Fallback auf bisherige Tokenanzeige, falls Hub offline.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versionssprung von `0.15.0` auf `0.16.0`.
 
 ## Verifikationsplan

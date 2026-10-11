@@ -32,17 +32,17 @@ Ziel ist es, die Auslastung transparent im Dashboard-Header und in der Statuslei
 
 ### [Quota-Modul]
 
-#### [ADD] [lib/quota.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/quota.js)
+#### [ADD] [lib/quota.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/quota.js)
 - `fetchClaudeQuota()`: Liest Token aus `~/.claude/.credentials.json`, ruft Anthropic Usage API ab (mit Fallback auf `curl.exe` und Token-Refresh bei Bedarf).
 - `fetchAntigravityQuota()`: Berechnet aus `conversation_summaries.db` und den Transkripten der letzten 7 Tage das Tokenvolumen im 5-Stunden- und 7-Tage-Fenster und prüft auf 429-Fehler.
 - `getQuotaSummary()`: Führt beide Provider zusammen, cached die Ergebnisse für 45 Sekunden (vermeidet unnötige API-Calls und Dateiscans).
 
 ### [Model & Registry Integration]
 
-#### [MODIFY] [lib/registry.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/registry.js)
+#### [MODIFY] [lib/registry.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/registry.js)
 - Export von `getQuotaSummary` zur zentralen Abfrage durch das `SessionModel`.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - `SessionModel`: Hält aktuellen `quota`-Zustand.
 - Aktualisiert Quota bei Modell-Refresh (oder via TTL).
 - Reicht Quota an `boardPanel.js` und `statusBar.js` weiter.
@@ -50,7 +50,7 @@ Ziel ist es, die Auslastung transparent im Dashboard-Header und in der Statuslei
 
 ### [UI-Erweiterungen]
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - HTML/CSS: Neuer `.quota-strip` direkt unter der Toolbar.
 - Zeigt je nach Provider-Filter Claude-Code- und Antigravity-Karten:
   - Claude Code: 5-Stunden-Auslastungsbalken (% + Reset-Uhrzeit) und 7-Tage-Auslastungsbalken (% + Reset-Datum).
@@ -58,12 +58,12 @@ Ziel ist es, die Auslastung transparent im Dashboard-Header und in der Statuslei
 - Farbschema konsistent mit Token-Balken (<65% blau, 65-85% gelb, >85% rot).
 - Tooltips mit detaillierten Metriken.
 
-#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/statusBar.js)
+#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/statusBar.js)
 - Hover-Tooltip um Quota-Übersicht ergänzen:
   - Claude: `⚡ 5-Std.-Limit: X% (Reset HH:MM) · 📅 7-Tage-Limit: Y% (Reset Wochentag HH:MM)`
   - Antigravity: `⚡ 5-Std.-Verbrauch: ~X Tokens · 📅 7-Tage-Verbrauch: ~Y Tokens`
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versionssprung von `0.12.0` auf `0.13.0`.
 - `npm run check` prüft auch `lib/quota.js`.
 

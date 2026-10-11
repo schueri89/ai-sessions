@@ -22,25 +22,25 @@ Task-Ziel: Schutz von „Erledigt“- und „Gemerkt“-Markierungen gegen Verlu
 
 ### [session-dashboard]
 
-#### [MODIFY] [lib/doneStore.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/doneStore.js)
+#### [MODIFY] [lib/doneStore.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/doneStore.js)
 - `reconcile(live)`: Das automatische Löschen von Markierungen bei `vanished` entfernt.
 - `reconcile` entfernt eine Markierung **nur und ausschließlich**, wenn die Session nachweislich reaktiviert wurde (`reactivated`: `s.state === 'busy'` oder `s.state === 'waiting'` oder `s.startedAt > mark.markedAt`).
 - Dadurch sind Markierungen absolut resistent gegen I/O-Fehler, gesperrte Dateien oder unvollständige Scans. Sessions, die nicht mehr existieren, werden im Dashboard ohnehin nicht angezeigt (da das Board nur `live` darstellt).
 
-#### [MODIFY] [lib/bookmarkStore.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/bookmarkStore.js)
+#### [MODIFY] [lib/bookmarkStore.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/bookmarkStore.js)
 - `reconcile(live)`: Entfernen des `vanished`-Prunings. Pinned-Sessions dürfen niemals automatisch entpinnt werden, nur weil ein Scan die Datei temporär nicht erfassen konnte.
 - Lesezeichen werden nur manuell gelöst (über Pin-Button, `unbookmarkAll` oder beim Markieren als `done`).
 
-#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - SQL-Query in `readSessions()`: `LIMIT 250` entfernt, sodass alle aktiven und historischen Sessions (wo `killed = 0`) vollständig geladen werden.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Aufrufe von `reconcile`: Vereinfacht auf `await this.done.reconcile(live)` und `await this.bookmarks.reconcile(live)`.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versions-Bump auf `0.22.0`.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Bug-Eintrag aus „Bug“ entfernt und unter „Erledigt“ dokumentiert.
 
 ## Verifikation

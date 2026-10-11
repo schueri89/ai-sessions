@@ -36,7 +36,7 @@ Ziel ist es, eine zentrale Hilfsfunktion `resolveMaxContext(model)` bereitzustel
 
 ### [Modell- & Kontextauflösung]
 
-#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/format.js)
+#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/format.js)
 - Neue exportierte Funktion `resolveMaxContext(model)`:
   - Prüft auf `gemini`/`antigravity` (1M) bzw. `2m` (2M).
   - Erkennt alle 1M-Claude-Modelle: `opus-5*`, `opus-4.8`, `opus-4.7`, `opus-4.6`, `sonnet-5*`, `sonnet-4.6`, `fable*`, `mythos*`, `1m`.
@@ -44,7 +44,7 @@ Ziel ist es, eine zentrale Hilfsfunktion `resolveMaxContext(model)` bereitzustel
 - `friendlyModel(m)` erweitern:
   - Ergänzung von `Opus 5`, `Opus 4.8`, `Opus 4.7`, `Opus 4.6`, `Sonnet 5.5`, `Sonnet 5`, `Sonnet 4.6`, `Fable 5.1`, `Fable`, `Mythos`.
 
-#### [MODIFY] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/transcripts.js)
+#### [MODIFY] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/transcripts.js)
 - Import von `resolveMaxContext` aus `./format`.
 - `emptyInfo()` um `model: ''` erweitern.
 - In `applyLine()`:
@@ -54,20 +54,20 @@ Ziel ist es, eine zentrale Hilfsfunktion `resolveMaxContext(model)` bereitzustel
     - `maxContext = resolveMaxContext(model)`.
     - `percent = Math.min(100, Math.round((context / maxContext) * 100))`.
 
-#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - Import von `resolveMaxContext` aus `../format`.
 - In `readTranscriptTail()`: `maxContext = resolveMaxContext(step.model || 'Gemini')`.
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Client-seitige Hilfsfunktion `friendlyModel(m)` synchronisieren mit `format.js`.
 - Im Karten-Rendering bei Bedarf Fallback für `maxContext` via `resolveMaxContext(t.model)` absichern.
 
 ### [Projekt & Dokumentation]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versionssprung auf `0.14.0`.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Punkt `Context-Window pro Modell prüfen, ggf. korrigieren` abhaken und nach Erledigt verschieben.
 
 ## Verifikationsplan

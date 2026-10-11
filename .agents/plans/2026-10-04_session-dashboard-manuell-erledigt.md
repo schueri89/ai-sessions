@@ -17,26 +17,26 @@ Mit dieser Änderung gilt ein striktes Prinzip:
 
 ### [Status-Mapping & Extension-Logik]
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - `displayState`: Wenn `s.state === 'closed'`, wird die Session auf `idle` gemappt, nicht auf `done`.
 - `done` wird ausschließlich gesetzt, wenn `isDone === true` ist.
 
-#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - Entfernen der Konstante `RECENT_IDLE_WINDOW_MS`.
 - Antigravity-Sessions, die gerade nicht laufen/warten, verbleiben dauerhaft im Status `idle` und werden nicht nach 24h geschlossen.
 
-#### [MODIFY] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [MODIFY] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - Historische bzw. beendete Claude-Sessions aus `scanHistory()` werden mit `state: 'idle'` initialisiert.
 
-#### [MODIFY] [lib/doneStore.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/doneStore.js)
+#### [MODIFY] [lib/doneStore.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/doneStore.js)
 - Reaktivierungsprüfung in `reconcile`: Wenn eine als erledigt markierte Session neu gestartet wird oder auf Rückfrage wartet (`s.state === 'waiting'` oder `s.startedAt > mark.markedAt`), wird die Erledigt-Markierung automatisch entfernt.
 
-#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/format.js)
+#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/format.js)
 - `describe()`: `lastActive()` greift für `closed` und `displayState === 'done'`.
 
 ### [Paketierung & Version]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versionsanhebung auf `0.20.0`.
 
 ## Verifikationsplan & Testergebnisse

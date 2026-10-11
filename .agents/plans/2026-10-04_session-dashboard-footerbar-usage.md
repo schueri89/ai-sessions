@@ -37,19 +37,19 @@ Dieses Dokument beschreibt die Konzeption und Umsetzung der dauerhaften Quota- &
 
 ### [Icon-Font & Ressourcen]
 
-#### [ADD] [resources/icons.woff](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/resources/icons.woff)
+#### [ADD] [resources/icons.woff](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/resources/icons.woff)
 - Kompilierter WOFF-Icon-Font mit Glyphen für `claude` (`\uea02`) und `antigravity` (`\uea01`).
 
 ### [Quota-Modul]
 
-#### [MODIFY] [lib/quota.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/quota.js)
+#### [MODIFY] [lib/quota.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/quota.js)
 - `User-Agent: claude-code/0.2.29` für `fetch` und `curl.exe` setzen.
 - `lastSuccessfulClaude` Caching implementieren.
 - Fehlerprüfung auf `data.error` bei der JSON-Rückgabe.
 
 ### [Statusleisten-Widget]
 
-#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/statusBar.js)
+#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/statusBar.js)
 - Methode `formatUsage(format)` ergänzen, die standardmäßig `$(claude)` und `$(antigravity)` Icons verwendet (oder Text bei Option `text`).
 - `update()`: `this.item.text` kombiniert Session-Teil und Quota-Icons:
   - Z. B. `🤖 1 arbeitet | $(claude) 100% · $(antigravity) 66%`.
@@ -57,19 +57,19 @@ Dieses Dokument beschreibt die Konzeption und Umsetzung der dauerhaften Quota- &
 
 ### [Extension & Reaktivität]
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - In `model.refresh()`: Antigravity Live-Quota in `signature` aufnehmen.
 - `onDidChangeConfiguration` registrieren für `sessionDashboard.statusBarUsage`.
 - `sessionDashboard.filter` und `quickMenu`: Provider mit `$(claude)` und `$(antigravity)` Icons versehen.
 
 ### [Konfiguration & Metadaten]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versionssprung auf `0.19.0`.
 - `contributes.icons`: `claude` und `antigravity` mit Pfad zu `resources/icons.woff`.
 - Konfigurationseigenschaft `sessionDashboard.statusBarUsage` um `text` ergänzt.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Aufgabe als erledigt markieren.
 
 ## Verifikationsplan

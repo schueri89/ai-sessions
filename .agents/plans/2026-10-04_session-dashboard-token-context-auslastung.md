@@ -49,28 +49,28 @@ In `type: "PLANNER_RESPONSE"`-Schritten:
 
 ### [session-dashboard]
 
-#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/format.js)
+#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/format.js)
 - Neue Hilfsfunktion `formatTokens(n)`: Kompakte Formatierung von Tokenzahlen (`50.5k`, `200k`, `1M`).
 - Neue Hilfsfunktion `friendlyModel(m)`: Bereinigt Modellnamen zu lesbaren Labels (`Opus 5.5`, `Sonnet 3.5`, `Gemini`).
 
-#### [MODIFY] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/transcripts.js)
+#### [MODIFY] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/transcripts.js)
 - Erweitert `INTERESTING` um `'"usage"'`.
 - `emptyInfo()` initialisiert `tokens: null`.
 - Liest in `applyLine()` bei `type === 'assistant'` `rec.message.usage` und `rec.message.model` aus.
 - Berechnet `context`, `maxContext` (200k), `percent` und liefert `tokens` im Info-Objekt zurück.
 
-#### [MODIFY] [lib/history.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/history.js)
+#### [MODIFY] [lib/history.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/history.js)
 - Reicht `tokens: info.tokens || null` bei historischen Claude-Code-Sessions durch.
 
-#### [MODIFY] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [MODIFY] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - Hängt `tokens` an Live-Sessions und an geschlossene Sessions an.
 
-#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - Liest im `readTranscriptTail()` die Token-Metriken des letzten `PLANNER_RESPONSE` (`input_tokens`, `cache_read_tokens`, `output_tokens`).
 - Berechnet Kontextgröße gegen das 1M-Gemini-Fenster.
 - Bindet `tokens` an das Session-Objekt.
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - CSS für `.token-bar`, `.token-track`, `.token-fill` mit Farbstufen:
   - `< 65%`: Blau (`var(--vscode-charts-blue)`)
   - `65% – 85%`: Gelb (`var(--vscode-charts-yellow)`)
@@ -79,17 +79,17 @@ In `type: "PLANNER_RESPONSE"`-Schritten:
 - Reicher Tooltip beim Überfahren mit Aufschlüsselung von Cache-Read, Cache-Creation, neuem Input und Output.
 - Freitextsuche filtert auch nach Modellnamen (`opus`, `sonnet`, `gemini`).
 
-#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - Ergänzt den Sidebar-Tooltip um das Kontextfenster: `🧠 **Kontextfenster:** 51k / 200k (25%) · Opus 5.5`.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Integriert `s.tokens` in den Signature-Vergleich zur automatischen Aktualisierung bei neuen Modell-Turns.
 - Zeigt Modell und Tokenstand in QuickPick-Suche und Schnellmenü an.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Bump auf Version `0.12.0`.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Aufgabe als erledigt markiert und auf diesen Plan verlinkt.
 
 ## Verifikationsplan

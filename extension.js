@@ -63,7 +63,7 @@ class SessionModel {
   }
 
   async setFilter(filter) {
-    if (!['all', 'claude', 'antigravity', 'copilot'].includes(filter)) filter = 'all';
+    if (!['all', 'claude', 'antigravity', 'copilot', 'codex'].includes(filter)) filter = 'all';
     this.providerFilter = filter;
     await this.context.globalState.update('sessionDashboard.providerFilter', filter);
   }
@@ -78,6 +78,7 @@ class SessionModel {
     if (this.providerFilter === 'claude') list = list.filter((s) => s.provider === 'claude');
     else if (this.providerFilter === 'antigravity') list = list.filter((s) => s.provider === 'antigravity');
     else if (this.providerFilter === 'copilot') list = list.filter((s) => s.provider === 'copilot');
+    else if (this.providerFilter === 'codex') list = list.filter((s) => s.provider === 'codex');
     if (this.projectFilter && this.projectFilter !== 'all') {
       list = list.filter((s) => s.project === this.projectFilter);
     }
@@ -554,7 +555,7 @@ async function openCodexSession(info) {
 
   try {
     const uriScheme = vscode.env.uriScheme || 'vscode';
-    const deepLink = vscode.Uri.parse(`${uriScheme}://openai.chatgpt/thread/${sessionId}`);
+    const deepLink = vscode.Uri.parse(`${uriScheme}://openai.chatgpt/local/${sessionId}`);
     logDebug(`[Codex] 2. Öffne Thread via Deep-Link: ${deepLink.toString()}`);
     await vscode.env.openExternal(deepLink);
   } catch (err) {
@@ -649,6 +650,8 @@ function activate(context) {
           filterParts.push(a5 ? `Antigravity (~${formatTokens(a5)})` : 'Antigravity');
         } else if (model.providerFilter === 'copilot') {
           filterParts.push('GitHub Copilot');
+        } else if (model.providerFilter === 'codex') {
+          filterParts.push('OpenAI Codex');
         }
         if (model.projectFilter && model.projectFilter !== 'all') filterParts.push(model.projectFilter);
         view.description = filterParts.join(' · ');
@@ -816,7 +819,7 @@ function activate(context) {
         }
         const items = visible.map((s) => ({
           label: (s.isBookmarked ? '📌 ' : '') + (s.title || s.sessionId),
-          description: (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code')) + (s.project ? ` · [${s.project}]` : ''),
+          description: (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code'))) + (s.project ? ` · [${s.project}]` : ''),
           session: s
         }));
         const picked = await vscode.window.showQuickPick(items, {
@@ -994,7 +997,7 @@ function activate(context) {
         const pick = await vscode.window.showQuickPick(
           visible.map((s) => ({
             label: `[${s.project}] ` + (s.title || s.sessionId.slice(0, 8)),
-            description: s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code'),
+            description: s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code')),
             detail: s.lastPrompt ? s.lastPrompt.slice(0, 80) : s.sessionId,
             sessionId: s.sessionId
           })),
@@ -1087,7 +1090,7 @@ function activate(context) {
       const visible = model.visibleSessions();
       const now = Date.now();
       const items = visible.map((s) => {
-        const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
+        const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
         const state = STATES[s.displayState] || { label: s.displayState, icon: 'circle-outline' };
         const isBookmarked = s.isBookmarked ? '📌 ' : '';
         const ticketPrefix = s.ticket ? `[🎫 ${s.ticket}] ` : '';
@@ -1190,7 +1193,7 @@ function activate(context) {
       if (waitingSessions.length > 0) {
         items.push({ label: 'Wartet auf dich', kind: vscode.QuickPickItemKind.Separator });
         for (const s of waitingSessions) {
-          const providerLabel = s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude');
+          const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
           const proj = s.project ? `[${s.project}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
@@ -1206,7 +1209,7 @@ function activate(context) {
       if (busySessions.length > 0) {
         items.push({ label: 'Arbeitet', kind: vscode.QuickPickItemKind.Separator });
         for (const s of busySessions) {
-          const providerLabel = s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude');
+          const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
           const proj = s.project ? `[${s.project}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
@@ -1222,7 +1225,7 @@ function activate(context) {
       if (idleSessions.length > 0) {
         items.push({ label: 'Fertig', kind: vscode.QuickPickItemKind.Separator });
         for (const s of idleSessions) {
-          const providerLabel = s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude');
+          const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
           const proj = s.project ? `[${s.project}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({

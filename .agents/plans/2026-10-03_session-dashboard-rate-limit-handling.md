@@ -31,7 +31,7 @@ Ziel ist eine zweiphasige Behandlung:
 
 ### [Transkript-Parser & History]
 
-#### [MODIFY] [transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/transcripts.js)
+#### [MODIFY] [transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/transcripts.js)
 - `INTERESTING`-Filter um `"rate_limit"`, `"quotaLimits"` und `"type":"assistant"` erweitert.
 - In `applyLine`:
   - Erkennt Assistant-Nachrichten mit `error === 'rate_limit'` oder `rec.quotaLimits?.status === 'rejected'` bzw. `apiErrorStatus === 429`.
@@ -39,18 +39,18 @@ Ziel ist eine zweiphasige Behandlung:
   - Bei nachfolgender erfolgreicher Assistant-Nachricht (`rec.type === 'assistant' && !rec.error && !rec.isApiErrorMessage`) wird `rateLimit` auf `null` zurückgesetzt.
 - In `readTranscriptInfo`: `rateLimit` im Rückgabe-Objekt ergänzt.
 
-#### [MODIFY] [history.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/history.js)
+#### [MODIFY] [history.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/history.js)
 - In `readEntry`: `rateLimit: info.rateLimit || null` in den History-Cache übernommen, damit auch geschlossene oder historische Sessions den Rate-Limit-Status kennen.
 
-#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - `rateLimit` an Live- und Closed-Sessions durchgereicht.
 
-#### [MODIFY] [antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - `rateLimit: null` für einheitliche Session-Objektstruktur ergänzt.
 
 ### [Statuslogik & Modell]
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - In `model.refresh()`:
   - Bei vorhandenem `s.rateLimit`:
     - Falls `Date.now() < s.rateLimit.resetsAt`: `displayState = 'busy'` (Phase 1).
@@ -59,28 +59,28 @@ Ziel ist eine zweiphasige Behandlung:
 
 ### [Formatierung & Darstellung]
 
-#### [MODIFY] [format.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/format.js)
+#### [MODIFY] [format.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/format.js)
 - `formatTime(ts)` für Uhrzeitanzeige im Format `HH:MM Uhr` hinzugefügt.
 - In `describe(s)`:
   - Rate-Limit-spezifische Beschreibung: `⏳ Limit bis HH:MM Uhr` bzw. `⚠️ Limit vorbei · Bereit zum Fortsetzen`.
 
-#### [MODIFY] [treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [MODIFY] [treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - Rate-Limited Sessions in Phase 1 mit `clock`-Icon in `charts.yellow` statt Endlos-Spinner anzeigen.
 - Tooltip um Rate-Limit-Details und genaue Reset-Uhrzeit ergänzen.
 
-#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Karte bei aktivem Limit mit Klasse `.rate-limited` (gelber Rahmen, gelbe Detail-Schrift) und Badge `⏳ Limit erreicht` bzw. `⚠️ Limit vorbei` kennzeichnen.
 - CSS-Styling für `.rate-limit-badge` und `.card.rate-limited` ergänzt.
 
 ### [Version & Dokumentation]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Bump auf `0.5.0` und `lib/history.js` in `scripts.check` aufgenommen.
 
-#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/README.md)
+#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/README.md)
 - Dokumentation der Rate-Limit-Erkennung.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Aufgabe als erledigt abgehakt.
 
 ## Verifikationsplan & Testergebnisse

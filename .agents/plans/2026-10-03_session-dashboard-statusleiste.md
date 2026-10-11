@@ -13,7 +13,7 @@ Entwickler arbeiten oft in Vollbild-Editoren oder mit geschlossener Sidebar. Ein
 
 ### [session-dashboard]
 
-#### [ADD] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/statusBar.js)
+#### [ADD] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/statusBar.js)
 - Klasse `StatusBarWidget` zur Verwaltung des VS-Code-Statusleisteneintrags (`vscode.window.createStatusBarItem`).
 - Formatierung:
   - `🤖 X arbeitet · Y wartet` (wenn beides aktiv)
@@ -24,12 +24,12 @@ Entwickler arbeiten oft in Vollbild-Editoren oder mit geschlossener Sidebar. Ein
 - Reicher Markdown-Tooltip mit Aufschlüsselung aller Zustände.
 - Verknüpfung mit Befehl `sessionDashboard.statusBarClick`.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Instanziiert `StatusBarWidget` und aktualisiert es bei jedem `update()`.
 - Neuer Befehl `sessionDashboard.statusBarClick` (liest Konfiguration `sessionDashboard.statusBarClickAction`: `board`, `quickpick` oder `firstWaiting`).
 - Neuer Befehl `sessionDashboard.quickMenu` für schnellen Zugriff auf wartende/arbeitende Sessions und Aktionen.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Bump auf Version `0.11.0`.
 - Registriert Befehle `sessionDashboard.statusBarClick` und `sessionDashboard.quickMenu`.
 - Konfiguration `sessionDashboard.statusBarClickAction` (`board` [Default], `quickpick`, `firstWaiting`).

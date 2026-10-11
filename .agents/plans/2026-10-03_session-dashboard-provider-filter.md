@@ -16,13 +16,13 @@ im Dashboard (Toolbar-Filterbuttons mit Zählern) eine synchrone Filtermöglichk
 
 ### [session-dashboard]
 
-#### [MODIFY] [session-dashboard/package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [session-dashboard/package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Neuen Befehl `sessionDashboard.filter` registrieren (`Filter nach Provider...`, Icon `$(filter)`).
 - `menus["view/title"]`: Filter-Befehl vor `showBoard` und `refresh` anordnen (`navigation@1`).
 - `menus["commandPalette"]`: Befehl registrieren.
 - Version auf `0.3.0` anheben.
 
-#### [MODIFY] [session-dashboard/extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [session-dashboard/extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - `SessionModel`:
   - `providerFilter`: aus `context.globalState` laden (`'all' | 'claude' | 'antigravity'`).
   - `setFilter(filter)`: Filter setzen und in `globalState` persistieren.
@@ -35,10 +35,10 @@ im Dashboard (Toolbar-Filterbuttons mit Zählern) eine synchrone Filtermöglichk
   - `view.badge` auf Basis von `visibleSessions()` berechnen.
   - `board.update()` mit `filter` und `counts` anreichern.
 
-#### [MODIFY] [session-dashboard/lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [MODIFY] [session-dashboard/lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - `getChildren()` verwendet `this.model.visibleSessions()`.
 
-#### [MODIFY] [session-dashboard/lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [session-dashboard/lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - `update()` berechnet Spalten über `visibleSessions()` und sendet `filter` + `counts` an das Webview.
 - Nachrichtenempfänger: Aktion `setFilter` empfangen und an `model.setFilter()` weiterleiten.
 - Webview Toolbar:

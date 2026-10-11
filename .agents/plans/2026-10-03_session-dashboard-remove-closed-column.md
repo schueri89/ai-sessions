@@ -44,30 +44,30 @@ Nach der Umstellung gibt es 5 klare, aufgeräumte Spalten:
 
 ### [Formatierung & Modell]
 
-#### [MODIFY] [format.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/format.js)
+#### [MODIFY] [format.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/format.js)
 - Entfernen von `closed` aus `STATES` und `STATE_ORDER`.
 - `STATE_ORDER` ist nun `['waiting', 'busy', 'bookmarked', 'idle', 'done']`.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Status-Zuweisung in `model.refresh()` aktualisiert:
   - `s.state === 'closed'` wird zu `displayState = 'done'`, sofern nicht gepinnt (`isBookmarked`).
 - Entfernen des nun überflüssigen Befehls `sessionDashboard.markAllClosedDone`.
 
 ### [Board & Darstellung]
 
-#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Entfernen des Buttons „Alle erledigt" und der `.closed`-CSS-Regeln.
 - Entfernen des Message-Handlers `markAllClosedDone`.
 
 ### [Version & Dokumentation]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Bump auf `0.6.0`.
 
-#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/README.md)
+#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/README.md)
 - Aktualisierung der Statustabelle auf 5 Gruppen.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Punkt als erledigt markiert.
 
 ## Verifikationsplan & Testergebnisse

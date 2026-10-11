@@ -26,15 +26,15 @@ markiert werden:
 
 ### [session-dashboard]
 
-#### [ADD] [lib/bookmarkStore.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/bookmarkStore.js)
+#### [ADD] [lib/bookmarkStore.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/bookmarkStore.js)
 - Verwaltet persistente Markierungen im `context.globalState` unter dem Schlüssel `sessionDashboard.bookmarks`.
 - Methoden: `isBookmarked(sessionId)`, `toggle(sessionId)`, `mark(sessionId)`, `unmark(sessionId)`, `unmarkMany(sessionIds)`, `all()`, `reconcile(live, knownIds)`.
 
-#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/format.js)
+#### [MODIFY] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/format.js)
 - `STATES`: Neuer Eintrag `bookmarked: { label: 'Gemerkt', icon: 'pinned', color: 'charts.yellow' }`.
 - `STATE_ORDER`: Anordnung auf `['waiting', 'busy', 'bookmarked', 'idle', 'closed', 'done']`.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - `SessionModel`:
   - `this.bookmarks = new BookmarkStore(context.globalState)`.
   - Bei `refresh()`: Für jede Session `s.isBookmarked` prüfen.
@@ -46,12 +46,12 @@ markiert werden:
   - `sessionDashboard.unbookmark(sessionId)`
   - `sessionDashboard.unbookmarkAll()`
 
-#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - Session-Items in der Sidebar:
   - Wenn `s.isBookmarked` und nicht in Gruppe `bookmarked`: Pin-Kennzeichnung im Tooltip und Description (`📌`).
   - Eigene Gruppe `Gemerkt (n)` mit gelbem Pin-Icon.
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Card-Header:
   - Pin-Button links neben dem Provider-Icon (`.pin-btn`).
   - Klick sendet `{ action: 'toggleBookmark', sessionId: s.sessionId }`.
@@ -61,12 +61,12 @@ markiert werden:
   - Button „Alle geprüft" im Spaltenkopf zum gemeinsamen Entfernen.
   - Card-Button: Statt nur „Erledigt" zusätzlich Button „Geprüft" (entfernt Pin).
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Befehle `sessionDashboard.bookmark`, `sessionDashboard.unbookmark` und `sessionDashboard.toggleBookmark` registrieren.
 - Inline-Menü in `view/item/context` für schnelles Pinnen/Entpinnen per Hover in der Sidebar.
 - Version auf `0.4.0` anheben.
 
-#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/README.md)
+#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/README.md)
 - Neue Gruppe/Spalte „Gemerkt" und Pin-Funktion dokumentieren.
 
 ## Verifikation

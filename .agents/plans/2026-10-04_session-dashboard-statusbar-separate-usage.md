@@ -47,7 +47,7 @@ Task-Ziel: Status Bar trennt Usage-Informationen für Claude Code und Google Ant
 
 ### [Statusleisten-Modul]
 
-#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/statusBar.js)
+#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/statusBar.js)
 - Refactoring von `StatusBarWidget`:
   - Erzeugt `sessionItem`, `claudeItem`, `antigravityItem`.
   - Methoden `updateSessionItem()`, `updateClaudeItem(config)`, `updateAntigravityItem(config)`.
@@ -57,14 +57,14 @@ Task-Ziel: Status Bar trennt Usage-Informationen für Claude Code und Google Ant
 
 ### [Extension & Befehle]
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Registrierung der neuen Klick-Befehle:
   - `sessionDashboard.claudeStatusClick`
   - `sessionDashboard.antigravityStatusClick`
 
 ### [Konfiguration & Metadaten]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versionssprung auf `0.21.0`.
 - Neue Konfigurationsoptionen:
   - `sessionDashboard.quotaWarningThreshold` (Standard: 80)
@@ -73,7 +73,7 @@ Task-Ziel: Status Bar trennt Usage-Informationen für Claude Code und Google Ant
   - `sessionDashboard.claudeStatusClick`
   - `sessionDashboard.antigravityStatusClick`
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Aufgabe als erledigt abhaken und Plan referenzieren.
 
 ---

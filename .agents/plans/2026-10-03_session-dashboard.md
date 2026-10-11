@@ -40,42 +40,42 @@ nicht Ziel — das geschieht weiter im Chat.
 
 ### [Extension]
 
-#### [ADD] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [ADD] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Manifest: Aktivitätsleisten-Container mit Baumansicht, Befehle (Öffnen, Erledigt, Zurückholen,
   Übersicht, Aktualisieren), Kontextmenüs. Kein Laufzeit-Paket, nur `@vscode/vsce` zum Paketieren.
 
-#### [ADD] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [ADD] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Verdrahtung: Beobachter auf `~/.claude/sessions/` (entprellt) plus 5-Sekunden-Takt für Liveness und
   relative Zeiten; Badge mit der Zahl wartender Sessions.
 
-#### [ADD] [lib/registry.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/registry.js)
+#### [ADD] [lib/registry.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/registry.js)
 - Liest das Register tolerant ein (unlesbare Datei → übersprungen, unbekanntes Feld → egal), filtert
   tote Prozesse, `spare`, `parkedJobId` und nicht-interaktive Sessions, bildet den Zustand ab.
 
-#### [ADD] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/transcripts.js)
+#### [ADD] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/transcripts.js)
 - Titel und letzter Prompt aus dem Transkript, **inkrementell** gelesen (nur die seit dem letzten
   Lauf angehängten Bytes), damit große, laufend wachsende Transkripte nichts kosten.
 
-#### [ADD] [lib/doneStore.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/doneStore.js)
+#### [ADD] [lib/doneStore.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/doneStore.js)
 - „Erledigt"-Markierungen im `globalState` der Extension. Wird die Session nach der Markierung
   wieder `busy`, fällt die Markierung weg. Verwaiste Einträge räumt sie nach 14 Tagen ab.
 
-#### [ADD] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [ADD] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - Seitenleiste mit den Gruppen „Wartet auf dich" (älteste zuerst), „Arbeitet", „Fertig",
   „Erledigt" (eingeklappt). Klick öffnet den Chat, Häkchen markiert als erledigt.
 
-#### [ADD] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [ADD] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Übersicht als Editor-Tab (Webview, Kachelspalten je Zustand), gleiche Aktionen, Farben aus dem
   VS-Code-Theme.
 
-#### [ADD] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/format.js)
+#### [ADD] [lib/format.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/format.js)
 - Gemeinsame Texte: Zustandsnamen, `waitingFor`-Übersetzung, relative Zeit, Datum `dd.mm.yyyy`.
 
-#### [ADD] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/README.md), `.vscodeignore`, `resources/icon.svg`
+#### [ADD] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/README.md), `.vscodeignore`, `resources/icon.svg`
 
 ### [Repo & Wissensbasis]
 
-#### [MODIFY] [.gitignore](file:///c:/lucee/tomcat/webapps/ROOT/tools/.gitignore)
+#### [MODIFY] [.gitignore](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/.gitignore)
 - `node_modules/` und `*.vsix` ausschließen.
 
 #### [MODIFY] [landkarte.md](file:///c:/lucee/tomcat/webapps/ROOT/.agents/landkarte.md)

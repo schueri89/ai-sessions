@@ -26,19 +26,19 @@ Die Transkripte (`.jsonl`) enthalten für jede Zeile einen unveränderlichen Zei
 
 ### [Transkript-Parser & History]
 
-#### [MODIFY] [transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/transcripts.js)
+#### [MODIFY] [transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/transcripts.js)
 - `emptyInfo()` um `startedAt: 0` und `lastActivity: 0` erweitern.
 - In `applyLine`:
   - `startedAt` aus dem ersten Zeilen-Zeitstempel setzen.
   - `lastActivity` bei `user`-, `assistant`- und `last-prompt`-Nachrichten aktualisieren.
 - In `readTranscriptInfo`: `startedAt` und `lastActivity` im Rückgabe-Objekt zurückgeben.
 
-#### [MODIFY] [history.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/history.js)
+#### [MODIFY] [history.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/history.js)
 - In `readEntry`:
   - `startedAt: info.startedAt || mtimeMs`
   - `lastActivity: info.lastActivity || info.startedAt || mtimeMs`
 
-#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - Für Live-Sessions:
   - `startedAt: info.startedAt || s.startedAt` (echtes Erstellungsdatum statt PID-Start)
   - `statusUpdatedAt`: für `busy`/`waiting` weiterhin der Status-Zeitpunkt, für `idle`/`closed` die echte `info.lastActivity`
@@ -48,10 +48,10 @@ Die Transkripte (`.jsonl`) enthalten für jede Zeile einen unveränderlichen Zei
 
 ### [Version & Dokumentation]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Bump auf `0.7.0`.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Aufgabe als erledigt markieren.
 
 ## Verifikationsplan

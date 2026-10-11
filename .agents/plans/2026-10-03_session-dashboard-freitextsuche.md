@@ -31,7 +31,7 @@ sofort zu finden.
 
 ### [Dashboard Webview & Suche]
 
-#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Such-Icon zu `ICONS` hinzufügen (`ICONS.search`).
 - In `update()`: `cwd: s.cwd || ''` an jede Session übergeben.
 - Im Toolbar-Header: Suchfeld mit Lupe, Eingabefeld, Leeren-Button (`✕`) und Trefferanzahl-Badge einbauen.
@@ -47,24 +47,24 @@ sofort zu finden.
 
 ### [Erweiterung & QuickPick-Befehl]
 
-#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - Bei geschlossenen Sessions `cwd: h.entrypoint || ''` übergeben, damit Projektordner auch bei archivierten Sessions durchsuchbar sind.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Befehl `sessionDashboard.search` implementieren:
   - Öffnet `vscode.window.showQuickPick` mit allen sichtbaren Sessions.
   - Durchsucht Titel, Provider, Status, Detail und Prompt.
   - Direkter Sprung zur gewählten Session.
 - `board.show(query)` unterstützt optionales Vorbelegen des Suchfeldes.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versions-Bump auf `0.8.0`.
 - Befehl `sessionDashboard.search` deklarieren mit Icon `$(search)`.
 - Icon in `view/title` der Session-Sidebar einbinden.
 
 ### [Dokumentation]
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Freitextsuche-Aufgabe abhaken und Plan referenzieren.
 
 ## Verifikationsplan

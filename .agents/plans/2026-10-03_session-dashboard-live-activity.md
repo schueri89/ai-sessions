@@ -30,41 +30,41 @@ Mit einer Live-Aktivitätsanzeige sieht der Benutzer auf einen Blick:
 
 ### [Transkripte & Provider]
 
-#### [MODIFY] [transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/transcripts.js)
+#### [MODIFY] [transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/transcripts.js)
 - `emptyInfo()` um `activity: ''` erweitern.
 - In `applyLine(info, line)`:
   - Bei `assistant`: Letzten `tool_use`- oder `thinking`-Block extrahieren und lesbar formatieren (`🛠️ Befehl`, `✏️ Bearbeitet datei`, `📖 Liest datei`, `🧠 Denkt nach…`).
   - Bei `last-prompt`: Auf `⏳ Startet…` setzen.
 - In `readTranscriptInfo`: `activity: info.activity || ''` zurückgeben.
 
-#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [MODIFY] [claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - In `readLiveSessions`: `activity: s.state === 'busy' ? (info.activity || 'Arbeitet…') : ''` übergeben.
 
-#### [MODIFY] [antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - In `readTranscriptTail`: Letzten Tool-Call / Denkprozess aus `PLANNER_RESPONSE` auslesen und formatieren.
 - In `readSessions`: `activity: state === 'busy' ? (info.activity || 'Arbeitet…') : ''` an die Session anhängen.
 
 ### [Model & UI]
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - `s.activity` in `refresh()` berechnen und in die State-Signatur aufnehmen (ermöglicht sofortige UI-Aktualisierung bei Tool-Wechsel).
 - `s.activity` im QuickPick anzeigen.
 
-#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - `activity: s.activity || ''` in das Webview-Spaltenpayload übergeben.
 - CSS: `.activity` und `.activity-pulse` animieren.
 - HTML/Card-Rendering: Badge anzeigen, wenn `s.activity` vorhanden ist.
 - Such-Matching: `s.activity` in `matchesSession` einbinden.
 
-#### [MODIFY] [treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [MODIFY] [treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - Bei `displayState === 'busy'` die Aktivität in `item.description` und im Tooltip anzeigen.
 
 ### [Version & Dokumentation]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versions-Bump auf `0.9.0`.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Aufgabe als erledigt markieren.
 
 ## Verifikationsplan

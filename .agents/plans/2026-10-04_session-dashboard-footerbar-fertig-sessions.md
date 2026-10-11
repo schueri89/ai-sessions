@@ -33,7 +33,7 @@ Mit der Einbindung von `Z fertig` sieht man sofort auf einen Blick:
 
 ### [Statusleisten-Widget]
 
-#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/statusBar.js)
+#### [MODIFY] [lib/statusBar.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/statusBar.js)
 - Text-Generierung dynamisch aufbauen:
   ```javascript
   const parts = [];
@@ -54,15 +54,15 @@ Mit der Einbindung von `Z fertig` sieht man sofort auf einen Blick:
 
 ### [QuickMenu-Direktzugriff]
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - In `sessionDashboard.quickMenu`: `idleSessions` auflisten mit Status-Icon `$(pass)` und Direktsprung zur fertigen Session.
 
 ### [Projekt & Dokumentation]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versionssprung von `0.14.0` auf `0.15.0`.
 
-#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/TODO.md)
+#### [MODIFY] [TODO.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/TODO.md)
 - Aufgabe als erledigt markieren.
 
 ## Verifikationsplan

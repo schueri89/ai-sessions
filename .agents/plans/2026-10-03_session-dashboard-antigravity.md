@@ -44,42 +44,42 @@ per Klick direkt in der jeweiligen Oberfläche geöffnet werden können.
 
 ### [Extension: Provider-Architektur & Antigravity-Integration]
 
-#### [ADD] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [ADD] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - Liest `~/.gemini/antigravity/conversation_summaries.db` schreibgeschützt via `node:sqlite` ein.
 - Prüft `presence/<id>.lock` und filtert auf relevante Sessions (aktiv gelockt, `not_fully_idle === 1`, oder im aktuellen Workspace in den letzten 24h aktiv).
 - Mappt Antigravity-Zustände auf `waiting`, `busy`, `idle`.
 - Liest bei Bedarf den letzten Prompt aus dem Transkript `brain/<id>/.system_generated/logs/transcript.jsonl`.
 - Liefert standardisierte Session-Objekte: `{ provider: 'antigravity', sessionId, title, lastPrompt, state, statusUpdatedAt, cwd, workspaceUris }`.
 
-#### [ADD] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [ADD] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - Kapselt die bisherige Claude-Code-Logik aus `lib/registry.js` und `lib/transcripts.js`.
 - Liefert standardisierte Session-Objekte mit `provider: 'claude'`.
 
-#### [MODIFY] [lib/registry.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/registry.js)
+#### [MODIFY] [lib/registry.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/registry.js)
 - Fungiert als Aggregator: Ruft beide Provider (`claude.js` und `antigravity.js`) parallel ab und fasst die Sessions zusammen.
 - Exportiert Pfade für Dateisystem-Watcher beider Quellen (`sessionsDir()` für Claude, `antigravityDbPath()` / `presenceDir()` für Antigravity).
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - `openSession(sessionOrId)`: Unterscheidet nach `provider`:
   - `claude`: `vscode.commands.executeCommand('claude-vscode.editor.open', id)`
   - `antigravity`: `vscode.commands.executeCommand('antigravity.openConversation', id)`
 - Beobachtet Dateisystemänderungen beider Ordner (`~/.claude/sessions` und `~/.gemini/antigravity`).
 - Polling-Zyklus (5s) aktualisiert beide Quellen.
 
-#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - Session-Items erhalten ein Provider-Label/Icon (z. B. `[AG]` / `[Claude]` oder ein entsprechendes Theme-Icon/Tooltip), um auf einen Blick die Herkunft zu erkennen.
 - Click-Befehl übergibt das Session-Objekt mit Provider-Info an `sessionDashboard.open`.
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Webview-Karten erhalten ein Provider-Tag (z. B. Antigravity / Claude Code).
 - Klick-Event meldet `provider` mit an die Extension.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Display-Titel und Beschreibungen generalisieren: „AI Session Dashboard" (bzw. „Claude & Antigravity Sessions").
 - Script `check` um die neuen Dateien erweitern.
 - Version auf `0.2.0` hochzählen.
 
-#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/README.md)
+#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/README.md)
 - Dokumentation um die Antigravity-Quelle, Erkennung und den Öffnen-Befehl ergänzen.
 
 ## Verifikationsplan

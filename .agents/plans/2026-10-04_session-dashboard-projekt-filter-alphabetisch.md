@@ -12,15 +12,15 @@ Ziel ist eine stabile, alphabetische Sortierung der Projekte nach ihrem Namen (u
 
 ### [session-dashboard]
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - `updateProjectChipsUI`: Sortierung der `projEntries` von `b[1] - a[1]` umgestellt auf:
   `a[0].localeCompare(b[0], undefined, { sensitivity: 'base', numeric: true }) || a[0].localeCompare(b[0])`
 - „Alle“-Chip bleibt wie gehabt als erster Eintrag vorangestellt.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Command `sessionDashboard.filterProject`: Sortierung von `sortedProjects` im QuickPick analog umgestellt auf alphabetische Sortierung nach Projektname.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Versions-Bump auf `0.21.2`.
 
 ## Verifikation

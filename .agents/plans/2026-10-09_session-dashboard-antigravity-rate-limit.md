@@ -38,7 +38,7 @@ Turn abgebrochen war. Ziel ist dasselbe Verhalten wie bei Claude Code: bis zum R
 
 ### [Erkennung]
 
-#### [MODIFY] [antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - `readLimitError(sessionId)`: liest die letzten 12 Schritte der Konversations-DB; solange es
   Fehlerschritte (`step_type 17`) sind, wird nach `RESOURCE_EXHAUSTED` gesucht. Ergebnis je Session
   über die mtime von `.db` und `.db-wal` gecacht.
@@ -50,24 +50,24 @@ Turn abgebrochen war. Ziel ist dasselbe Verhalten wie bei Claude Code: bis zum R
 
 ### [Reset-Zeit]
 
-#### [MODIFY] [quota.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/quota.js)
+#### [MODIFY] [quota.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/quota.js)
 - `resolveAntigravityReset(sessionId, blockedAt, agQuota)`: nimmt aus allen Buckets (Gemini und
   Drittanbieter, 5 Std. und Woche) die erschöpften, deren Fenster `blockedAt` überdeckt
   (`blockedAt >= resetsAt - Fensterlänge`), und liefert den spätesten Reset. Überdeckt keiner, ist
   das Limit vorbei → `blockedAt` (Vergangenheit) → „Wartet auf dich". Ohne Live-Quota der zuletzt
   ermittelte Wert, sonst `0` („Session-Limit erreicht" ohne Uhrzeit).
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - In `refresh()` vor der Zustandsableitung `rateLimit.resetsAt` für Antigravity-Sessions über
   `resolveAntigravityReset` setzen; Anzeige, Badge, Tooltip und Sound laufen über die bestehende
   Claude-Logik.
 
 ### [Version & Doku]
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Version `0.30.0`.
 
-#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/README.md)
+#### [MODIFY] [README.md](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/README.md)
 - Rate-Limit-Erkennung um Antigravity ergänzt.
 
 ## Walkthrough & Testergebnisse

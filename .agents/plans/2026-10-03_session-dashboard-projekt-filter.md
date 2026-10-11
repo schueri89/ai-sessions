@@ -12,7 +12,7 @@ Im Workspace `c:/lucee/tomcat/webapps/ROOT/` existieren zahlreiche Teilprojekte 
 
 ### [session-dashboard]
 
-#### [ADD] [lib/project.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/project.js)
+#### [ADD] [lib/project.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/project.js)
 - Scannt dynamisch die Projektunterordner unter dem Workspace-Root (`c:/lucee/tomcat/webapps/ROOT`).
 - Ignoriert Systemordner (`WEB-INF`, `META-INF`, `node_modules`, `.git`, `.vscode`, `logs`, `data`, `backups` etc.).
 - Heuristik zur Projekterkennung:
@@ -22,30 +22,30 @@ Im Workspace `c:/lucee/tomcat/webapps/ROOT/` existieren zahlreiche Teilprojekte 
   4. Vorkommen des Projektnamens in Titel / Prompt
   5. Fallback auf `ROOT` für übergreifende Aufgaben.
 
-#### [MODIFY] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/transcripts.js)
+#### [MODIFY] [lib/transcripts.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/transcripts.js)
 - Erkennt in `applyLine()` Dateizugriffe auf Projektunterordner und merkt sich das erkannte Projekt auf dem Info-Objekt.
 
-#### [MODIFY] [lib/history.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/history.js)
+#### [MODIFY] [lib/history.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/history.js)
 - Ermittelt beim Parsen von Head/Tail das Projekt jeder historischen Claude-Session und speichert es gecacht im History-Eintrag.
 
-#### [MODIFY] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/claude.js)
+#### [MODIFY] [lib/providers/claude.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/claude.js)
 - Übergibt `project` für Live-Sessions und historische Sessions.
 
-#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/providers/antigravity.js)
+#### [MODIFY] [lib/providers/antigravity.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/providers/antigravity.js)
 - Liest bei Sessions mit `cwd = ROOT` Pfade aus `transcript.jsonl` und ordnet sie dem konkreten Projekt zu.
 - Übergibt `project` im Session-Objekt.
 
-#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/boardPanel.js)
+#### [MODIFY] [lib/boardPanel.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/boardPanel.js)
 - Rendert Projekt-Badges (`📁 <projekt>`) auf Session-Karten (Klick auf Badge aktiviert direkt den Projektfilter).
 - Rendert dynamische Filter-Chips für alle Projekte mit aktiven Sessions in der Toolbar.
 - Unterstützt nahtloses Umschalten und Zurücksetzen ("Alle Projekte").
 - Bezieht `project` in die Freitextsuche ein.
 
-#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/lib/treeView.js)
+#### [MODIFY] [lib/treeView.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/lib/treeView.js)
 - Zeigt `[<projekt>]` in der Beschreibung der Tree-Items.
 - Ergänzt `📁 **Projekt:** <projekt>` im Markdown-Tooltip.
 
-#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/extension.js)
+#### [MODIFY] [extension.js](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/extension.js)
 - Verwaltet `projectFilter` im `SessionModel` (persistiert in `globalState`).
 - `visibleSessions()` filtert nach Provider- und Projekt-Filter.
 - `counts()` liefert `byProject`-Verteilung.
@@ -53,7 +53,7 @@ Im Workspace `c:/lucee/tomcat/webapps/ROOT/` existieren zahlreiche Teilprojekte 
 - Korrigiert Referenz in `sessionDashboard.search` und ergänzt Projekt in QuickPick-Labels.
 - Zeigt aktiven Projektfilter in `view.description` der Sidebar an.
 
-#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/tools/session-dashboard/package.json)
+#### [MODIFY] [package.json](file:///c:/lucee/tomcat/webapps/ROOT/ai-sessions/package.json)
 - Bump auf Version `0.10.0`.
 - Registriert Befehl `sessionDashboard.filterProject`.
 
