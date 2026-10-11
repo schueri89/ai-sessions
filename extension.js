@@ -5,6 +5,7 @@ const fs = require('fs');
 const { readSessions, watchTargets, getQuotaSummary } = require('./lib/registry');
 const { DoneStore } = require('./lib/doneStore');
 const { BookmarkStore } = require('./lib/bookmarkStore');
+const { TicketStore, detectTicket, buildJiraUrl } = require('./lib/ticketStore');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
@@ -28,6 +29,7 @@ class SessionModel {
     this.extensionUri = context.extensionUri;
     this.done = new DoneStore(context.globalState);
     this.bookmarks = new BookmarkStore(context.globalState);
+    this.tickets = new TicketStore(context.globalState);
     this.providerFilter = context.globalState.get('sessionDashboard.providerFilter', 'all');
     this.projectFilter = context.globalState.get('sessionDashboard.projectFilter', 'all');
     this.sessions = [];
@@ -101,6 +103,7 @@ class SessionModel {
       .map((s) => {
         const isDone = this.done.isDone(s.sessionId);
         const isBookmarked = this.bookmarks.isBookmarked(s.sessionId);
+        const ticket = this.tickets.getTicket(s.sessionId) || null;
         if (s.provider === 'antigravity' && s.rateLimit) {
           s.rateLimit.resetsAt = resolveAntigravityReset(s.sessionId, s.rateLimit.blockedAt, quota && quota.antigravity);
         }
@@ -121,6 +124,7 @@ class SessionModel {
         return {
           ...s,
           isBookmarked,
+          ticket,
           displayState
         };
       })
@@ -136,7 +140,7 @@ class SessionModel {
           this.quota.antigravity.gemini ? [this.quota.antigravity.gemini.fiveHour?.percent, this.quota.antigravity.gemini.weekly?.percent] : null
         ] : null
       ] : null,
-      this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
+      this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.ticket, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;
@@ -762,6 +766,103 @@ function activate(context) {
     }),
     vscode.commands.registerCommand('sessionDashboard.showBoard', (query) => board.show(typeof query === 'string' ? query : undefined, 'board')),
     vscode.commands.registerCommand('sessionDashboard.showAnalyse', () => board.show(undefined, 'analyse')),
+    vscode.commands.registerCommand('sessionDashboard.showHistory', () => board.show(undefined, 'history')),
+    vscode.commands.registerCommand('sessionDashboard.assignTicket', async (arg) => {
+      const info = sessionInfoOf(arg, model);
+      let sId = sessionIdOf(arg) || (info ? info.sessionId : null);
+      if (!sId) {
+        const visible = model.visibleSessions();
+        if (visible.length === 0) {
+          vscode.window.showInformationMessage('Keine aktiven Sessions vorhanden.');
+          return;
+        }
+        const pick = await vscode.window.showQuickPick(
+          visible.map((s) => ({
+            label: (s.ticket ? `[${s.ticket}] ` : '') + (s.title || s.sessionId.slice(0, 8)),
+            description: s.project || 'ROOT',
+            detail: s.lastPrompt ? s.lastPrompt.slice(0, 80) : s.sessionId,
+            sessionId: s.sessionId
+          })),
+          { placeHolder: 'Session für JIRA-Ticket-Zuweisung wählen...' }
+        );
+        if (!pick) return;
+        sId = pick.sessionId;
+      }
+      const session = model.sessions.find((s) => s.sessionId === sId) || (info ? info.session : null);
+      const currentTicket = model.tickets.getTicket(sId) || '';
+      const candidate = !currentTicket && session
+        ? (detectTicket(session.title) || detectTicket(session.lastPrompt) || '')
+        : '';
+      const titleLabel = session ? (session.title || sId.slice(0, 8)) : sId.slice(0, 8);
+      const input = await vscode.window.showInputBox({
+        prompt: `JIRA-Ticket für Session „${titleLabel}“ zuweisen:`,
+        placeHolder: 'z. B. PROJ-123 (leer lassen zum Entfernen)',
+        value: currentTicket || candidate
+      });
+      if (input === undefined) return;
+      const trimmed = input.trim();
+      if (!trimmed) {
+        await model.tickets.removeTicket(sId);
+        vscode.window.showInformationMessage(`JIRA-Ticket für Session „${titleLabel}“ entfernt.`);
+      } else {
+        const cleanKey = trimmed.toUpperCase();
+        await model.tickets.setTicket(sId, cleanKey);
+        const cfgUrl = vscode.workspace.getConfiguration('sessionDashboard').get('jiraBaseUrl', '');
+        if (cfgUrl) {
+          vscode.window.showInformationMessage(
+            `Session „${titleLabel}“ wurde JIRA-Ticket ${cleanKey} zugewiesen.`,
+            'Im Browser öffnen'
+          ).then((choice) => {
+            if (choice === 'Im Browser öffnen') {
+              vscode.commands.executeCommand('sessionDashboard.openJira', sId);
+            }
+          });
+        } else {
+          vscode.window.showInformationMessage(`Session „${titleLabel}“ wurde JIRA-Ticket ${cleanKey} zugewiesen.`);
+        }
+      }
+      await update(true);
+      if (board.viewMode === 'history') {
+        board.sendHistory();
+      }
+    }),
+    vscode.commands.registerCommand('sessionDashboard.openJira', async (arg) => {
+      const info = sessionInfoOf(arg, model);
+      const sId = sessionIdOf(arg) || (info ? info.sessionId : null);
+      if (!sId) return;
+      const ticket = model.tickets.getTicket(sId);
+      if (!ticket) {
+        return vscode.commands.executeCommand('sessionDashboard.assignTicket', sId);
+      }
+      const baseUrl = vscode.workspace.getConfiguration('sessionDashboard').get('jiraBaseUrl', '');
+      if (!baseUrl || !baseUrl.trim()) {
+        const action = await vscode.window.showWarningMessage(
+          `Keine JIRA-Basis-URL in den Einstellungen hinterlegt. Bitte 'sessionDashboard.jiraBaseUrl' pflegen (z. B. 'https://ihre-firma.atlassian.net/browse/').`,
+          'Einstellungen öffnen'
+        );
+        if (action === 'Einstellungen öffnen') {
+          vscode.commands.executeCommand('sessionDashboard.openSettings');
+        }
+        return;
+      }
+      const url = buildJiraUrl(baseUrl, ticket);
+      if (url) {
+        try {
+          await vscode.env.openExternal(vscode.Uri.parse(url));
+        } catch (err) {
+          vscode.window.showErrorMessage(`Konnte JIRA-URL nicht öffnen: ${err.message}`);
+        }
+      }
+    }),
+    vscode.commands.registerCommand('sessionDashboard.removeTicket', async (arg) => {
+      const id = sessionIdOf(arg);
+      if (!id) return;
+      await model.tickets.removeTicket(id);
+      await update(true);
+      if (board.viewMode === 'history') {
+        board.sendHistory();
+      }
+    }),
     vscode.commands.registerCommand('sessionDashboard.search', async () => {
       const visible = model.visibleSessions();
       const now = Date.now();
@@ -769,12 +870,13 @@ function activate(context) {
         const providerLabel = s.provider === 'antigravity' ? 'Antigravity' : 'Claude';
         const state = STATES[s.displayState] || { label: s.displayState, icon: 'circle-outline' };
         const isBookmarked = s.isBookmarked ? '📌 ' : '';
+        const ticketPrefix = s.ticket ? `[🎫 ${s.ticket}] ` : '';
         const projectPrefix = s.project ? `[${s.project}] ` : '';
         const activityPrefix = s.displayState === 'busy' && s.activity ? `[${s.activity}] ` : '';
         const detail = describe(s, now);
         const tokenDetail = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)} (${s.tokens.percent}%)${s.tokens.model ? ' ' + friendlyModel(s.tokens.model) : ''}` : '';
         return {
-          label: `${isBookmarked}${projectPrefix}${s.title}`,
+          label: `${isBookmarked}${ticketPrefix}${projectPrefix}${s.title}`,
           description: `[${providerLabel}] ${state.label}${detail ? ' · ' + detail : ''}${tokenDetail}`,
           detail: activityPrefix + (s.lastPrompt || (s.cwd ? `Ordner: ${s.cwd}` : s.sessionId)),
           session: s
@@ -840,7 +942,7 @@ function activate(context) {
       ];
 
       const q = model.quota;
-      if (q && ((q.claude && q.claude.available) || (q.antigravity && q.antigravity.available))) {
+      if (q && ((q.claude && q.claude.available) || (q.antigravity && q.antigravity.available) || (q.copilot && q.copilot.available))) {
         const qParts = [];
         if (q.claude && q.claude.available && q.claude.fiveHour && typeof q.claude.fiveHour.percent === 'number') {
           qParts.push(`$(dashboard-claude) ${q.claude.fiveHour.percent}% (5h)`);
@@ -920,6 +1022,11 @@ function activate(context) {
         action: 'analyse'
       });
       items.push({
+        label: '$(table) Session-Historie öffnen (Tabelle)',
+        description: 'Vollständige sortier- & filterbare Tabelle',
+        action: 'history'
+      });
+      items.push({
         label: '$(folder) Nach Projekt filtern...',
         description: model.projectFilter !== 'all' ? `Aktiv: ${model.projectFilter}` : 'Alle',
         action: 'filterProject'
@@ -941,6 +1048,8 @@ function activate(context) {
           await vscode.commands.executeCommand('sessionDashboard.showBoard');
         } else if (picked.action === 'analyse') {
           await vscode.commands.executeCommand('sessionDashboard.showAnalyse');
+        } else if (picked.action === 'history') {
+          await vscode.commands.executeCommand('sessionDashboard.showHistory');
         } else if (picked.action === 'search') {
           await vscode.commands.executeCommand('sessionDashboard.search');
         } else if (picked.action === 'filterProject') {

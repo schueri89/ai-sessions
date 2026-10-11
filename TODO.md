@@ -9,14 +9,14 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] wie funktioniert Zuweisung von Session zu Projekt? das aktualisiert sich teilweise durch Öffnen des Chats - manuelle Korrektur wäre gut!
 
-- [ ] 3.Tab für Historie aller Sessions mit mehr Infos in Form einer Tabelle (analog zum anderen Plugin)
-
 - [ ] Codex ergänzen! (inkl. Anpassung in Settings)
 
 - [ ] Fixes für Copilot einspielen (siehe 2 Mails)
 - [ ] Dashboard: Usage Card für Copilot möglich?
 
 ## Erledigt
+- [x] session-dashboard v0.34.0: JIRA-Integration & Ticket-Zuweisung im 3. Tab (Historie) und auf den Kanban-Karten, konfigurierbare Basis-URL (sessionDashboard.jiraBaseUrl), 1-Click Ticket-Browserlink, Auto-Detection & Detail-Accordion-Verwaltung *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-jira-integration.md))*
+- [x] session-dashboard v0.33.0: 3. Tab für Historie aller Sessions in Tabellenform mit Filtern, Spaltensortierung, Detail-Accordion und Lazy-Loading *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-session-historie-tabelle.md))*
 - [x] session-dashboard v0.32.1: Sidebar-Header Icons wiederhergestellt (Filter, Projekt, Suche, Refresh), nur Analyse-Icon entfernt *(10.10.2026)*
 - [x] session-dashboard v0.32.0: Ladeanimation beim Tab-Öffnen/VSCode-Start stabilisiert (Initial-Load-Gate), Settings-Button ⚙️ oben rechts auf dem Dashboard, Lazy-Loading für Analyse-Tab (Preload entfällt) *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-loading-settings-lazyloading-sidebar.md))*
 - [x] session-dashboard v0.31.2: Antigravity-Navigation gegen statische window.location.pathname-Sperre im Webview-Iframe gehärtet (Cache-Bust-Query & Dual-Ping-Retry) *(10.10.2026)*
