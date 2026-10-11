@@ -88,15 +88,17 @@ class SessionModel {
     let claude = 0;
     let antigravity = 0;
     let copilot = 0;
+    let codex = 0;
     const byProject = {};
     for (const s of this.sessions) {
       if (s.provider === 'claude') claude++;
       else if (s.provider === 'antigravity') antigravity++;
       else if (s.provider === 'copilot') copilot++;
+      else if (s.provider === 'codex') codex++;
       const p = s.project || (this.getProjectDetectionMode() === 'auto' ? 'ROOT' : 'Nicht zugewiesen');
       byProject[p] = (byProject[p] || 0) + 1;
     }
-    return { all: this.sessions.length, claude, antigravity, copilot, byProject };
+    return { all: this.sessions.length, claude, antigravity, copilot, codex, byProject };
   }
 
   getEnabledProviders() {
@@ -104,7 +106,8 @@ class SessionModel {
     return {
       claude: config.get('claude', true),
       antigravity: config.get('antigravity', true),
-      copilot: config.get('copilot', true)
+      copilot: config.get('copilot', true),
+      codex: config.get('codex', true)
     };
   }
 
@@ -533,6 +536,32 @@ async function openCopilotSession(info) {
   setTimeout(cleanupTabs, 200);
 }
 
+async function openCodexSession(info) {
+  const sessionId = info.sessionId;
+  if (!sessionId) return;
+
+  logDebug(`[Codex] Öffne Session: ${sessionId}`, {
+    title: info.title || info.session?.title,
+    project: info.project || info.session?.project
+  });
+
+  try {
+    logDebug(`[Codex] 1. Fokussiere Codex Sidebar (chatgpt.openSidebar)...`);
+    await vscode.commands.executeCommand('chatgpt.openSidebar');
+  } catch (err) {
+    logDebug(`[Codex] chatgpt.openSidebar fehlgeschlagen: ${err.message}`);
+  }
+
+  try {
+    const uriScheme = vscode.env.uriScheme || 'vscode';
+    const deepLink = vscode.Uri.parse(`${uriScheme}://openai.chatgpt/thread/${sessionId}`);
+    logDebug(`[Codex] 2. Öffne Thread via Deep-Link: ${deepLink.toString()}`);
+    await vscode.env.openExternal(deepLink);
+  } catch (err) {
+    logDebug(`[Codex] Deep-Link fehlgeschlagen: ${err.message}`);
+  }
+}
+
 async function openSession(info) {
   if (!info || !info.sessionId) return;
   if (info.provider === 'antigravity') {
@@ -540,6 +569,9 @@ async function openSession(info) {
   }
   if (info.provider === 'copilot') {
     return openCopilotSession(info);
+  }
+  if (info.provider === 'codex') {
+    return openCodexSession(info);
   }
   return openClaudeSession(info);
 }
@@ -714,6 +746,14 @@ function activate(context) {
           description: `${counts.copilot}`,
           detail: current === 'copilot' ? '✓ Aktiver Filter' : '',
           filter: 'copilot'
+        });
+      }
+      if (enabled.codex !== false) {
+        items.push({
+          label: '$(sparkle) OpenAI Codex',
+          description: `${counts.codex}`,
+          detail: current === 'codex' ? '✓ Aktiver Filter' : '',
+          filter: 'codex'
         });
       }
 

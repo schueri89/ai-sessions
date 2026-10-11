@@ -1,8 +1,8 @@
 {
   "name": "ai-sessions",
   "displayName": "AI Sessions",
-  "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.39.0",
+  "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot- und OpenAI-Codex-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
+  "version": "0.40.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -386,6 +386,11 @@
           "default": true,
           "description": "GitHub-Copilot-Sessions erfassen und anzeigen."
         },
+        "sessionDashboard.providers.codex": {
+          "type": "boolean",
+          "default": true,
+          "description": "OpenAI-Codex-Sessions erfassen und anzeigen."
+        },
         "sessionDashboard.sound.enabled": {
           "type": "boolean",
           "default": true,
@@ -405,6 +410,11 @@
           "type": "boolean",
           "default": true,
           "description": "Sounds für GitHub-Copilot-Sessions abspielen."
+        },
+        "sessionDashboard.sound.providers.codex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sounds für OpenAI-Codex-Sessions abspielen."
         },
         "sessionDashboard.sound.taskCompleted.enabled": {
           "type": "boolean",
@@ -601,7 +611,7 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node test/check-webviews.js",
+    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node test/check-webviews.js",
     "package": "node -e \"const fs=require('fs');fs.mkdirSync('vsix',{recursive:true})\" && vsce package --skip-license --allow-missing-repository --out vsix/"
   },
   "devDependencies": {
