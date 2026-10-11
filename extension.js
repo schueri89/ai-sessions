@@ -93,7 +93,7 @@ class SessionModel {
       if (s.provider === 'claude') claude++;
       else if (s.provider === 'antigravity') antigravity++;
       else if (s.provider === 'copilot') copilot++;
-      const p = s.project || 'ROOT';
+      const p = s.project || (this.getProjectDetectionMode() === 'auto' ? 'ROOT' : 'Nicht zugewiesen');
       byProject[p] = (byProject[p] || 0) + 1;
     }
     return { all: this.sessions.length, claude, antigravity, copilot, byProject };
@@ -108,15 +108,20 @@ class SessionModel {
     };
   }
 
+  getProjectDetectionMode() {
+    return vscode.workspace.getConfiguration('sessionDashboard').get('projectDetection', 'auto');
+  }
+
   // Re-reads registry across all providers. Returns true if anything visible changed.
   async refresh() {
     const enabled = this.getEnabledProviders();
+    const detectionMode = this.getProjectDetectionMode();
     if (this.providerFilter !== 'all' && enabled[this.providerFilter] === false) {
       this.providerFilter = 'all';
       await this.context.globalState.update('sessionDashboard.providerFilter', 'all');
     }
     const [live, quota] = await Promise.all([
-      readSessions(enabled),
+      readSessions(enabled, { detectionMode }),
       getQuotaSummary(false, enabled).catch(() => null)
     ]);
     this.quota = quota;
@@ -129,7 +134,8 @@ class SessionModel {
         const isBookmarked = this.bookmarks.isBookmarked(s.sessionId);
         const ticket = this.tickets.getTicket(s.sessionId) || null;
         const manualProject = this.projects.getOverride(s.sessionId);
-        const effectiveProject = manualProject || s.project || 'ROOT';
+        const autoProj = s.project || (detectionMode === 'auto' ? 'ROOT' : 'Nicht zugewiesen');
+        const effectiveProject = manualProject || autoProj;
         const isProjectOverridden = Boolean(manualProject);
         if (s.provider === 'antigravity' && s.rateLimit) {
           s.rateLimit.resetsAt = resolveAntigravityReset(s.sessionId, s.rateLimit.blockedAt, quota && quota.antigravity);
@@ -151,7 +157,7 @@ class SessionModel {
         return {
           ...s,
           project: effectiveProject,
-          autoProject: s.project || 'ROOT',
+          autoProject: autoProj,
           isProjectOverridden,
           isBookmarked,
           ticket,
@@ -658,6 +664,9 @@ function activate(context) {
       if (e.affectsConfiguration('sessionDashboard.sound')) {
         board.update();
       }
+      if (e.affectsConfiguration('sessionDashboard.projectDetection')) {
+        update(true);
+      }
       if (e.affectsConfiguration('sessionDashboard.providers')) {
         update(true);
       }
@@ -728,7 +737,7 @@ function activate(context) {
           filter: 'all'
         },
         ...sortedProjects.map(([proj, cnt]) => ({
-          label: `$(folder) ${proj}`,
+          label: proj === 'Nicht zugewiesen' ? `$(inbox) ${proj}` : `$(folder) ${proj}`,
           description: `${cnt}`,
           detail: current === proj ? '✓ Aktiver Filter' : '',
           filter: proj
@@ -956,8 +965,10 @@ function activate(context) {
       const session = model.sessions.find((s) => s.sessionId === sId) || (info ? info.session : null);
       const titleLabel = session ? (session.title || sId.slice(0, 8)) : sId.slice(0, 8);
       const currentOverride = model.projects.getOverride(sId);
-      const currentEffective = session ? session.project : (currentOverride || 'ROOT');
-      const autoProject = session?.autoProject || (currentOverride ? 'ROOT' : currentEffective);
+      const detectionMode = model.getProjectDetectionMode();
+      const fallbackDefault = detectionMode === 'auto' ? 'ROOT' : 'Nicht zugewiesen';
+      const currentEffective = session ? session.project : (currentOverride || fallbackDefault);
+      const autoProject = session?.autoProject || (currentOverride ? fallbackDefault : currentEffective);
 
       const knownSubfolders = getKnownSubfolders();
       const projectList = Array.from(new Set(['ROOT', ...knownSubfolders])).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));

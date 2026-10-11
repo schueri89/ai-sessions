@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.36.0",
+  "version": "0.37.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -440,6 +440,21 @@
           "type": "string",
           "default": "",
           "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
+        },
+        "sessionDashboard.projectDetection": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "exact",
+            "manual"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "Vollständige automatische Erkennung über Workspaces, Transkripte und Textsuche in Prompts/Titeln.",
+            "Präzise Erkennung nur über Verzeichnisse und Workspaces (CWD). Keine unsichere Textsuche in Prompts/Titeln.",
+            "Keine automatische Zuweisung. Sessions ohne manuellen Eintrag erscheinen als 'Nicht zugewiesen'."
+          ],
+          "description": "Modus für die Erkennung und Zuweisung von Projekten zu KI-Sessions."
         }
       }
     }

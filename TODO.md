@@ -10,7 +10,11 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 - [ ] Codex ergänzen! (inkl. Anpassung in Settings)
 
+- [ ] Claudes idle_prompt (der Hinweis nach etwa 60 Sekunden Leerlauf) bleibt stumm, weil die Extension dafür keinen Ton hat.
+- [ ] "Geprüft" Button kann weg, da das Pin-Icon bereits die gleiche Funktion hat
+
 ## Erledigt
+- [x] session-dashboard v0.37.0: Konfigurierbare Projekt-Erkennungsmodi (auto, exact, manual) zur Verhinderung von Session-Sprüngen durch AI-Titel/Prompts, Postfach „Nicht zugewiesen" mit 1-Click-Zuweisung & Filter-Chip *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-projekt-erkennungsmodi.md))*
 - [x] session-dashboard v0.36.0: Manuelle Projekt-Zuweisung & Korrektur per QuickPick (inkl. Auto-Reset) auf Kanban-Karten, in der Historie-Tabelle und im Accordion-Detailbereich *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-manuelle-projektzuweisung.md))*
 - [x] session-dashboard v0.35.0: GitHub-Copilot Quota & Zusatzbudget-Kachel im Dashboard & Schnellmenü (inkl. GHE/ghe.com Enterprise-Support), Freigaben-Statistik (ToolConfirmKind) mit Auto-Approve-Kandidaten & Verlauf im Analyse-Tab sowie ToolCall-Deduplizierung *(11.10.2026, [Plan](.agents/plans/2026-10-11_copilot-quota-und-approvals.md))*
 - [x] session-dashboard v0.34.0: JIRA-Integration & Ticket-Zuweisung im 3. Tab (Historie) und auf den Kanban-Karten, konfigurierbare Basis-URL (sessionDashboard.jiraBaseUrl), 1-Click Ticket-Browserlink, Auto-Detection & Detail-Accordion-Verwaltung *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-jira-integration.md))*
