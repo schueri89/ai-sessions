@@ -11,7 +11,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 - [ ] "Alles erledigt markieren" Button: immer bestätigen lassen, bevor alle als erledigt markiert werden
 
+- [ ] Dashboard: Animation der Session-Card, die fertig geworden ist... soll kurz vorgehoben werden, während der Sound abgespielt wird
+
 ## Erledigt
+- [x] session-dashboard v0.40.2: Codex Session-Zeitstempel gegen UI-Aufrufe gehärtet (passive thread_settings_applied-Events ignoriert, echte letzte Aktivität/Fertigstellung aus Rollout-Transkript) & Turn-Extraktion im Transcript-Viewer erweitert *(11.10.2026)*
 - [x] session-dashboard v0.40.1: Codex Deep-Link Routing auf /local/${sessionId} korrigiert (leere Ansicht behoben) & Filter-Logik für Codex auf Dashboard und in Menüs komplettiert *(11.10.2026)*
 - [x] session-dashboard v0.40.0: OpenAI Codex Integration (Provider-Erfassung über ~/.codex/state_*.sqlite & Rollout-Transkripte, Live-Status, Tool- & Token-Tracking, Transcript-Viewer, Deep-Linking via vscode://openai.chatgpt/local/, Provider- & Sound-Settings) *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-codex-integration.md))*
 - [x] session-dashboard v0.39.0: Sound-Auswahl per Dropdown (kein Freitext) für alle 4 Sound-Ereignisse in den Einstellungen, 1-Klick-Vorhören direkt aus den Settings sowie interaktiver Sound-Katalog & Zuweisungs-Assistent (sessionDashboard.previewSound) *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-sound-dropdown-und-vorhoeren.md))*
