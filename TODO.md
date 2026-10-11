@@ -4,7 +4,6 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] **Changelog integrieren** — `CHANGELOG.md` im `.vsix` (zeigt VS Code in der Extension-Ansicht), Altbestand aus der Git-Historie *(Konzept: `ROOT/.agents/changelog.md`, 11.10.2026)*
-- [ ] Settings: Dropdown für Sound Auswahl integrieren, kein Freitext inkl. Vorhören des Sounds?
 
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
@@ -14,6 +13,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Codex ergänzen! (inkl. Anpassung in Settings)
 
 ## Erledigt
+- [x] session-dashboard v0.39.0: Sound-Auswahl per Dropdown (kein Freitext) für alle 4 Sound-Ereignisse in den Einstellungen, 1-Klick-Vorhören direkt aus den Settings sowie interaktiver Sound-Katalog & Zuweisungs-Assistent (sessionDashboard.previewSound) *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-sound-dropdown-und-vorhoeren.md))*
 - [x] session-dashboard v0.38.1: Dashboard: „Alle geprüft“-Button im Spaltenkopf der Gemerkt-Spalte entfernt *(11.10.2026)*
 - [x] session-dashboard v0.38.0: Akustischer Leerlauf-Reminder (idleReminder) nach ca. 60s (Claudes idle_prompt) via ding/Ping, redundanten „Geprüft"-Button von Gemerkt-Karten entfernt (Pin-Icon übernimmt Funktion) *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-idle-reminder-unpin-cleanup.md))*
 - [x] session-dashboard v0.37.0: Konfigurierbare Projekt-Erkennungsmodi (auto, exact, manual) zur Verhinderung von Session-Sprüngen durch AI-Titel/Prompts, Postfach „Nicht zugewiesen" mit 1-Click-Zuweisung & Filter-Chip *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-projekt-erkennungsmodi.md))*

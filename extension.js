@@ -12,7 +12,7 @@ const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
 const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
-const { SoundNotifier } = require('./lib/soundNotifier');
+const { SoundNotifier, SOUND_OPTIONS } = require('./lib/soundNotifier');
 const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quota');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 
@@ -1247,15 +1247,148 @@ function activate(context) {
       await soundNotifier.toggleSound();
       board.update();
     }),
-    vscode.commands.registerCommand('sessionDashboard.previewSound', async () => {
-      const pick = await vscode.window.showQuickPick([
-        { label: '$(check) Session fertig (taskCompleted)', eventType: 'taskCompleted', description: 'Standard: tada' },
-        { label: '$(bell) Leerlauf-Reminder / idle_prompt (idleReminder)', eventType: 'idleReminder', description: 'Standard: ding' },
-        { label: '$(question) Rückfrage besteht (needsInput)', eventType: 'needsInput', description: 'Standard: chimes' },
-        { label: '$(zap) Limit wieder verfügbar (limitAvailable)', eventType: 'limitAvailable', description: 'Standard: chimes' }
-      ], { placeHolder: 'Sound auswählen zum Vorhören' });
-      if (pick) {
-        soundNotifier.previewSound(pick.eventType);
+    vscode.commands.registerCommand('sessionDashboard.previewSound', async (arg) => {
+      const eventLabels = {
+        taskCompleted: 'Aufgabe beendet (taskCompleted)',
+        idleReminder: 'Leerlauf-Reminder (idleReminder)',
+        needsInput: 'Rückfrage / Bestätigung (needsInput)',
+        limitAvailable: 'Limit wieder verfügbar (limitAvailable)'
+      };
+
+      const openSoundPickerForEvent = async (eventKey) => {
+        const cfg = vscode.workspace.getConfiguration('sessionDashboard.sound');
+        const fallback = eventKey === 'idleReminder' ? 'ding' : (eventKey === 'taskCompleted' ? 'tada' : 'chimes');
+        const current = cfg.get(`${eventKey}.sound`, fallback);
+        const items = SOUND_OPTIONS.map((s) => ({
+          label: s.id === current ? `✓ ${s.label}` : s.label,
+          description: s.id === current ? 'Aktuell ausgewählt' : s.description,
+          soundId: s.id
+        }));
+        const pick = await vscode.window.showQuickPick(items, {
+          placeHolder: `Sound für „${eventLabels[eventKey]}“ wählen (aktuell: ${current}). Klick spielt Sound ab und speichert.`
+        });
+        if (pick) {
+          if (pick.soundId !== 'none') {
+            soundNotifier.previewSound(pick.soundId);
+          }
+          await cfg.update(`${eventKey}.sound`, pick.soundId, vscode.ConfigurationTarget.Global);
+          vscode.window.showInformationMessage(`AI Sessions: Sound für „${eventLabels[eventKey]}“ auf „${pick.soundId}“ gesetzt.`);
+        }
+      };
+
+      // 1. Direkter Aufruf aus VS Code Settings (Link mit Parameter: command:sessionDashboard.previewSound?"taskCompleted")
+      if (typeof arg === 'string' && eventLabels[arg]) {
+        const cfg = vscode.workspace.getConfiguration('sessionDashboard.sound');
+        const fallback = arg === 'idleReminder' ? 'ding' : (arg === 'taskCompleted' ? 'tada' : 'chimes');
+        const currentSound = cfg.get(`${arg}.sound`, fallback);
+        if (currentSound === 'none') {
+          vscode.window.showInformationMessage(`AI Sessions: Sound für „${eventLabels[arg]}“ ist stummgeschaltet (none).`);
+          return;
+        }
+        soundNotifier.previewSound(arg);
+        vscode.window.showInformationMessage(
+          `AI Sessions: Sound für „${eventLabels[arg]}“ abgespielt: ${currentSound}`,
+          'Sound ändern...'
+        ).then((choice) => {
+          if (choice === 'Sound ändern...') {
+            openSoundPickerForEvent(arg);
+          }
+        });
+        return;
+      }
+
+      // 2. Interaktives Menü
+      const cfg = vscode.workspace.getConfiguration('sessionDashboard.sound');
+      const taskSound = cfg.get('taskCompleted.sound', 'tada');
+      const idleSound = cfg.get('idleReminder.sound', 'ding');
+      const inputSound = cfg.get('needsInput.sound', 'chimes');
+      const limitSound = cfg.get('limitAvailable.sound', 'chimes');
+
+      const mainItems = [
+        {
+          label: '$(play) Alle Sounds probehören (Katalog)',
+          description: 'Alle verfügbaren Töne durchhören',
+          action: 'catalog'
+        },
+        { label: '', kind: vscode.QuickPickItemKind.Separator },
+        {
+          label: '$(check) Ton für „Aufgabe beendet“ wählen...',
+          description: `Aktuell: ${taskSound}`,
+          eventKey: 'taskCompleted',
+          action: 'configure'
+        },
+        {
+          label: '$(bell) Ton für „Leerlauf-Reminder“ wählen...',
+          description: `Aktuell: ${idleSound}`,
+          eventKey: 'idleReminder',
+          action: 'configure'
+        },
+        {
+          label: '$(question) Ton für „Rückfrage“ wählen...',
+          description: `Aktuell: ${inputSound}`,
+          eventKey: 'needsInput',
+          action: 'configure'
+        },
+        {
+          label: '$(zap) Ton für „Limit frei“ wählen...',
+          description: `Aktuell: ${limitSound}`,
+          eventKey: 'limitAvailable',
+          action: 'configure'
+        }
+      ];
+
+      const mainPick = await vscode.window.showQuickPick(mainItems, {
+        placeHolder: 'AI Sessions: Sound vorhören oder konfigurieren...'
+      });
+      if (!mainPick) return;
+
+      if (mainPick.action === 'configure') {
+        return openSoundPickerForEvent(mainPick.eventKey);
+      }
+
+      if (mainPick.action === 'catalog') {
+        let continueBrowsing = true;
+        while (continueBrowsing) {
+          const catalogItems = SOUND_OPTIONS.map((s) => ({
+            label: s.id === 'none' ? `$(mute) ${s.label}` : `$(megaphone) ${s.label}`,
+            description: s.description,
+            soundId: s.id
+          }));
+          const selected = await vscode.window.showQuickPick(catalogItems, {
+            placeHolder: 'Klicke auf einen Sound, um ihn anzuhören (Esc zum Beenden)...'
+          });
+          if (!selected) {
+            continueBrowsing = false;
+            break;
+          }
+          if (selected.soundId !== 'none') {
+            soundNotifier.previewSound(selected.soundId);
+            const nextAction = await vscode.window.showInformationMessage(
+              `Sound „${selected.soundId}“ abgespielt.`,
+              'Weiteren Sound testen',
+              'Diesem Ereignis zuweisen...',
+              'Fertig'
+            );
+            if (nextAction === 'Diesem Ereignis zuweisen...') {
+              const evPick = await vscode.window.showQuickPick([
+                { label: 'Aufgabe beendet (taskCompleted)', eventKey: 'taskCompleted' },
+                { label: 'Leerlauf-Reminder (idleReminder)', eventKey: 'idleReminder' },
+                { label: 'Rückfrage / Bestätigung (needsInput)', eventKey: 'needsInput' },
+                { label: 'Limit wieder verfügbar (limitAvailable)', eventKey: 'limitAvailable' }
+              ], { placeHolder: `Sound „${selected.soundId}“ zuweisen an:` });
+              if (evPick) {
+                await cfg.update(`${evPick.eventKey}.sound`, selected.soundId, vscode.ConfigurationTarget.Global);
+                vscode.window.showInformationMessage(`AI Sessions: Sound für „${evPick.label}“ auf „${selected.soundId}“ gesetzt.`);
+              }
+              continueBrowsing = false;
+            } else if (nextAction !== 'Weiteren Sound testen') {
+              continueBrowsing = false;
+            }
+          } else {
+            vscode.window.showInformationMessage('Kein Sound ausgewählt (stumm).');
+            continueBrowsing = false;
+          }
+        }
       }
     }),
     vscode.commands.registerCommand('sessionDashboard.openSettings', () => {

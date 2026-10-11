@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.38.1",
+  "version": "0.39.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -413,8 +413,39 @@
         },
         "sessionDashboard.sound.taskCompleted.sound": {
           "type": "string",
+          "enum": [
+            "tada",
+            "ding",
+            "chimes",
+            "notify",
+            "chord",
+            "ringin",
+            "Windows Notify",
+            "Windows Background",
+            "Hero",
+            "Glass",
+            "Ping",
+            "Pop",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+            "Notify / Pop (Moderne Benachrichtigung)",
+            "Chord / Submarine (Klassischer System-Akkord)",
+            "Ringin / Blow (Signalton / Klingeln)",
+            "Windows Notify (Voller Benachrichtigungston)",
+            "Windows Background (Sehr sanfter Hintergrundton)",
+            "Hero (macOS Fanfare)",
+            "Glass (macOS Glockenton)",
+            "Ping (macOS Sonar-Ping)",
+            "Pop (macOS Blase / Klick)",
+            "Kein Sound (Stumm für dieses Ereignis)"
+          ],
           "default": "tada",
-          "description": "Sound beim Beenden einer Aufgabe (Windows: tada, notify etc. / macOS: Hero, Glass etc.)."
+          "description": "Sound beim Beenden einer Aufgabe (Task).",
+          "markdownDescription": "Sound beim Beenden einer Aufgabe (Task).\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22taskCompleted%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
         },
         "sessionDashboard.sound.idleReminder.enabled": {
           "type": "boolean",
@@ -423,8 +454,39 @@
         },
         "sessionDashboard.sound.idleReminder.sound": {
           "type": "string",
+          "enum": [
+            "tada",
+            "ding",
+            "chimes",
+            "notify",
+            "chord",
+            "ringin",
+            "Windows Notify",
+            "Windows Background",
+            "Hero",
+            "Glass",
+            "Ping",
+            "Pop",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+            "Notify / Pop (Moderne Benachrichtigung)",
+            "Chord / Submarine (Klassischer System-Akkord)",
+            "Ringin / Blow (Signalton / Klingeln)",
+            "Windows Notify (Voller Benachrichtigungston)",
+            "Windows Background (Sehr sanfter Hintergrundton)",
+            "Hero (macOS Fanfare)",
+            "Glass (macOS Glockenton)",
+            "Ping (macOS Sonar-Ping)",
+            "Pop (macOS Blase / Klick)",
+            "Kein Sound (Stumm für dieses Ereignis)"
+          ],
           "default": "ding",
-          "description": "Sound für den Leerlauf-Reminder (Windows: ding, notify etc. / macOS: Ping, Pop etc. / Linux: message.oga)."
+          "description": "Sound für den Leerlauf-Reminder (Windows: ding, notify etc. / macOS: Ping, Pop etc. / Linux: message.oga).",
+          "markdownDescription": "Sound als Reminder abspielen, wenn eine Session nach Fertigstellung im Leerlauf auf Eingabe wartet.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22idleReminder%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
         },
         "sessionDashboard.sound.idleReminder.delaySeconds": {
           "type": "number",
@@ -440,8 +502,39 @@
         },
         "sessionDashboard.sound.needsInput.sound": {
           "type": "string",
+          "enum": [
+            "tada",
+            "ding",
+            "chimes",
+            "notify",
+            "chord",
+            "ringin",
+            "Windows Notify",
+            "Windows Background",
+            "Hero",
+            "Glass",
+            "Ping",
+            "Pop",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+            "Notify / Pop (Moderne Benachrichtigung)",
+            "Chord / Submarine (Klassischer System-Akkord)",
+            "Ringin / Blow (Signalton / Klingeln)",
+            "Windows Notify (Voller Benachrichtigungston)",
+            "Windows Background (Sehr sanfter Hintergrundton)",
+            "Hero (macOS Fanfare)",
+            "Glass (macOS Glockenton)",
+            "Ping (macOS Sonar-Ping)",
+            "Pop (macOS Blase / Klick)",
+            "Kein Sound (Stumm für dieses Ereignis)"
+          ],
           "default": "chimes",
-          "description": "Sound bei Rückfrage / benötigter Zustimmung."
+          "description": "Sound bei Rückfrage / benötigter Zustimmung.",
+          "markdownDescription": "Sound bei Rückfrage oder benötigter Zustimmung (Tool-Approval, Prompt).\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22needsInput%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
         },
         "sessionDashboard.sound.limitAvailable.enabled": {
           "type": "boolean",
@@ -450,8 +543,39 @@
         },
         "sessionDashboard.sound.limitAvailable.sound": {
           "type": "string",
+          "enum": [
+            "tada",
+            "ding",
+            "chimes",
+            "notify",
+            "chord",
+            "ringin",
+            "Windows Notify",
+            "Windows Background",
+            "Hero",
+            "Glass",
+            "Ping",
+            "Pop",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+            "Notify / Pop (Moderne Benachrichtigung)",
+            "Chord / Submarine (Klassischer System-Akkord)",
+            "Ringin / Blow (Signalton / Klingeln)",
+            "Windows Notify (Voller Benachrichtigungston)",
+            "Windows Background (Sehr sanfter Hintergrundton)",
+            "Hero (macOS Fanfare)",
+            "Glass (macOS Glockenton)",
+            "Ping (macOS Sonar-Ping)",
+            "Pop (macOS Blase / Klick)",
+            "Kein Sound (Stumm für dieses Ereignis)"
+          ],
           "default": "chimes",
-          "description": "Sound wenn Kontingent/Limit wieder frei ist (Standard: chimes, wie bei Rückfrage)."
+          "description": "Sound wenn Kontingent/Limit wieder frei ist (Standard: chimes, wie bei Rückfrage).",
+          "markdownDescription": "Sound wenn Kontingent oder Rate-Limit wieder frei ist.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22limitAvailable%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
         },
         "sessionDashboard.jiraBaseUrl": {
           "type": "string",
