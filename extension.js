@@ -11,11 +11,32 @@ const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
 const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
 const { SoundNotifier } = require('./lib/soundNotifier');
-const { resolveAntigravityReset } = require('./lib/quota');
+const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quota');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
+
+const GITHUB_SCOPES = ['user:email'];
+
+// Mirrors Copilot's own auth setup (github.com vs. GitHub Enterprise incl. GHE.com data residency).
+function resolveGitHubAuth() {
+  const advanced = vscode.workspace.getConfiguration('github.copilot').get('advanced') || {};
+  if (advanced.authProvider !== 'github-enterprise') {
+    return { providerId: 'github', apiBaseUrl: 'https://api.github.com' };
+  }
+  const raw = vscode.workspace.getConfiguration('github-enterprise').get('uri');
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    return { providerId: 'github-enterprise', apiBaseUrl: '', error: 'github-enterprise.uri fehlt oder ist ungültig' };
+  }
+  const apiBaseUrl = url.hostname.endsWith('.ghe.com')
+    ? `https://api.${url.hostname}`
+    : `${url.origin}/api/v3`;
+  return { providerId: 'github-enterprise', apiBaseUrl };
+}
 
 // Waiting sessions: longest wait first. Everything else: most recent first.
 function compareSessions(a, b) {
@@ -138,6 +159,14 @@ class SessionModel {
           this.quota.antigravity.tokens5h,
           this.quota.antigravity.isRateLimited,
           this.quota.antigravity.gemini ? [this.quota.antigravity.gemini.fiveHour?.percent, this.quota.antigravity.gemini.weekly?.percent] : null
+        ] : null,
+        this.quota.copilot ? [
+          this.quota.copilot.available,
+          this.quota.copilot.needsAuth,
+          this.quota.copilot.error,
+          this.quota.copilot.premium?.percent,
+          this.quota.copilot.premium?.overageCount,
+          this.quota.copilot.budget?.used
         ] : null
       ] : null,
       this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.ticket, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
@@ -501,6 +530,22 @@ async function openSession(info) {
 }
 
 function activate(context) {
+  setCopilotTokenProvider(async () => {
+    const auth = resolveGitHubAuth();
+    if (auth.error) {
+      logDebug(`GitHub-Auth: ${auth.error}`);
+      return undefined;
+    }
+    try {
+      const session = await vscode.authentication.getSession(auth.providerId, GITHUB_SCOPES, { silent: true });
+      if (!session) logDebug(`GitHub-Session (${auth.providerId}): keine (Zugriff für die Extension noch nicht freigegeben)`);
+      return session ? { token: session.accessToken, apiBaseUrl: auth.apiBaseUrl, account: session.account?.label || '' } : undefined;
+    } catch (err) {
+      logDebug(`GitHub-Session (${auth.providerId}): Fehler ${err.message || err}`);
+      throw err;
+    }
+  });
+
   const model = new SessionModel(context);
   const soundNotifier = new SoundNotifier(context);
   model.soundNotifier = soundNotifier;
@@ -607,6 +652,11 @@ function activate(context) {
       if (e.affectsConfiguration('sessionDashboard.providers')) {
         update(true);
       }
+    }),
+    vscode.authentication.onDidChangeSessions(async (e) => {
+      if (e.provider.id !== resolveGitHubAuth().providerId) return;
+      await getQuotaSummary(true, model.getEnabledProviders()).catch(() => null);
+      await update(true);
     })
   );
 
@@ -686,6 +736,16 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.open', (arg) => {
       const info = sessionInfoOf(arg, model);
       if (info) return openSession(info);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.copilotSignIn', async () => {
+      try {
+        await vscode.authentication.getSession(resolveGitHubAuth().providerId, GITHUB_SCOPES, { createIfNone: true });
+      } catch (err) {
+        vscode.window.showErrorMessage(`GitHub-Anmeldung fehlgeschlagen: ${err.message || err}`);
+        return;
+      }
+      await getQuotaSummary(true, model.getEnabledProviders()).catch(() => null);
+      await update(true);
     }),
     vscode.commands.registerCommand('sessionDashboard.viewTranscript', async (arg) => {
       let info = sessionInfoOf(arg, model);
@@ -954,6 +1014,9 @@ function activate(context) {
           } else if (typeof q.antigravity.tokens5h === 'number') {
             qParts.push(`$(dashboard-antigravity) ~${formatTokens(q.antigravity.tokens5h)}`);
           }
+        }
+        if (q.copilot && q.copilot.available && q.copilot.premium && typeof q.copilot.premium.percent === 'number') {
+          qParts.push(`$(copilot) ${q.copilot.premium.percent}% (Monat)${q.copilot.budget ? ` + Budget ${q.copilot.budget.percent}%` : ''}`);
         }
         if (qParts.length > 0) {
           items.push({

@@ -11,10 +11,8 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 - [ ] Codex ergänzen! (inkl. Anpassung in Settings)
 
-- [ ] Fixes für Copilot einspielen (siehe 2 Mails)
-- [ ] Dashboard: Usage Card für Copilot möglich?
-
 ## Erledigt
+- [x] session-dashboard v0.35.0: GitHub-Copilot Quota & Zusatzbudget-Kachel im Dashboard & Schnellmenü (inkl. GHE/ghe.com Enterprise-Support), Freigaben-Statistik (ToolConfirmKind) mit Auto-Approve-Kandidaten & Verlauf im Analyse-Tab sowie ToolCall-Deduplizierung *(11.10.2026, [Plan](.agents/plans/2026-10-11_copilot-quota-und-approvals.md))*
 - [x] session-dashboard v0.34.0: JIRA-Integration & Ticket-Zuweisung im 3. Tab (Historie) und auf den Kanban-Karten, konfigurierbare Basis-URL (sessionDashboard.jiraBaseUrl), 1-Click Ticket-Browserlink, Auto-Detection & Detail-Accordion-Verwaltung *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-jira-integration.md))*
 - [x] session-dashboard v0.33.0: 3. Tab für Historie aller Sessions in Tabellenform mit Filtern, Spaltensortierung, Detail-Accordion und Lazy-Loading *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-session-historie-tabelle.md))*
 - [x] session-dashboard v0.32.1: Sidebar-Header Icons wiederhergestellt (Filter, Projekt, Suche, Refresh), nur Analyse-Icon entfernt *(10.10.2026)*

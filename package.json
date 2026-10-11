@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -135,6 +135,12 @@
         "title": "Schnellmenü öffnen (Direktzugriff)",
         "category": "Session Dashboard",
         "icon": "$(zap)"
+      },
+      {
+        "command": "sessionDashboard.copilotSignIn",
+        "title": "GitHub Copilot: Zugriff freigeben / Anmelden",
+        "category": "Session Dashboard",
+        "icon": "$(copilot)"
       },
       {
         "command": "sessionDashboard.statusBarClick",
