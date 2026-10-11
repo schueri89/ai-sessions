@@ -186,6 +186,13 @@ class SessionModel {
           this.quota.copilot.premium?.percent,
           this.quota.copilot.premium?.overageCount,
           this.quota.copilot.budget?.used
+        ] : null,
+        this.quota.codex ? [
+          this.quota.codex.available,
+          this.quota.codex.fiveHour?.percent,
+          this.quota.codex.sevenDay?.percent,
+          this.quota.codex.plan,
+          this.quota.codex.credits?.balance
         ] : null
       ] : null,
       this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.isProjectOverridden, s.displayState, s.isBookmarked, s.ticket, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
@@ -631,10 +638,10 @@ function activate(context) {
     running = true;
     try {
       const changed = await model.refresh();
-      soundNotifier.evaluate(model.sessions, model.quota);
+      const soundEvents = soundNotifier.evaluate(model.sessions, model.quota);
       if (changed || force === true) {
         tree.refresh();
-        board.update();
+        board.update(soundEvents?.completedSessionIds);
         statusBar.update();
         const visible = model.visibleSessions();
         const waiting = visible.filter((s) => s.displayState === 'waiting').length;
@@ -753,7 +760,7 @@ function activate(context) {
       }
       if (enabled.codex !== false) {
         items.push({
-          label: '$(sparkle) OpenAI Codex',
+          label: '$(dashboard-codex) OpenAI Codex',
           description: `${counts.codex}`,
           detail: current === 'codex' ? '✓ Aktiver Filter' : '',
           filter: 'codex'
@@ -849,11 +856,23 @@ function activate(context) {
       } else {
         ids = model.visibleSessions().filter((s) => s.displayState === 'idle').map((s) => s.sessionId);
       }
-      if (ids.length > 0) {
-        await model.done.markMany(ids);
-        await model.bookmarks.unmarkMany(ids);
-        await update(true);
+      if (ids.length === 0) return;
+
+      const count = ids.length;
+      const countLabel = count === 1 ? '1 fertige Session' : `${count} fertigen Sessions`;
+      const confirmAction = count === 1 ? 'Als erledigt markieren' : 'Alle als erledigt markieren';
+      const answer = await vscode.window.showWarningMessage(
+        `Möchtest du wirklich ${count === 1 ? 'diese' : 'alle'} ${countLabel} als erledigt markieren?`,
+        { modal: true, detail: 'Die Sessions werden in den Zustand „Erledigt“ verschoben.' },
+        confirmAction
+      );
+      if (answer !== confirmAction) {
+        return;
       }
+
+      await model.done.markMany(ids);
+      await model.bookmarks.unmarkMany(ids);
+      await update(true);
     }),
     vscode.commands.registerCommand('sessionDashboard.unmarkDone', async (arg) => {
       const id = sessionIdOf(arg);
@@ -1150,6 +1169,16 @@ function activate(context) {
       }
       return vscode.commands.executeCommand('sessionDashboard.showBoard');
     }),
+    vscode.commands.registerCommand('sessionDashboard.codexStatusClick', async () => {
+      const next = model.providerFilter === 'codex' ? 'all' : 'codex';
+      await model.setFilter(next);
+      await update(true);
+      const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
+      if (action === 'quickpick') {
+        return vscode.commands.executeCommand('sessionDashboard.quickMenu');
+      }
+      return vscode.commands.executeCommand('sessionDashboard.showBoard');
+    }),
     vscode.commands.registerCommand('sessionDashboard.quickMenu', async () => {
       const visible = model.visibleSessions();
       const waitingSessions = visible.filter((s) => s.displayState === 'waiting');
@@ -1165,7 +1194,7 @@ function activate(context) {
       ];
 
       const q = model.quota;
-      if (q && ((q.claude && q.claude.available) || (q.antigravity && q.antigravity.available) || (q.copilot && q.copilot.available))) {
+      if (q && ((q.claude && q.claude.available) || (q.antigravity && q.antigravity.available) || (q.copilot && q.copilot.available) || (q.codex && q.codex.available))) {
         const qParts = [];
         if (q.claude && q.claude.available && q.claude.fiveHour && typeof q.claude.fiveHour.percent === 'number') {
           qParts.push(`$(dashboard-claude) ${q.claude.fiveHour.percent}% (5h)`);
@@ -1180,6 +1209,9 @@ function activate(context) {
         }
         if (q.copilot && q.copilot.available && q.copilot.premium && typeof q.copilot.premium.percent === 'number') {
           qParts.push(`$(copilot) ${q.copilot.premium.percent}% (Monat)${q.copilot.budget ? ` + Budget ${q.copilot.budget.percent}%` : ''}`);
+        }
+        if (q.codex && q.codex.available && q.codex.fiveHour && typeof q.codex.fiveHour.percent === 'number') {
+          qParts.push(`$(dashboard-codex) ${q.codex.fiveHour.percent}% (5h)`);
         }
         if (qParts.length > 0) {
           items.push({
