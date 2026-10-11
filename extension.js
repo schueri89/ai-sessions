@@ -6,6 +6,8 @@ const { readSessions, watchTargets, getQuotaSummary } = require('./lib/registry'
 const { DoneStore } = require('./lib/doneStore');
 const { BookmarkStore } = require('./lib/bookmarkStore');
 const { TicketStore, detectTicket, buildJiraUrl } = require('./lib/ticketStore');
+const { ProjectStore } = require('./lib/projectStore');
+const { getKnownSubfolders } = require('./lib/project');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
@@ -51,6 +53,7 @@ class SessionModel {
     this.done = new DoneStore(context.globalState);
     this.bookmarks = new BookmarkStore(context.globalState);
     this.tickets = new TicketStore(context.globalState);
+    this.projects = new ProjectStore(context.globalState);
     this.providerFilter = context.globalState.get('sessionDashboard.providerFilter', 'all');
     this.projectFilter = context.globalState.get('sessionDashboard.projectFilter', 'all');
     this.sessions = [];
@@ -125,6 +128,9 @@ class SessionModel {
         const isDone = this.done.isDone(s.sessionId);
         const isBookmarked = this.bookmarks.isBookmarked(s.sessionId);
         const ticket = this.tickets.getTicket(s.sessionId) || null;
+        const manualProject = this.projects.getOverride(s.sessionId);
+        const effectiveProject = manualProject || s.project || 'ROOT';
+        const isProjectOverridden = Boolean(manualProject);
         if (s.provider === 'antigravity' && s.rateLimit) {
           s.rateLimit.resetsAt = resolveAntigravityReset(s.sessionId, s.rateLimit.blockedAt, quota && quota.antigravity);
         }
@@ -144,6 +150,9 @@ class SessionModel {
         }
         return {
           ...s,
+          project: effectiveProject,
+          autoProject: s.project || 'ROOT',
+          isProjectOverridden,
           isBookmarked,
           ticket,
           displayState
@@ -169,7 +178,7 @@ class SessionModel {
           this.quota.copilot.budget?.used
         ] : null
       ] : null,
-      this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.displayState, s.isBookmarked, s.ticket, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
+      this.sessions.map((s) => [s.sessionId, s.provider, s.project, s.isProjectOverridden, s.displayState, s.isBookmarked, s.ticket, s.rateLimit ? [s.rateLimit.resetsAt, s.rateLimit.humanText] : null, s.tokens ? [s.tokens.context, s.tokens.percent] : null, s.title, describe(s, now), s.lastPrompt, s.activity])
     ]);
     const changed = signature !== this.signature;
     this.signature = signature;
@@ -918,6 +927,105 @@ function activate(context) {
       const id = sessionIdOf(arg);
       if (!id) return;
       await model.tickets.removeTicket(id);
+      await update(true);
+      if (board.viewMode === 'history') {
+        board.sendHistory();
+      }
+    }),
+    vscode.commands.registerCommand('sessionDashboard.assignProject', async (arg) => {
+      const info = sessionInfoOf(arg, model);
+      let sId = sessionIdOf(arg) || (info ? info.sessionId : null);
+      if (!sId) {
+        const visible = model.visibleSessions();
+        if (visible.length === 0) {
+          vscode.window.showInformationMessage('Keine aktiven Sessions vorhanden.');
+          return;
+        }
+        const pick = await vscode.window.showQuickPick(
+          visible.map((s) => ({
+            label: `[${s.project}] ` + (s.title || s.sessionId.slice(0, 8)),
+            description: s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code'),
+            detail: s.lastPrompt ? s.lastPrompt.slice(0, 80) : s.sessionId,
+            sessionId: s.sessionId
+          })),
+          { placeHolder: 'Session für manuelle Projekt-Zuweisung wählen...' }
+        );
+        if (!pick) return;
+        sId = pick.sessionId;
+      }
+      const session = model.sessions.find((s) => s.sessionId === sId) || (info ? info.session : null);
+      const titleLabel = session ? (session.title || sId.slice(0, 8)) : sId.slice(0, 8);
+      const currentOverride = model.projects.getOverride(sId);
+      const currentEffective = session ? session.project : (currentOverride || 'ROOT');
+      const autoProject = session?.autoProject || (currentOverride ? 'ROOT' : currentEffective);
+
+      const knownSubfolders = getKnownSubfolders();
+      const projectList = Array.from(new Set(['ROOT', ...knownSubfolders])).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+      const items = [];
+      if (currentOverride) {
+        items.push({
+          label: '$(discard) Automatische Erkennung wiederherstellen',
+          description: `Zurücksetzen auf Heuristik (wäre: ${autoProject})`,
+          action: 'reset'
+        });
+        items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
+      }
+
+      for (const p of projectList) {
+        const isSelected = p.toLowerCase() === currentEffective.toLowerCase();
+        items.push({
+          label: isSelected ? `$(check) ${p}` : `$(folder) ${p}`,
+          description: isSelected ? 'Aktuell ausgewählt' : '',
+          project: p,
+          action: 'set'
+        });
+      }
+
+      items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
+      items.push({
+        label: '$(edit) Anderen Projektnamen eingeben...',
+        description: 'Freitext-Eingabe eines Verzeichnisnamens',
+        action: 'custom'
+      });
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: `Projekt für Session „${titleLabel}“ auswählen (aktuell: ${currentEffective})`
+      });
+      if (!picked) return;
+
+      if (picked.action === 'reset') {
+        await model.projects.removeOverride(sId);
+        vscode.window.showInformationMessage(`Projekt für Session „${titleLabel}“ auf automatische Erkennung (${autoProject}) zurückgesetzt.`);
+      } else if (picked.action === 'set') {
+        await model.projects.setOverride(sId, picked.project);
+        vscode.window.showInformationMessage(`Session „${titleLabel}“ wurde manuell dem Projekt „${picked.project}“ zugewiesen.`);
+      } else if (picked.action === 'custom') {
+        const customName = await vscode.window.showInputBox({
+          prompt: `Projektnamen für Session „${titleLabel}“ eingeben:`,
+          placeHolder: 'z. B. mein-neues-projekt (leer lassen zum Zurücksetzen)',
+          value: currentOverride || ''
+        });
+        if (customName === undefined) return;
+        const clean = customName.trim();
+        if (!clean) {
+          await model.projects.removeOverride(sId);
+          vscode.window.showInformationMessage(`Projekt für Session „${titleLabel}“ auf automatische Erkennung zurückgesetzt.`);
+        } else {
+          await model.projects.setOverride(sId, clean);
+          vscode.window.showInformationMessage(`Session „${titleLabel}“ wurde manuell dem Projekt „${clean}“ zugewiesen.`);
+        }
+      }
+
+      await update(true);
+      if (board.viewMode === 'history') {
+        board.sendHistory();
+      }
+    }),
+    vscode.commands.registerCommand('sessionDashboard.removeProjectOverride', async (arg) => {
+      const id = sessionIdOf(arg);
+      if (!id) return;
+      await model.projects.removeOverride(id);
       await update(true);
       if (board.viewMode === 'history') {
         board.sendHistory();

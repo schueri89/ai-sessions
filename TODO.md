@@ -4,14 +4,14 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] Changelog integrieren
-- [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
 
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
-- [ ] wie funktioniert Zuweisung von Session zu Projekt? das aktualisiert sich teilweise durch Öffnen des Chats - manuelle Korrektur wäre gut!
+- [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
 
 - [ ] Codex ergänzen! (inkl. Anpassung in Settings)
 
 ## Erledigt
+- [x] session-dashboard v0.36.0: Manuelle Projekt-Zuweisung & Korrektur per QuickPick (inkl. Auto-Reset) auf Kanban-Karten, in der Historie-Tabelle und im Accordion-Detailbereich *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-manuelle-projektzuweisung.md))*
 - [x] session-dashboard v0.35.0: GitHub-Copilot Quota & Zusatzbudget-Kachel im Dashboard & Schnellmenü (inkl. GHE/ghe.com Enterprise-Support), Freigaben-Statistik (ToolConfirmKind) mit Auto-Approve-Kandidaten & Verlauf im Analyse-Tab sowie ToolCall-Deduplizierung *(11.10.2026, [Plan](.agents/plans/2026-10-11_copilot-quota-und-approvals.md))*
 - [x] session-dashboard v0.34.0: JIRA-Integration & Ticket-Zuweisung im 3. Tab (Historie) und auf den Kanban-Karten, konfigurierbare Basis-URL (sessionDashboard.jiraBaseUrl), 1-Click Ticket-Browserlink, Auto-Detection & Detail-Accordion-Verwaltung *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-jira-integration.md))*
 - [x] session-dashboard v0.33.0: 3. Tab für Historie aller Sessions in Tabellenform mit Filtern, Spaltensortierung, Detail-Accordion und Lazy-Loading *(10.10.2026, [Plan](.agents/plans/2026-10-10_session-dashboard-session-historie-tabelle.md))*
