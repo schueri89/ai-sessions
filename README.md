@@ -15,7 +15,7 @@ auf einen Blick zeigt:
   ihren Chat (in Claude Code oder Antigravity), das Pinnadel-Icon merkt bzw. entmerkt die Session, das Häkchen markiert sie als erledigt, der Tooltip zeigt den letzten Prompt.
 - **Rate-Limit-Erkennung (Claude Code und Antigravity):** Erreicht eine Session ihr Kontingentlimit („You've hit your session limit" bzw. `RESOURCE_EXHAUSTED (429)`), bleibt sie bis zum Reset-Zeitpunkt in **„Arbeitet“** (mit gelbem Warn-Badge `⏳ Limit bis HH:MM Uhr`). Nach Ablauf des Limits wechselt sie automatisch nach **„Wartet auf dich“** (`⚠️ Limit vorbei · Bereit zum Fortsetzen`), sodass man über das Sidebar-Badge sofort benachrichtigt wird. Bei Antigravity stammt die Reset-Zeit aus der Live-Quota; läuft Antigravity nicht, zeigt die Karte „Limit erreicht“ ohne Uhrzeit.
 - **Provider-Filter:** Schnelle Filterung nach *Alle*, *Claude Code* oder *Antigravity* über das Filter-Icon in der Sidebar (`Filter nach Provider...`) sowie über die Toolbar-Buttons im Board.
-- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Icons, Filterleiste und Pin-Schaltflächen auf den Karten sowie Massenfreigabe („Alle geprüft“).
+- **Übersicht:** Schaltfläche oben in der Seitenleiste, öffnet ein Kachel-Board als Editor-Tab mit Provider-Icons, Filterleiste und Pin-Schaltflächen auf den Karten.
 
 Steuern lässt sich über die Extension nichts — das geschieht weiter im jeweiligen Chat.
 
