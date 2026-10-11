@@ -571,6 +571,7 @@ function activate(context) {
   context.subscriptions.push(
     view,
     statusBar,
+    soundNotifier,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
         if (board.panel) {
@@ -1249,6 +1250,7 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.previewSound', async () => {
       const pick = await vscode.window.showQuickPick([
         { label: '$(check) Session fertig (taskCompleted)', eventType: 'taskCompleted', description: 'Standard: tada' },
+        { label: '$(bell) Leerlauf-Reminder / idle_prompt (idleReminder)', eventType: 'idleReminder', description: 'Standard: ding' },
         { label: '$(question) Rückfrage besteht (needsInput)', eventType: 'needsInput', description: 'Standard: chimes' },
         { label: '$(zap) Limit wieder verfügbar (limitAvailable)', eventType: 'limitAvailable', description: 'Standard: chimes' }
       ], { placeHolder: 'Sound auswählen zum Vorhören' });

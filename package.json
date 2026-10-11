@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity- und GitHub-Copilot-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.37.0",
+  "version": "0.38.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -415,6 +415,23 @@
           "type": "string",
           "default": "tada",
           "description": "Sound beim Beenden einer Aufgabe (Windows: tada, notify etc. / macOS: Hero, Glass etc.)."
+        },
+        "sessionDashboard.sound.idleReminder.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sound als Reminder abspielen, wenn eine Session nach Fertigstellung im Leerlauf auf Eingabe wartet (z. B. Claudes idle_prompt nach etwa 60 Sekunden)."
+        },
+        "sessionDashboard.sound.idleReminder.sound": {
+          "type": "string",
+          "default": "ding",
+          "description": "Sound für den Leerlauf-Reminder (Windows: ding, notify etc. / macOS: Ping, Pop etc. / Linux: message.oga)."
+        },
+        "sessionDashboard.sound.idleReminder.delaySeconds": {
+          "type": "number",
+          "default": 60,
+          "minimum": 10,
+          "maximum": 600,
+          "description": "Verzögerung in Sekunden ab Beginn des Leerlaufs bis zum Reminder-Ton (Standard: 60 Sekunden)."
         },
         "sessionDashboard.sound.needsInput.enabled": {
           "type": "boolean",
