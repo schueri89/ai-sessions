@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot- und OpenAI-Codex-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.42.0",
+  "version": "0.44.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -167,6 +167,11 @@
       {
         "command": "sessionDashboard.codexStatusClick",
         "title": "OpenAI-Codex-Sessions anzeigen",
+        "category": "Session Dashboard"
+      },
+      {
+        "command": "sessionDashboard.copilotStatusClick",
+        "title": "GitHub-Copilot-Sessions anzeigen",
         "category": "Session Dashboard"
       },
       {
@@ -359,11 +364,11 @@
             "off"
           ],
           "enumDescriptions": [
-            "Icons kompakt: $(dashboard-claude) X% · $(dashboard-antigravity) Y% · $(dashboard-codex) Z% (Standard)",
-            "Text kompakt: Claude: X% · AG: Y% · Codex: Z%",
-            "5-Stunden-Fenster beschriftet: $(dashboard-claude) X% (5h) · $(dashboard-antigravity) Y% (5h) · $(dashboard-codex) Z% (5h)",
-            "5h & 7d kombiniert: $(dashboard-claude) X%/Y% · $(dashboard-antigravity) A%/B% · $(dashboard-codex) C%/D%",
-            "Ausführlich mit Beschriftung: $(dashboard-claude) X% (5h) · Y% (7d) · $(dashboard-antigravity) A% (5h) · B% (7d) · $(dashboard-codex) C% (5h) · D% (7d)",
+            "Icons kompakt: $(dashboard-claude) X% · $(dashboard-antigravity) Y% · $(dashboard-codex) Z% · $(copilot) M% (Standard)",
+            "Text kompakt: Claude: X% · AG: Y% · Codex: Z% · Copilot: M%",
+            "Kurzzeit-Fenster beschriftet: $(dashboard-claude) X% (5h) · $(dashboard-antigravity) Y% (5h) · $(dashboard-codex) Z% (5h) · $(copilot) M% (Monat)",
+            "5h & 7d / Monat & Budget kombiniert: $(dashboard-claude) X%/Y% · $(dashboard-antigravity) A%/B% · $(dashboard-codex) C%/D% · $(copilot) M%/B%",
+            "Ausführlich mit Beschriftung: $(dashboard-claude) X% (5h) · Y% (7d) · $(dashboard-antigravity) A% (5h) · B% (7d) · $(dashboard-codex) C% (5h) · D% (7d) · $(copilot) M% (Monat) · B% (Budget)",
             "Usage in Statusleiste ausblenden (nur beim Hover)"
           ],
           "default": "compact",

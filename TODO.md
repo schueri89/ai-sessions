@@ -5,11 +5,14 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] **Changelog integrieren** — `CHANGELOG.md` im `.vsix` (zeigt VS Code in der Extension-Ansicht), Altbestand aus der Git-Historie *(Konzept: `ROOT/.agents/changelog.md`, 11.10.2026)*
 - [ ] Dashboard: Spaltenüberschrift sticky oben ansetzen, wenn man herunterscrollt
+- [ ] Statusbar: Informationen über alle 4 Anbieter hinweg angleichen - was wird wo angezeigt, bitte Übersicht liefern
 
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
 
 ## Erledigt
+- [x] session-dashboard v0.44.0: GitHub Copilot Quota & Budget in Statusleiste (neues copilotItem mit 6 statusBarUsage-Formaten, Monatskontingent & Zusatzbudget, Farb-Schwellenwerte, Auth-Prompt bei needsAuth, Hover-Tooltip & 1-Klick-Filter) *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-copilot-statusbar.md))*
+- [x] session-dashboard v0.43.1: Tab Analytics: OpenAI Codex voll integriert (Rollout-Transkript-Erfassung in collectRawTurns, eigenes Provider-Scope-Bundle in getAllAnalytics, korrigierte Kosten- und Token-Berechnung, separate Codex-Kostenzeile im KPI-Card, Fehler bei Fallback auf cachedAnalytics.all behoben) *(12.10.2026)*
 - [x] session-dashboard v0.42.0: Bestätigungsdialog vor „Alles erledigt markieren“ (Modal mit Session-Anzahl) & Session-Card Highlight-Animation synchron zum Sound bei Fertigstellung *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-confirm-mark-all-done-and-card-animation.md))*
 - [x] session-dashboard v0.41.0: OpenAI Codex Quota & Limits Integration (Verbrauchsdaten für 5h- & 7d-Fenster, Plan Plus/Pro & Credits über ChatGPT Wham-API, Quota-Kachel im Dashboard, Statusleisten-Widget & QuickMenu, reaktive Signatur-Updates) *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-codex-quota.md))*
 - [x] session-dashboard v0.40.2: Codex Session-Zeitstempel gegen UI-Aufrufe gehärtet (passive thread_settings_applied-Events ignoriert, echte letzte Aktivität/Fertigstellung aus Rollout-Transkript) & Turn-Extraktion im Transcript-Viewer erweitert *(11.10.2026)*
