@@ -10,7 +10,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
 
+- [ ] JIRA Button zum Hinzufügen auch auf dem Dashboard... Hinweis einfügen, wie man diese Löschen kann?
+
 ## Erledigt
+- [x] session-dashboard v0.45.2: Copilot-Session „Fertig“-Erkennung bei Retry & Resent korrigiert (JSONL-Splice-Index i für requests und response ausgewertet), gestreamte Response-Chunks dedupliziert & Analytics-Cache über COPILOT_TURN_CACHE_VERSION 3 invalidiert *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-fix-copilot-splice.md))*
 - [x] session-dashboard v0.45.1: Sofortige UI-Umschaltung des aktiven Anbieter- und Projekt-Filters auf dem Dashboard (optimistischer Toggle) und beschleunigte In-Memory-Aktualisierung (syncViews) ohne blockierenden Disk-Reload *(12.10.2026)*
 - [x] session-dashboard v0.45.0: GitHub Copilot Freigaben mit Unterbefehl-Chips (z. B. git status/diff, npm, docker) & 1-Klick autoApprove-Regel für settings.json, Befehlsketten-Aufteilung (; && ||), Safe-by-default-Vorauswahl *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-freigaben-unterbefehle.md))*
 - [x] session-dashboard v0.44.0: GitHub Copilot Quota & Budget in Statusleiste (neues copilotItem mit 6 statusBarUsage-Formaten, Monatskontingent & Zusatzbudget, Farb-Schwellenwerte, Auth-Prompt bei needsAuth, Hover-Tooltip & 1-Klick-Filter) *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-copilot-statusbar.md))*
