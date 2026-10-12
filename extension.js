@@ -629,6 +629,35 @@ function activate(context) {
   let running = false;
   let pending = false;
   let pendingForce = false;
+
+  function syncViews(completedSessionIds = []) {
+    tree.refresh();
+    board.update(completedSessionIds);
+    statusBar.update();
+    const visible = model.visibleSessions();
+    const waiting = visible.filter((s) => s.displayState === 'waiting').length;
+    view.badge = waiting > 0
+      ? { value: waiting, tooltip: waiting === 1 ? '1 Session wartet auf dich' : `${waiting} Sessions warten auf dich` }
+      : undefined;
+    const filterParts = [];
+    if (model.providerFilter === 'claude') {
+      const c5 = model.quota?.claude?.fiveHour?.percent;
+      filterParts.push(c5 !== undefined && c5 !== null ? `Claude (${c5}% 5h)` : 'Claude Code');
+    } else if (model.providerFilter === 'antigravity') {
+      const a5 = model.quota?.antigravity?.tokens5h;
+      filterParts.push(a5 ? `Antigravity (~${formatTokens(a5)})` : 'Antigravity');
+    } else if (model.providerFilter === 'copilot') {
+      filterParts.push('GitHub Copilot');
+    } else if (model.providerFilter === 'codex') {
+      filterParts.push('OpenAI Codex');
+    }
+    if (model.projectFilter && model.projectFilter !== 'all') filterParts.push(model.projectFilter);
+    view.description = filterParts.join(' · ');
+    view.message = visible.length === 0
+      ? (model.sessions.length === 0 ? 'Keine laufenden KI-Sessions gefunden.' : `Keine Sessions für Filter (${filterParts.join(', ')}).`)
+      : undefined;
+  }
+
   async function update(force = false) {
     if (running) {
       pending = true;
@@ -640,31 +669,7 @@ function activate(context) {
       const changed = await model.refresh();
       const soundEvents = soundNotifier.evaluate(model.sessions, model.quota);
       if (changed || force === true) {
-        tree.refresh();
-        board.update(soundEvents?.completedSessionIds);
-        statusBar.update();
-        const visible = model.visibleSessions();
-        const waiting = visible.filter((s) => s.displayState === 'waiting').length;
-        view.badge = waiting > 0
-          ? { value: waiting, tooltip: waiting === 1 ? '1 Session wartet auf dich' : `${waiting} Sessions warten auf dich` }
-          : undefined;
-        const filterParts = [];
-        if (model.providerFilter === 'claude') {
-          const c5 = model.quota?.claude?.fiveHour?.percent;
-          filterParts.push(c5 !== undefined && c5 !== null ? `Claude (${c5}% 5h)` : 'Claude Code');
-        } else if (model.providerFilter === 'antigravity') {
-          const a5 = model.quota?.antigravity?.tokens5h;
-          filterParts.push(a5 ? `Antigravity (~${formatTokens(a5)})` : 'Antigravity');
-        } else if (model.providerFilter === 'copilot') {
-          filterParts.push('GitHub Copilot');
-        } else if (model.providerFilter === 'codex') {
-          filterParts.push('OpenAI Codex');
-        }
-        if (model.projectFilter && model.projectFilter !== 'all') filterParts.push(model.projectFilter);
-        view.description = filterParts.join(' · ');
-        view.message = visible.length === 0
-          ? (model.sessions.length === 0 ? 'Keine laufenden KI-Sessions gefunden.' : `Keine Sessions für Filter (${filterParts.join(', ')}).`)
-          : undefined;
+        syncViews(soundEvents?.completedSessionIds);
       }
     } catch (err) {
       console.error('[session-dashboard] refresh failed', err);
@@ -772,7 +777,7 @@ function activate(context) {
       });
       if (picked && picked.filter) {
         await model.setFilter(picked.filter);
-        await update(true);
+        syncViews();
       }
     }),
     vscode.commands.registerCommand('sessionDashboard.filterProject', async () => {
@@ -799,7 +804,7 @@ function activate(context) {
       });
       if (picked && picked.filter) {
         await model.setProjectFilter(picked.filter);
-        await update(true);
+        syncViews();
       }
     }),
     vscode.commands.registerCommand('sessionDashboard.open', (arg) => {
@@ -1152,7 +1157,7 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.claudeStatusClick', async () => {
       const next = model.providerFilter === 'claude' ? 'all' : 'claude';
       await model.setFilter(next);
-      await update(true);
+      syncViews();
       const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
       if (action === 'quickpick') {
         return vscode.commands.executeCommand('sessionDashboard.quickMenu');
@@ -1162,7 +1167,7 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.antigravityStatusClick', async () => {
       const next = model.providerFilter === 'antigravity' ? 'all' : 'antigravity';
       await model.setFilter(next);
-      await update(true);
+      syncViews();
       const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
       if (action === 'quickpick') {
         return vscode.commands.executeCommand('sessionDashboard.quickMenu');
@@ -1172,7 +1177,7 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.codexStatusClick', async () => {
       const next = model.providerFilter === 'codex' ? 'all' : 'codex';
       await model.setFilter(next);
-      await update(true);
+      syncViews();
       const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
       if (action === 'quickpick') {
         return vscode.commands.executeCommand('sessionDashboard.quickMenu');
@@ -1182,7 +1187,7 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.copilotStatusClick', async () => {
       const next = model.providerFilter === 'copilot' ? 'all' : 'copilot';
       await model.setFilter(next);
-      await update(true);
+      syncViews();
       const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
       if (action === 'quickpick') {
         return vscode.commands.executeCommand('sessionDashboard.quickMenu');
@@ -1328,6 +1333,7 @@ function activate(context) {
       }
     }),
     vscode.commands.registerCommand('sessionDashboard.refresh', () => update(true)),
+    vscode.commands.registerCommand('sessionDashboard.syncViews', () => syncViews()),
     vscode.commands.registerCommand('sessionDashboard.toggleSound', async () => {
       await soundNotifier.toggleSound();
       board.update();
