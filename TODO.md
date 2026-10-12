@@ -13,6 +13,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] JIRA Button zum Hinzufügen auch auf dem Dashboard... Hinweis einfügen, wie man diese Löschen kann?
 
 ## Erledigt
+- [x] session-dashboard v0.46.0: Jenkins-Tab „Deploys“ (Schritt 1: Jobliste & Pipelines) im Board integriert (lesender Zugriff via JSON-API, automatische Pipeline-Erkennung aus Views & Upstream/Downstream-Ketten, Topologische Sortierung, Filter Nur Deploy/Alle, Suche, Credential-Management via SecretStorage & Settings) *(12.10.2026, [Plan](.agents/plans/ai-sessions-jenkins-tab.md))*
 - [x] session-dashboard v0.45.2: Copilot-Session „Fertig“-Erkennung bei Retry & Resent korrigiert (JSONL-Splice-Index i für requests und response ausgewertet), gestreamte Response-Chunks dedupliziert & Analytics-Cache über COPILOT_TURN_CACHE_VERSION 3 invalidiert *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-fix-copilot-splice.md))*
 - [x] session-dashboard v0.45.1: Sofortige UI-Umschaltung des aktiven Anbieter- und Projekt-Filters auf dem Dashboard (optimistischer Toggle) und beschleunigte In-Memory-Aktualisierung (syncViews) ohne blockierenden Disk-Reload *(12.10.2026)*
 - [x] session-dashboard v0.45.0: GitHub Copilot Freigaben mit Unterbefehl-Chips (z. B. git status/diff, npm, docker) & 1-Klick autoApprove-Regel für settings.json, Befehlsketten-Aufteilung (; && ||), Safe-by-default-Vorauswahl *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-freigaben-unterbefehle.md))*

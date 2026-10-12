@@ -15,6 +15,7 @@ const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
 const { SoundNotifier, SOUND_OPTIONS } = require('./lib/soundNotifier');
 const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quota');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
+const { setJenkinsCredentials } = require('./lib/jenkins');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
@@ -711,6 +712,9 @@ function activate(context) {
       }
       if (e.affectsConfiguration('sessionDashboard.sound')) {
         board.update();
+      }
+      if (e.affectsConfiguration('sessionDashboard.jenkins')) {
+        board.onJenkinsConfigChanged();
       }
       if (e.affectsConfiguration('sessionDashboard.projectDetection')) {
         update(true);
@@ -1484,7 +1488,9 @@ function activate(context) {
     }),
     vscode.commands.registerCommand('sessionDashboard.openSettings', () => {
       vscode.commands.executeCommand('workbench.action.openSettings', '@ext:schueri.ai-sessions');
-    })
+    }),
+    vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', () => setJenkinsCredentials(context.secrets)),
+    vscode.commands.registerCommand('sessionDashboard.showJenkins', () => board.show(undefined, 'jenkins'))
   );
 
   update(true);

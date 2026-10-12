@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot- und OpenAI-Codex-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.45.2",
+  "version": "0.46.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -227,6 +227,18 @@
         "title": "Projekt manuell zuweisen...",
         "category": "Session Dashboard",
         "icon": "$(folder)"
+			},
+			{
+				"command": "sessionDashboard.showJenkins",
+				"title": "Jenkins Deploy-Jobs anzeigen",
+				"category": "Session Dashboard",
+				"icon": "$(rocket)"
+			},
+			{
+				"command": "sessionDashboard.jenkinsSetCredentials",
+				"title": "Jenkins-Zugangsdaten hinterlegen...",
+				"category": "Session Dashboard",
+				"icon": "$(key)"
       }
     ],
     "menus": {
@@ -609,6 +621,22 @@
           "default": "",
           "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
         },
+				"sessionDashboard.jenkins.baseUrl": {
+					"type": "string",
+					"default": "",
+					"pattern": "^(https://.*)?$",
+					"description": "Basis-URL des Jenkins-Servers (nur https), z. B. 'https://jenkins.beispiel.local:8443'. Wird im Tab 'Deploys' verwendet."
+				},
+				"sessionDashboard.jenkins.user": {
+					"type": "string",
+					"default": "",
+					"markdownDescription": "Jenkins-Benutzername. Der API-Token wird verschlüsselt im VS Code Secret Storage abgelegt: [🔑 Zugangsdaten hinterlegen...](command:sessionDashboard.jenkinsSetCredentials)"
+				},
+				"sessionDashboard.jenkins.jobFilter": {
+					"type": "string",
+					"default": "deploy",
+					"description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung) auf den vollen Jobnamen inkl. Ordner, der einen Job als Deploy-Job kennzeichnet. Leer = alle Jobs."
+				},
         "sessionDashboard.projectDetection": {
           "type": "string",
           "enum": [
@@ -628,7 +656,7 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js",
+    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/jenkins.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js",
     "package": "node -e \"const fs=require('fs');fs.mkdirSync('vsix',{recursive:true})\" && vsce package --skip-license --allow-missing-repository --out vsix/"
   },
   "devDependencies": {
