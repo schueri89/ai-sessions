@@ -11,6 +11,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
 
 ## Erledigt
+- [x] session-dashboard v0.45.0: GitHub Copilot Freigaben mit Unterbefehl-Chips (z. B. git status/diff, npm, docker) & 1-Klick autoApprove-Regel für settings.json, Befehlsketten-Aufteilung (; && ||), Safe-by-default-Vorauswahl *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-freigaben-unterbefehle.md))*
 - [x] session-dashboard v0.44.0: GitHub Copilot Quota & Budget in Statusleiste (neues copilotItem mit 6 statusBarUsage-Formaten, Monatskontingent & Zusatzbudget, Farb-Schwellenwerte, Auth-Prompt bei needsAuth, Hover-Tooltip & 1-Klick-Filter) *(12.10.2026, [Plan](.agents/plans/2026-10-12_session-dashboard-copilot-statusbar.md))*
 - [x] session-dashboard v0.43.1: Tab Analytics: OpenAI Codex voll integriert (Rollout-Transkript-Erfassung in collectRawTurns, eigenes Provider-Scope-Bundle in getAllAnalytics, korrigierte Kosten- und Token-Berechnung, separate Codex-Kostenzeile im KPI-Card, Fehler bei Fallback auf cachedAnalytics.all behoben) *(12.10.2026)*
 - [x] session-dashboard v0.42.0: Bestätigungsdialog vor „Alles erledigt markieren“ (Modal mit Session-Anzahl) & Session-Card Highlight-Animation synchron zum Sound bei Fertigstellung *(11.10.2026, [Plan](.agents/plans/2026-10-11_session-dashboard-confirm-mark-all-done-and-card-animation.md))*
