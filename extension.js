@@ -1490,7 +1490,9 @@ function activate(context) {
       vscode.commands.executeCommand('workbench.action.openSettings', '@ext:schueri.ai-sessions');
     }),
     vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', () => setJenkinsCredentials(context.secrets)),
-    vscode.commands.registerCommand('sessionDashboard.showJenkins', () => board.show(undefined, 'jenkins'))
+    vscode.commands.registerCommand('sessionDashboard.showJenkins', () => {
+      vscode.window.showInformationMessage('Der Jenkins Deploy-Tab ist derzeit noch in Arbeit (Coming Soon).');
+    })
   );
 
   update(true);
