@@ -21,6 +21,10 @@ weil dort alle Repos nebeneinanderliegen, und wird nie deployt.
   trägt es dort nach — sonst bleibt es ungeprüft.
 - **Versionierung:** `version` in `package.json` je Änderung hochzählen (Patch für Fixes, Minor für
   Funktionen); die Version gehört in den Erledigt-Eintrag der `TODO.md` und die Commit-Nachricht.
+- **Changelog:** Jede Version bekommt in derselben Änderung einen Eintrag oben in `CHANGELOG.md`
+  (`## [x.y.z] – dd.mm.yyyy`, ein Satz je Änderung aus Nutzersicht, keine Technik). VS Code zeigt
+  die Datei im Reiter „Changelog" der Extension-Ansicht. Da hier jede Änderung eine eigene Version
+  bekommt, gilt die Tagesregel aus `ROOT/.agents/changelog.md` nicht: je Version ein Eintrag.
 - **VSIX-Paketierung & Automatische Installation:** Nach jeder Änderung (nach erfolgreichem `npm run check`)
   immer automatisch die neue Version paketieren (`npm run package`) und direkt im Editor installieren
   (`code --install-extension vsix/ai-sessions-<version>.vsix`), bevor der Vorgang abgeschlossen gemeldet wird.

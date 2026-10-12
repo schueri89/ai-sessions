@@ -3,7 +3,6 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] **Changelog integrieren** — `CHANGELOG.md` im `.vsix` (zeigt VS Code in der Extension-Ansicht), Altbestand aus der Git-Historie *(Konzept: `ROOT/.agents/changelog.md`, 11.10.2026)*
 - [ ] Dashboard: Spaltenüberschrift sticky oben ansetzen, wenn man herunterscrollt
 - [ ] Statusbar: Informationen über alle 4 Anbieter hinweg angleichen - was wird wo angezeigt, bitte Übersicht liefern
 
@@ -13,6 +12,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] JIRA Button zum Hinzufügen auch auf dem Dashboard... Hinweis einfügen, wie man diese Löschen kann?
 
 ## Erledigt
+- [x] session-dashboard v0.46.3: `CHANGELOG.md` im `.vsix` (Reiter „Changelog“ der Extension-Ansicht), Altbestand 0.1.0–0.46.2 aus Git-Historie und Erledigt-Liste ausgearbeitet *(12.10.2026)*
 - [x] session-dashboard v0.46.2: Schriftfarbe und Styling des „Coming Soon“-Badges an die übrigen Badges im Tab-Header angeglichen (color: inherit, mode-badge Klassenverbund) *(12.10.2026)*
 - [x] session-dashboard v0.46.1: Jenkins-Tab „Deploys“ mit „Coming Soon“-Badge versehen, Tab-Umschaltung deaktiviert (inaktiv/disabled) & showJenkins-Hinweismeldung hinterlegt *(12.10.2026)*
 - [x] session-dashboard v0.46.0: Jenkins-Tab „Deploys“ (Schritt 1: Jobliste & Pipelines) im Board integriert (lesender Zugriff via JSON-API, automatische Pipeline-Erkennung aus Views & Upstream/Downstream-Ketten, Topologische Sortierung, Filter Nur Deploy/Alle, Suche, Credential-Management via SecretStorage & Settings) *(12.10.2026, [Plan](.agents/plans/ai-sessions-jenkins-tab.md))*

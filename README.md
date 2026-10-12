@@ -56,8 +56,8 @@ npm run package    # erzeugt vsix/ai-sessions-<version>.vsix
 code --install-extension vsix/ai-sessions-<version>.vsix
 ```
 
-Danach „Developer: Reload Window". Für ein Update `version` in der `package.json` hochzählen, neu
-paketieren und erneut installieren.
+Danach „Developer: Reload Window". Für ein Update `version` in der `package.json` hochzählen, den
+Eintrag in der `CHANGELOG.md` ergänzen, neu paketieren und erneut installieren.
 
 ## Grenzen
 
