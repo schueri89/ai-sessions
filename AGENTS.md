@@ -16,6 +16,7 @@ Alle fachlichen Regeln, Datenstrukturen und Architekturvorgaben stehen in
   ausdrückliche Anweisung.
 - **FEEDBACK.md**: Postfach für kleine Rückmeldungen zur laufenden Umsetzung; wird dabei
   abgearbeitet und ist am Ende wieder leer.
-- **Commit & Push**: Niemals eigenmächtig committen oder pushen! Vor jedem `git commit` und vor
-  jedem `git push` zwingend die explizite Freigabe des Benutzers einholen. Änderungen
-  ausschließlich in diesem Projektverzeichnis ausführen und pro Projekt separat committen.
+- **Commit & Push**: Niemals eigenmächtig committen oder pushen! Vor jedem `git commit` zwingend
+  die explizite Freigabe des Benutzers einholen; gepusht wird nur auf ausdrückliche Ansage, im
+  Chat wird nie danach gefragt. Änderungen ausschließlich in diesem Projektverzeichnis ausführen
+  und pro Projekt separat committen.
