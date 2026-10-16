@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot- und OpenAI-Codex-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.48.0",
+  "version": "0.51.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -379,7 +379,7 @@
             "Icons kompakt: $(dashboard-claude) X% · $(dashboard-antigravity) Y% · $(dashboard-codex) Z% · $(copilot) M% (Standard)",
             "Text kompakt: Claude: X% · AG: Y% · Codex: Z% · Copilot: M%",
             "Kurzzeit-Fenster beschriftet: $(dashboard-claude) X% (5h) · $(dashboard-antigravity) Y% (5h) · $(dashboard-codex) Z% (5h) · $(copilot) M% (Monat)",
-            "5h & 7d / Monat & Budget kombiniert: $(dashboard-claude) X%/Y% · $(dashboard-antigravity) A%/B% · $(dashboard-codex) C%/D% · $(copilot) M%/B%",
+            "5h & 7d / Monat & Budget kombiniert: $(dashboard-claude) X%/Y% · $(dashboard-antigravity) A%/B%[/C%] · $(dashboard-codex) C%/D% · $(copilot) M%/B%",
             "Ausführlich mit Beschriftung: $(dashboard-claude) X% (5h) · Y% (7d) · $(dashboard-antigravity) A% (5h) · B% (7d) · $(dashboard-codex) C% (5h) · D% (7d) · $(copilot) M% (Monat) · B% (Budget)",
             "Usage in Statusleiste ausblenden (nur beim Hover)"
           ],
@@ -621,22 +621,27 @@
           "default": "",
           "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
         },
-				"sessionDashboard.jenkins.baseUrl": {
-					"type": "string",
-					"default": "",
-					"pattern": "^(https://.*)?$",
-					"description": "Basis-URL des Jenkins-Servers (nur https), z. B. 'https://jenkins.beispiel.local:8443'. Wird im Tab 'Deploys' verwendet."
-				},
-				"sessionDashboard.jenkins.user": {
-					"type": "string",
-					"default": "",
-					"markdownDescription": "Jenkins-Benutzername. Der API-Token wird verschlüsselt im VS Code Secret Storage abgelegt: [🔑 Zugangsdaten hinterlegen...](command:sessionDashboard.jenkinsSetCredentials)"
-				},
-				"sessionDashboard.jenkins.jobFilter": {
-					"type": "string",
-					"default": "deploy",
-					"description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung) auf den vollen Jobnamen inkl. Ordner, der einen Job als Deploy-Job kennzeichnet. Leer = alle Jobs."
-				},
+        "sessionDashboard.jenkins.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Deploy-Tab (Jenkins) im Session-Dashboard anzeigen."
+        },
+        "sessionDashboard.jenkins.baseUrl": {
+          "type": "string",
+          "default": "",
+          "pattern": "^(https://.*)?$",
+          "description": "Basis-URL des Jenkins-Servers (nur https), z. B. 'https://jenkins.beispiel.local:8443'. Wird im Tab 'Deploys' verwendet."
+        },
+        "sessionDashboard.jenkins.user": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Jenkins-Benutzername. Der API-Token wird verschlüsselt im VS Code Secret Storage abgelegt: [🔑 Zugangsdaten hinterlegen...](command:sessionDashboard.jenkinsSetCredentials)"
+        },
+        "sessionDashboard.jenkins.jobFilter": {
+          "type": "string",
+          "default": "deploy",
+          "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung) auf den vollen Jobnamen inkl. Ordner, der einen Job als Deploy-Job kennzeichnet. Leer = alle Jobs."
+        },
         "sessionDashboard.projectDetection": {
           "type": "string",
           "enum": [

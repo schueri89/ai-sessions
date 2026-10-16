@@ -945,16 +945,22 @@ function activate(context) {
         ? (detectTicket(session.title) || detectTicket(session.lastPrompt) || '')
         : '';
       const titleLabel = session ? (session.title || sId.slice(0, 8)) : sId.slice(0, 8);
+      const hasCurrent = Boolean(currentTicket);
       const input = await vscode.window.showInputBox({
-        prompt: `JIRA-Ticket für Session „${titleLabel}“ zuweisen:`,
-        placeHolder: 'z. B. PROJ-123 (leer lassen zum Entfernen)',
+        title: hasCurrent
+          ? `JIRA-Ticket für „${titleLabel}“ ändern / löschen`
+          : `JIRA-Ticket zuweisen: „${titleLabel}“`,
+        prompt: hasCurrent
+          ? `Ticket-Key eingeben (z. B. PROJ-123). Um das Ticket „${currentTicket}“ zu entfernen, Text komplett leeren und Enter drücken.`
+          : `JIRA-Ticket-Key eingeben (z. B. PROJ-123):`,
+        placeHolder: 'z. B. PROJ-123 (Eingabe leeren = Ticket entfernen)',
         value: currentTicket || candidate
       });
       if (input === undefined) return;
       const trimmed = input.trim();
       if (!trimmed) {
         await model.tickets.removeTicket(sId);
-        vscode.window.showInformationMessage(`JIRA-Ticket für Session „${titleLabel}“ entfernt.`);
+        vscode.window.showInformationMessage(`JIRA-Ticket für Session „${titleLabel}“ wurde entfernt.`);
       } else {
         const cleanKey = trimmed.toUpperCase();
         await model.tickets.setTicket(sId, cleanKey);
@@ -1491,8 +1497,23 @@ function activate(context) {
       vscode.commands.executeCommand('workbench.action.openSettings', '@ext:schueri.ai-sessions');
     }),
     vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', () => setJenkinsCredentials(context.secrets)),
-    vscode.commands.registerCommand('sessionDashboard.showJenkins', () => {
-      vscode.window.showInformationMessage('Der Jenkins Deploy-Tab ist derzeit noch in Arbeit (Coming Soon).');
+    vscode.commands.registerCommand('sessionDashboard.showJenkins', async () => {
+      const enabled = vscode.workspace.getConfiguration('sessionDashboard.jenkins').get('enabled', false);
+      if (!enabled) {
+        const choice = await vscode.window.showInformationMessage(
+          'Der Deploy-Tab (Jenkins) ist in den Einstellungen deaktiviert.',
+          'Tab aktivieren',
+          'Einstellungen öffnen'
+        );
+        if (choice === 'Tab aktivieren') {
+          await vscode.workspace.getConfiguration('sessionDashboard.jenkins').update('enabled', true, vscode.ConfigurationTarget.Global);
+          board.show(undefined, 'jenkins');
+        } else if (choice === 'Einstellungen öffnen') {
+          vscode.commands.executeCommand('workbench.action.openSettings', 'sessionDashboard.jenkins');
+        }
+        return;
+      }
+      board.show(undefined, 'jenkins');
     })
   );
 

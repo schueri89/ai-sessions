@@ -3,14 +3,12 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Code-Review aller Commits durch Opus 5.5
-- [ ] Dashboard: Spaltenüberschrift sticky oben ansetzen, wenn man herunterscrollt
-- [ ] Statusbar: Informationen über alle 4 Anbieter hinweg angleichen - was wird wo angezeigt, bitte Übersicht liefern
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
-- [ ] ai-sessions hat eine Version (package.json, 0.46.2) und einen geplanten Changelog. Ein Eintrag im Hook für ein package.json im Wurzelverzeichnis würde aber bei app-kit und test-suite fehlzünden. Wenn ai-sessions dran ist, braucht es dort deshalb einen Abgleich über den Repo-Namen. Das fasse ich jetzt nicht an.
-- [ ] JIRA Button zum Hinzufügen auch auf dem Dashboard... Hinweis einfügen, wie man diese Löschen kann?
-- [ ] Deploy-Tab steuerbar machen (anzeigen ja/nein)
+
 ## Erledigt
+- [x] session-dashboard v0.51.0: JIRA-Button (+ JIRA, ✏️ Ändern, 🗑️ Löschen) auf Dashboard-Karten samt Löschhinweis; Deploy-Tab (Jenkins) über sessionDashboard.jenkins.enabled steuerbar; Quota-/Budget-Badge wechselt bei 100% von „Fast voll“ auf „Voll“ bzw. „Budget aufgebraucht“ *(16.10.2026, [Plan](.agents/plans/2026-10-16_session-dashboard-jira-dashboard-deploy-tab-quota-voll.md))*
+- [x] session-dashboard v0.50.0: Dashboard: Spaltenüberschriften sticky oben fixiert (inkl. z-index, Hintergrund & grid-row stretching); Statusleiste: Informationen über alle 4 Anbieter hinweg harmonisiert (Plan-Metadaten oben, Argon in format both, vollständige Quota-Details in Session-Tooltip) *(16.10.2026)*
 - [x] session-dashboard v0.48.0: Export-Funktion für manuell freigegebene Terminal-Befehle (GitHub Copilot) im Analyse-Tab als CSV, Markdown oder JSON für die Whitelist-Prüfung integriert *(16.10.2026, [Plan](.agents/plans/ai-sessions-approval-export.md))*
 - [x] session-dashboard v0.47.0: Gemini 4 Argon Quota & separates wöchentliches Budget-Fenster in Antigravity-Kachel auf dem Dashboard und in der Statusleiste integriert *(16.10.2026, [Plan](.agents/plans/2026-10-16_session-dashboard-gemini-argon-quota.md))*
 - [x] session-dashboard v0.46.3: `CHANGELOG.md` im `.vsix` (Reiter „Changelog“ der Extension-Ansicht), Altbestand 0.1.0–0.46.2 aus Git-Historie und Erledigt-Liste ausgearbeitet *(12.10.2026)*

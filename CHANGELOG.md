@@ -2,6 +2,17 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.51.0] – 16.10.2026
+
+- **JIRA auf dem Dashboard:** Karten auf dem Board haben einen Button zum Zuweisen eines JIRA-Tickets; bestehende Tickets lassen sich per Stift bearbeiten und per Mülleimer-Icon oder Leeren der Eingabe entfernen.
+- **Deploy-Tab:** Der Reiter „Deploys“ (Jenkins) lässt sich über die Einstellung `sessionDashboard.jenkins.enabled` nach Bedarf ein- oder ausblenden.
+- **Quota-Badge bei 100%:** Ist ein Kontingent oder Budget zu 100% ausgeschöpft, wechselt die Status-Badge von „Fast voll“ auf „Voll“ bzw. „Budget aufgebraucht“.
+
+## [0.50.0] – 16.10.2026
+
+- **Sticky Spaltenüberschriften im Dashboard:** Die Spaltenköpfe mit Status-Dot, Titel und Zähler bleiben beim Herunterscrollen über lange Listen oben angeheftet und erreichbar.
+- **Harmonisierte Statusleiste:** Tooltip-Aufbau (Plan-Information oben) und Quota-Anzeigen über alle vier Anbieter (Claude Code, Google Antigravity, OpenAI Codex und GitHub Copilot) angeglichen.
+
 ## [0.48.0] – 16.10.2026
 
 - **Freigaben-Export:** Manuell freigegebene Terminal-Befehle von GitHub Copilot lassen sich im Analyse-Tab als CSV, Markdown oder JSON für die Whitelist-Prüfung exportieren.
