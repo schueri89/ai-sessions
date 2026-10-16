@@ -2,7 +2,6 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-- [ ] Code-Review aller Commits durch Opus 5.5
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
 
