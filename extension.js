@@ -178,7 +178,8 @@ class SessionModel {
         this.quota.antigravity ? [
           this.quota.antigravity.tokens5h,
           this.quota.antigravity.isRateLimited,
-          this.quota.antigravity.gemini ? [this.quota.antigravity.gemini.fiveHour?.percent, this.quota.antigravity.gemini.weekly?.percent] : null
+          this.quota.antigravity.gemini ? [this.quota.antigravity.gemini.fiveHour?.percent, this.quota.antigravity.gemini.weekly?.percent] : null,
+          this.quota.antigravity.argon ? [this.quota.antigravity.argon.weekly?.percent] : null
         ] : null,
         this.quota.copilot ? [
           this.quota.copilot.available,

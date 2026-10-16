@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.47.0] – 16.10.2026
+
+- **Gemini 4 Argon:** Google Antigravity zeigt das separate wöchentliche Budget-Fenster für Gemini 4 Argon auf dem Dashboard und in der Statusleiste an.
+
 ## [0.46.3] – 12.10.2026
 
 - **Changelog:** Die Extension-Ansicht in VS Code zeigt im Reiter „Changelog“, was sich mit jeder Version geändert hat.
