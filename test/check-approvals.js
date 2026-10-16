@@ -93,4 +93,49 @@ const simpleRegex = new RegExp(simpleRegexStr, 'i');
 assert.strictEqual(simpleRegex.test('Get-ChildItem -Path .'), true);
 assert.strictEqual(simpleRegex.test('get-childitemx'), false);
 
-console.log('✓ All terminalCommands & autoApprove regex tests passed successfully.');
+// Test 10: approvalExport tests (CSV, Markdown, JSON)
+const { buildApprovalExport, normalizeRows, FORMATS } = require('../lib/approvalExport');
+
+assert.strictEqual(FORMATS.csv.ext, 'csv');
+assert.strictEqual(FORMATS.md.ext, 'md');
+assert.strictEqual(FORMATS.json.ext, 'json');
+
+const sampleRows = [
+  { cmd: 'git', sub: 'status', count: 5, safe: true },
+  { cmd: 'node', sub: '', count: 2, safe: false },
+  { cmd: '=x', sub: '', count: 1, safe: false }
+];
+
+const csvOut = buildApprovalExport('csv', sampleRows, '7d');
+assert(csvOut.startsWith('\uFEFFBefehl;Programm;Unterbefehl;Anzahl;Lesend (Vorschlag);Regex-Pattern (autoApprove)\r\n'), 'CSV missing UTF-8 BOM or header');
+assert(csvOut.includes('git status;git;status;5;Ja;/^git\\s+status\\b/i\r\n'), 'CSV missing git status row');
+assert(csvOut.includes('node;node;;2;Nein;/^node\\b/i\r\n'), 'CSV missing node row');
+assert(csvOut.includes("'=x;'=x;;1;Nein;/^=x\\b/i\r\n"), 'CSV missing sanitized formula injection row');
+
+const mdOut = buildApprovalExport('md', sampleRows, 'today');
+assert(mdOut.includes('# Manuell freigegebene Terminal-Befehle (GitHub Copilot)'), 'MD missing title');
+assert(mdOut.includes('- Zeitraum: Heute'), 'MD missing scope label');
+assert(mdOut.includes('| `git status` | 5 | Ja | `/^git\\s+status\\b/i` |'), 'MD missing table row');
+
+const jsonOut = buildApprovalExport('json', sampleRows, '30d');
+const parsed = JSON.parse(jsonOut);
+assert.strictEqual(parsed.source, 'ai-sessions / GitHub Copilot');
+assert.strictEqual(parsed.scope, 'Letzte 30 Tage');
+assert.strictEqual(parsed.commands.length, 3);
+assert.strictEqual(parsed.commands[0].command, 'git status');
+assert.strictEqual(parsed.commands[0].readOnly, true);
+
+// Test normalization robustness
+const norm = normalizeRows([
+  null,
+  { cmd: 123 },
+  { cmd: 'tool', count: '10', safe: 1 },
+  { cmd: 'a'.repeat(200), sub: 'b'.repeat(200) }
+]);
+assert.strictEqual(norm.length, 2);
+assert.strictEqual(norm[0].count, 10);
+assert.strictEqual(norm[0].readOnly, true);
+assert.strictEqual(norm[1].program.length, 100);
+assert.strictEqual(norm[1].subcommand.length, 100);
+
+console.log('✓ All terminalCommands & autoApprove regex & approvalExport tests passed successfully.');

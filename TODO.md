@@ -7,12 +7,11 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Statusbar: Informationen über alle 4 Anbieter hinweg angleichen - was wird wo angezeigt, bitte Übersicht liefern
 - [ ] welche weiteren Infos liefern Claude Code und Antigravity zu den einzelnen Sessions zurück? Tokens, Kosten, Cache?
 - [ ] weitere Features aus Changelog von Claude Notifier Plugin erarbeiten
-- [ ] JIRA Button zum Hinzufügen auch auf dem Dashboard... Hinweis einfügen, wie man diese Löschen kann?
 - [ ] ai-sessions hat eine Version (package.json, 0.46.2) und einen geplanten Changelog. Ein Eintrag im Hook für ein package.json im Wurzelverzeichnis würde aber bei app-kit und test-suite fehlzünden. Wenn ai-sessions dran ist, braucht es dort deshalb einen Abgleich über den Repo-Namen. Das fasse ich jetzt nicht an.
+- [ ] JIRA Button zum Hinzufügen auch auf dem Dashboard... Hinweis einfügen, wie man diese Löschen kann?
 - [ ] Deploy-Tab steuerbar machen (anzeigen ja/nein)
-- [ ] wenn Budget bei 100% ist, steht in der Badge weiterhin "Fast voll" -> das ist ja nicht ganz richtig
-
 ## Erledigt
+- [x] session-dashboard v0.48.0: Export-Funktion für manuell freigegebene Terminal-Befehle (GitHub Copilot) im Analyse-Tab als CSV, Markdown oder JSON für die Whitelist-Prüfung integriert *(16.10.2026, [Plan](.agents/plans/ai-sessions-approval-export.md))*
 - [x] session-dashboard v0.47.0: Gemini 4 Argon Quota & separates wöchentliches Budget-Fenster in Antigravity-Kachel auf dem Dashboard und in der Statusleiste integriert *(16.10.2026, [Plan](.agents/plans/2026-10-16_session-dashboard-gemini-argon-quota.md))*
 - [x] session-dashboard v0.46.3: `CHANGELOG.md` im `.vsix` (Reiter „Changelog“ der Extension-Ansicht), Altbestand 0.1.0–0.46.2 aus Git-Historie und Erledigt-Liste ausgearbeitet *(12.10.2026)*
 - [x] session-dashboard v0.46.2: Schriftfarbe und Styling des „Coming Soon“-Badges an die übrigen Badges im Tab-Header angeglichen (color: inherit, mode-badge Klassenverbund) *(12.10.2026)*
