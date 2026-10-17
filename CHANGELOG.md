@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.51.1] – 17.10.2026
+
+- **Kein doppelter Benachrichtigungston bei mehreren Fenstern:** Wenn mehrere VS-Code-Fenster gleichzeitig geöffnet sind, ertönen Benachrichtigungstöne beim Fertigstellen einer Aufgabe nur noch einmal statt in jedem Fenster parallel.
+
 ## [0.51.0] – 16.10.2026
 
 - **JIRA auf dem Dashboard:** Karten auf dem Board haben einen Button zum Zuweisen eines JIRA-Tickets; bestehende Tickets lassen sich per Stift bearbeiten und per Mülleimer-Icon oder Leeren der Eingabe entfernen.
