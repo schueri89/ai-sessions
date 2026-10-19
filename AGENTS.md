@@ -20,3 +20,7 @@ Alle fachlichen Regeln, Datenstrukturen und Architekturvorgaben stehen in
   die explizite Freigabe des Benutzers einholen; gepusht wird nur auf ausdrückliche Ansage, im
   Chat wird nie danach gefragt. Änderungen ausschließlich in diesem Projektverzeichnis ausführen
   und pro Projekt separat committen.
+- **Fail Fast statt vorsichtiger Programmierung**: Keine defensiven `try/catch`-Kapselungen
+  um Schnittstellen, Datenbankabfragen oder Services („damit nichts abstürzt“) und keine stillen
+  Fallbacks auf Altdaten oder leere Defaults. Fehler müssen direkt sichtbar werden. Fallbacks
+  immer vorab abstimmen.
