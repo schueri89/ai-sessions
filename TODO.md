@@ -3,9 +3,9 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Diff-Statistik auf den Session-Karten (`+167 / -28 Zeilen`) aus Claude-Code-Transkripten (`totalLinesAdded` / `totalLinesRemoved`) anzeigen
-- [ ] Cache-Effizienz-Anzeige (Cache-Hit-Rate %) auf Session-Karten und in der Historie (`cacheRead / (input + cacheRead + cacheCreation)`)
 
 ## Erledigt
+- [x] session-dashboard v0.54.0: Cache-Effizienz-Anzeige (Cache-Hit-Rate %) auf Session-Karten (grünes Badge & Kontext-Tooltip) und in der Historie (Formelkorrektur inkl. Cache-Creation, Spaltensortierung & N/A-Handling für Copilot) für Claude Code, Google Antigravity und OpenAI Codex *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-cache-efficiency.md))*
 - [x] session-dashboard v0.53.0: Echte Claude-Kosten (`totalCostUSD`) aus Transkript-`cost-state` auf Kanban-Karten (Kosten-Badge & Kontext-Tooltip), in der Historie-Tabelle (Kosten-Spalte mit ✓-Markierung & Accordion-Chip) und im Analyse-Tab (proportionale Turn-Skalierung für exakte KPI-Werte) *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-claude-real-costs.md))*
 - [x] session-dashboard v0.52.0: Kontextreiche VS-Code-Benachrichtigungen (Toast) bei Fertigstellung & Rückfrage mit 1-Klick-Button „Chat öffnen“ (Click-to-Focus, Workspace-Routing & Cooldown) *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-toast-notifications.md))*
 - [x] session-dashboard v0.51.1: Doppelter Benachrichtigungston bei Fertigstellung behoben (prozess- und fensterübergreifende Entprellung via shared lockfile mit 2,5s Cooldown verhindert Doppel-Tada und Folgetöne in Multi-Window-Setups) *(17.10.2026)*

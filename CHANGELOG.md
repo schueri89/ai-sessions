@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.54.0] – 23.10.2026
+
+- **Cache-Effizienz-Anzeige:** Session-Karten und die Historie-Tabelle zeigen für unterstützte Anbieter (Claude Code, Google Antigravity, OpenAI Codex) die prozentuale Cache-Hit-Rate mit Detail-Tooltip an; nicht unterstützte Anbieter (GitHub Copilot) werden dezent als N/A markiert.
+
 ## [0.53.0] – 23.10.2026
 
 - **Echte Claude-Kosten:** Claude-Code-Sessions zeigen die tatsächlichen Kosten aus den Transkripten (`cost-state`) auf den Kanban-Karten und in der Historie (mit `✓`-Markierung und Detail-Chip im Accordion). Im Analyse-Tab werden die Turns proportional skaliert, sodass die Gesamtkosten centgenau der tatsächlichen Abrechnung entsprechen.
