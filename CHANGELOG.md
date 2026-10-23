@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.55.0] – 23.10.2026
+
+- **Blätterfunktion und Diff-Statistik in der Historie:** Die Historie-Tabelle bietet eine vollständige Seitennavigation samt Seitengrößen-Auswahl (25, 50, 100 pro Seite) und zeigt für Claude Code, Google Antigravity und OpenAI Codex eine neue sortierbare Diff-Spalte (`+Zeilen / -Zeilen`) samt Detail-Chip im Accordion sowie Diff-Badges auf Claude-Karten an.
+
 ## [0.54.0] – 23.10.2026
 
 - **Cache-Effizienz-Anzeige:** Session-Karten und die Historie-Tabelle zeigen für unterstützte Anbieter (Claude Code, Google Antigravity, OpenAI Codex) die prozentuale Cache-Hit-Rate mit Detail-Tooltip an; nicht unterstützte Anbieter (GitHub Copilot) werden dezent als N/A markiert.
