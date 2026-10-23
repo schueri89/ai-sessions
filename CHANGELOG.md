@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.53.0] – 23.10.2026
+
+- **Echte Claude-Kosten:** Claude-Code-Sessions zeigen die tatsächlichen Kosten aus den Transkripten (`cost-state`) auf den Kanban-Karten und in der Historie (mit `✓`-Markierung und Detail-Chip im Accordion). Im Analyse-Tab werden die Turns proportional skaliert, sodass die Gesamtkosten centgenau der tatsächlichen Abrechnung entsprechen.
+
 ## [0.52.0] – 23.10.2026
 
 - **Visuelle Benachrichtigungen bei Aufgabenfertigstellung & Rückfragen:** Fertige Sessions und offene Rückfragen melden sich mit Projektname und Chat-Titel als VS-Code-Benachrichtigung und lassen sich mit einem Klick auf „Chat öffnen“ direkt ansteuern.

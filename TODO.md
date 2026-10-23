@@ -2,11 +2,11 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-- [ ] Echte Claude-Kosten (`totalCostUSD`) aus Transkript-`cost-state` auf Kanban-Karten, in der Historie-Tabelle und im Analyse-Tab anzeigen
 - [ ] Diff-Statistik auf den Session-Karten (`+167 / -28 Zeilen`) aus Claude-Code-Transkripten (`totalLinesAdded` / `totalLinesRemoved`) anzeigen
 - [ ] Cache-Effizienz-Anzeige (Cache-Hit-Rate %) auf Session-Karten und in der Historie (`cacheRead / (input + cacheRead + cacheCreation)`)
 
 ## Erledigt
+- [x] session-dashboard v0.53.0: Echte Claude-Kosten (`totalCostUSD`) aus Transkript-`cost-state` auf Kanban-Karten (Kosten-Badge & Kontext-Tooltip), in der Historie-Tabelle (Kosten-Spalte mit ✓-Markierung & Accordion-Chip) und im Analyse-Tab (proportionale Turn-Skalierung für exakte KPI-Werte) *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-claude-real-costs.md))*
 - [x] session-dashboard v0.52.0: Kontextreiche VS-Code-Benachrichtigungen (Toast) bei Fertigstellung & Rückfrage mit 1-Klick-Button „Chat öffnen“ (Click-to-Focus, Workspace-Routing & Cooldown) *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-toast-notifications.md))*
 - [x] session-dashboard v0.51.1: Doppelter Benachrichtigungston bei Fertigstellung behoben (prozess- und fensterübergreifende Entprellung via shared lockfile mit 2,5s Cooldown verhindert Doppel-Tada und Folgetöne in Multi-Window-Setups) *(17.10.2026)*
 - [x] session-dashboard v0.51.0: JIRA-Button (+ JIRA, ✏️ Ändern, 🗑️ Löschen) auf Dashboard-Karten samt Löschhinweis; Deploy-Tab (Jenkins) über sessionDashboard.jenkins.enabled steuerbar; Quota-/Budget-Badge wechselt bei 100% von „Fast voll“ auf „Voll“ bzw. „Budget aufgebraucht“ *(16.10.2026, [Plan](.agents/plans/2026-10-16_session-dashboard-jira-dashboard-deploy-tab-quota-voll.md))*
