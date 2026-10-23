@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.52.0] – 23.10.2026
+
+- **Visuelle Benachrichtigungen bei Aufgabenfertigstellung & Rückfragen:** Fertige Sessions und offene Rückfragen melden sich mit Projektname und Chat-Titel als VS-Code-Benachrichtigung und lassen sich mit einem Klick auf „Chat öffnen“ direkt ansteuern.
+
 ## [0.51.1] – 17.10.2026
 
 - **Kein doppelter Benachrichtigungston bei mehreren Fenstern:** Wenn mehrere VS-Code-Fenster gleichzeitig geöffnet sind, ertönen Benachrichtigungstöne beim Fertigstellen einer Aufgabe nur noch einmal statt in jedem Fenster parallel.

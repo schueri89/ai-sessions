@@ -13,6 +13,7 @@ const { BoardPanel } = require('./lib/boardPanel');
 const { StatusBarWidget } = require('./lib/statusBar');
 const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
 const { SoundNotifier, SOUND_OPTIONS } = require('./lib/soundNotifier');
+const { ToastNotifier } = require('./lib/toastNotifier');
 const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quota');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 const { setJenkinsCredentials } = require('./lib/jenkins');
@@ -606,6 +607,8 @@ function activate(context) {
   const model = new SessionModel(context);
   const soundNotifier = new SoundNotifier(context);
   model.soundNotifier = soundNotifier;
+  const toastNotifier = new ToastNotifier(context, (session) => openSession(session));
+  model.toastNotifier = toastNotifier;
   const tree = new SessionTreeProvider(model);
   const board = new BoardPanel(model);
   const statusBar = new StatusBarWidget(model);
@@ -614,6 +617,7 @@ function activate(context) {
     view,
     statusBar,
     soundNotifier,
+    toastNotifier,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
         if (board.panel) {
@@ -670,6 +674,7 @@ function activate(context) {
     try {
       const changed = await model.refresh();
       const soundEvents = soundNotifier.evaluate(model.sessions, model.quota);
+      toastNotifier.evaluate(model.sessions);
       if (changed || force === true) {
         syncViews(soundEvents?.completedSessionIds);
       }
@@ -1348,6 +1353,9 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.toggleSound', async () => {
       await soundNotifier.toggleSound();
       board.update();
+    }),
+    vscode.commands.registerCommand('sessionDashboard.toggleNotifications', async () => {
+      await toastNotifier.toggleNotifications();
     }),
     vscode.commands.registerCommand('sessionDashboard.previewSound', async (arg) => {
       const eventLabels = {

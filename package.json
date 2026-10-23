@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot- und OpenAI-Codex-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.51.1",
+  "version": "0.52.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -197,6 +197,12 @@
         "title": "Sounds ein-/ausschalten",
         "category": "Session Dashboard",
         "icon": "$(unmute)"
+      },
+      {
+        "command": "sessionDashboard.toggleNotifications",
+        "title": "Benachrichtigungen ein-/ausschalten",
+        "category": "Session Dashboard",
+        "icon": "$(bell)"
       },
       {
         "command": "sessionDashboard.previewSound",
@@ -616,6 +622,41 @@
           "description": "Sound wenn Kontingent/Limit wieder frei ist (Standard: chimes, wie bei Rückfrage).",
           "markdownDescription": "Sound wenn Kontingent oder Rate-Limit wieder frei ist.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22limitAvailable%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
         },
+        "sessionDashboard.notifications.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Visuelle Benachrichtigungen (Toasts) bei Fertigstellung und Rückfragen anzeigen."
+        },
+        "sessionDashboard.notifications.taskCompleted": {
+          "type": "boolean",
+          "default": true,
+          "description": "Benachrichtigung anzeigen, wenn eine Session eine Aufgabe abschließt."
+        },
+        "sessionDashboard.notifications.needsInput": {
+          "type": "boolean",
+          "default": true,
+          "description": "Benachrichtigung anzeigen, wenn eine Session auf Eingabe oder Freigabe wartet."
+        },
+        "sessionDashboard.notifications.providers.claude": {
+          "type": "boolean",
+          "default": true,
+          "description": "Benachrichtigungen für Claude-Code-Sessions anzeigen."
+        },
+        "sessionDashboard.notifications.providers.antigravity": {
+          "type": "boolean",
+          "default": true,
+          "description": "Benachrichtigungen für Google-Antigravity-Sessions anzeigen."
+        },
+        "sessionDashboard.notifications.providers.copilot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Benachrichtigungen für GitHub-Copilot-Sessions anzeigen."
+        },
+        "sessionDashboard.notifications.providers.codex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Benachrichtigungen für OpenAI-Codex-Sessions anzeigen."
+        },
         "sessionDashboard.jiraBaseUrl": {
           "type": "string",
           "default": "",
@@ -661,7 +702,7 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/jenkins.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js",
+    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/jenkins.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js",
     "package": "node -e \"const fs=require('fs');fs.mkdirSync('vsix',{recursive:true})\" && vsce package --skip-license --allow-missing-repository --out vsix/"
   },
   "devDependencies": {
