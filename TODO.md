@@ -5,6 +5,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 _Zurzeit keine offenen Aufgaben._
 
 ## Erledigt
+- [x] session-dashboard v0.55.1: Rate-Limit-Reset-Erkennung bei Antigravity (Argon) korrigiert (Erschöpfungsgrenze auf `<= 0.02` bzw. `>= 98%` angepasst, vorzeitiger Wechsel auf „Limit vorbei“ behoben) *(26.10.2026, [Plan](.agents/plans/2026-10-26_session-dashboard-fix-antigravity-argon-rate-limit-reset.md))*
 - [x] session-dashboard v0.55.0: Blätterfunktion (Pagination) & Multi-Provider Diff-Statistik (`+Zeilen / -Zeilen`) in der Historie-Tabelle samt Spaltensortierung und Detail-Accordion für Claude Code, Google Antigravity und OpenAI Codex sowie Diff-Badges auf Claude-Karten *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-history-pagination-and-diff-stats.md))*
 - [x] session-dashboard v0.54.0: Cache-Effizienz-Anzeige (Cache-Hit-Rate %) auf Session-Karten (grünes Badge & Kontext-Tooltip) und in der Historie (Formelkorrektur inkl. Cache-Creation, Spaltensortierung & N/A-Handling für Copilot) für Claude Code, Google Antigravity und OpenAI Codex *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-cache-efficiency.md))*
 - [x] session-dashboard v0.53.0: Echte Claude-Kosten (`totalCostUSD`) aus Transkript-`cost-state` auf Kanban-Karten (Kosten-Badge & Kontext-Tooltip), in der Historie-Tabelle (Kosten-Spalte mit ✓-Markierung & Accordion-Chip) und im Analyse-Tab (proportionale Turn-Skalierung für exakte KPI-Werte) *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-claude-real-costs.md))*

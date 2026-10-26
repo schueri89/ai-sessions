@@ -89,7 +89,7 @@ assert.ok(result.thirdParty, 'thirdParty group must exist');
 assert.strictEqual(result.thirdParty.fiveHour.percent, 0, '3p 5h should be 0%');
 assert.strictEqual(result.thirdParty.weekly.percent, 0, '3p weekly should be 0%');
 
-// Test resolveAntigravityReset with an exhausted Argon quota
+// Test resolveAntigravityReset with an exhausted Argon quota (remainingFraction 0 and near-zero fractional quota)
 const exhaustedArgonQuota = {
   available: true,
   argon: {
@@ -101,6 +101,19 @@ const exhaustedArgonQuota = {
 };
 const resetTime = resolveAntigravityReset('session-test-argon', Date.now(), exhaustedArgonQuota);
 assert.strictEqual(resetTime, exhaustedArgonQuota.argon.weekly.resetsAt, 'resolveAntigravityReset should identify exhausted Argon bucket');
+
+const nearZeroArgonQuota = {
+  available: true,
+  argon: {
+    weekly: {
+      percent: 99,
+      remainingFraction: 0.0074512,
+      resetsAt: Date.now() + 7200000
+    }
+  }
+};
+const nearZeroResetTime = resolveAntigravityReset('session-test-argon-fraction', Date.now(), nearZeroArgonQuota);
+assert.strictEqual(nearZeroResetTime, nearZeroArgonQuota.argon.weekly.resetsAt, 'resolveAntigravityReset should identify near-zero Argon bucket as exhausted');
 
 // Test friendlyModel for Argon
 assert.strictEqual(friendlyModel('gemini-4-argon'), 'Gemini 4 Argon');
