@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.56.0] – 26.10.2026
+
+- **Kompaktere Kacheln durch einstellbare Prompt-Anzeige:** Die Anzeige des letzten Prompts auf den Dashboard-Karten kann über die neue Einstellung `sessionDashboard.showLastPrompt` gesteuert werden (standardmäßig deaktiviert für schlankere Kacheln), bleibt bei Suchtreffern hervorgehoben und ist weiterhin per Mauszeiger als Schnellansicht-Tooltip abrufbar.
+
 ## [0.55.1] – 26.10.2026
 
 - **Korrektur der Rate-Limit-Reset-Erkennung bei Antigravity (Argon):** Google-Antigravity-Sessions mit nahezu erschöpftem Kontingent (z. B. 99% verbrauchtes Argon-Wochenlimit) werden zuverlässig erkannt und zeigen bis zum tatsächlichen Reset-Zeitpunkt die korrekte Wartezeit an, statt vorzeitig als abgelaufen gemeldet zu werden.
