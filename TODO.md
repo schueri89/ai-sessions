@@ -5,6 +5,8 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 _Zurzeit keine offenen Aufgaben._
 
 ## Erledigt
+- [x] session-dashboard v0.57.1: Cline-Kachel Titel-Bereinigung & Kürzung auf max. 65 Zeichen, message-basierte Zeitstempel (`inspection.lastEventTime`) gegen voreilige 2-Minuten-Anzeigen und Unterdrückung falscher `failed`-Statuswerte durch Cline Stale Session Reconciler *(26.10.2026)*
+- [x] session-dashboard v0.57.0: Cline Provider-Integration (lokale Ollama/Gemma 4 Sessions und alle Cline-Tasks im Dashboard, Transkript-Viewer, Historie & Analyse samt Click-to-Focus auf Cline-Sidebar) *(26.10.2026, [Plan](.agents/plans/2026-10-26_session-dashboard-cline-integration.md))*
 - [x] session-dashboard v0.56.0: Einstellbare Anzeige des letzten Prompts auf Dashboard-Kacheln (`sessionDashboard.showLastPrompt`, Standard: aus; Smart Search Highlight & Hover-Tooltip) *(26.10.2026, [Plan](.agents/plans/2026-10-26_session-dashboard-config-show-last-prompt.md))*
 - [x] session-dashboard v0.55.1: Rate-Limit-Reset-Erkennung bei Antigravity (Argon) korrigiert (Erschöpfungsgrenze auf `<= 0.02` bzw. `>= 98%` angepasst, vorzeitiger Wechsel auf „Limit vorbei“ behoben) *(26.10.2026, [Plan](.agents/plans/2026-10-26_session-dashboard-fix-antigravity-argon-rate-limit-reset.md))*
 - [x] session-dashboard v0.55.0: Blätterfunktion (Pagination) & Multi-Provider Diff-Statistik (`+Zeilen / -Zeilen`) in der Historie-Tabelle samt Spaltensortierung und Detail-Accordion für Claude Code, Google Antigravity und OpenAI Codex sowie Diff-Badges auf Claude-Karten *(23.10.2026, [Plan](.agents/plans/2026-10-23_session-dashboard-history-pagination-and-diff-stats.md))*

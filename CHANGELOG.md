@@ -2,6 +2,14 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.57.1] – 26.10.2026
+
+- **Kompakte Kartentitel und präzise Zeitstempel für Cline:** Titel von Cline-Sessions werden intelligent bereinigt (Pfadangaben und XML-Tags werden entfernt, Frage- und Absichtssätze bevorzugt und sauber auf 65 Zeichen gekürzt). Falsche `failed`-Statusanzeigen durch Clines Hintergrund-Prozessüberwachung beim VS-Code-Neustart werden unterdrückt und die Zeitstempel richten sich exakt nach der tatsächlichen letzten Nachricht.
+
+## [0.57.0] – 26.10.2026
+
+- **Cline Provider-Integration für lokale KIs:** Das Session-Dashboard erfasst ab sofort alle Sessions von Cline (inklusive lokaler Modelle wie Ollama und Gemma 4) mit Kanban-Kacheln, Live-Aktivitäten, Tokens, Filter-Buttons, Projekt-Erkennung, Historie sowie detaillierter Transkript-Ansicht und fokussiert die Cline-Sidebar mit einem Klick.
+
 ## [0.56.0] – 26.10.2026
 
 - **Kompaktere Kacheln durch einstellbare Prompt-Anzeige:** Die Anzeige des letzten Prompts auf den Dashboard-Karten kann über die neue Einstellung `sessionDashboard.showLastPrompt` gesteuert werden (standardmäßig deaktiviert für schlankere Kacheln), bleibt bei Suchtreffern hervorgehoben und ist weiterhin per Mauszeiger als Schnellansicht-Tooltip abrufbar.

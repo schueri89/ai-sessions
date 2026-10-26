@@ -65,7 +65,7 @@ class SessionModel {
   }
 
   async setFilter(filter) {
-    if (!['all', 'claude', 'antigravity', 'copilot', 'codex'].includes(filter)) filter = 'all';
+    if (!['all', 'claude', 'antigravity', 'copilot', 'codex', 'cline'].includes(filter)) filter = 'all';
     this.providerFilter = filter;
     await this.context.globalState.update('sessionDashboard.providerFilter', filter);
   }
@@ -81,6 +81,7 @@ class SessionModel {
     else if (this.providerFilter === 'antigravity') list = list.filter((s) => s.provider === 'antigravity');
     else if (this.providerFilter === 'copilot') list = list.filter((s) => s.provider === 'copilot');
     else if (this.providerFilter === 'codex') list = list.filter((s) => s.provider === 'codex');
+    else if (this.providerFilter === 'cline') list = list.filter((s) => s.provider === 'cline');
     if (this.projectFilter && this.projectFilter !== 'all') {
       list = list.filter((s) => s.project === this.projectFilter);
     }
@@ -92,16 +93,18 @@ class SessionModel {
     let antigravity = 0;
     let copilot = 0;
     let codex = 0;
+    let cline = 0;
     const byProject = {};
     for (const s of this.sessions) {
       if (s.provider === 'claude') claude++;
       else if (s.provider === 'antigravity') antigravity++;
       else if (s.provider === 'copilot') copilot++;
       else if (s.provider === 'codex') codex++;
+      else if (s.provider === 'cline') cline++;
       const p = s.project || (this.getProjectDetectionMode() === 'auto' ? 'ROOT' : 'Nicht zugewiesen');
       byProject[p] = (byProject[p] || 0) + 1;
     }
-    return { all: this.sessions.length, claude, antigravity, copilot, codex, byProject };
+    return { all: this.sessions.length, claude, antigravity, copilot, codex, cline, byProject };
   }
 
   getEnabledProviders() {
@@ -110,7 +113,8 @@ class SessionModel {
       claude: config.get('claude', true),
       antigravity: config.get('antigravity', true),
       copilot: config.get('copilot', true),
-      codex: config.get('codex', true)
+      codex: config.get('codex', true),
+      cline: config.get('cline', true)
     };
   }
 
@@ -573,6 +577,23 @@ async function openCodexSession(info) {
   }
 }
 
+async function openClineSession(info) {
+  const sessionId = info.sessionId;
+  if (!sessionId) return;
+
+  logDebug(`[Cline] Öffne Session: ${sessionId}`, {
+    title: info.title || info.session?.title,
+    project: info.project || info.session?.project
+  });
+
+  try {
+    logDebug(`[Cline] Fokussiere Cline Sidebar (claude-dev.SidebarProvider.focus)...`);
+    await vscode.commands.executeCommand('claude-dev.SidebarProvider.focus');
+  } catch (err) {
+    logDebug(`[Cline] claude-dev.SidebarProvider.focus fehlgeschlagen: ${err.message}`);
+  }
+}
+
 async function openSession(info) {
   if (!info || !info.sessionId) return;
   if (info.provider === 'antigravity') {
@@ -583,6 +604,9 @@ async function openSession(info) {
   }
   if (info.provider === 'codex') {
     return openCodexSession(info);
+  }
+  if (info.provider === 'cline') {
+    return openClineSession(info);
   }
   return openClaudeSession(info);
 }
@@ -656,6 +680,8 @@ function activate(context) {
       filterParts.push('GitHub Copilot');
     } else if (model.providerFilter === 'codex') {
       filterParts.push('OpenAI Codex');
+    } else if (model.providerFilter === 'cline') {
+      filterParts.push('Cline');
     }
     if (model.projectFilter && model.projectFilter !== 'all') filterParts.push(model.projectFilter);
     view.description = filterParts.join(' · ');
@@ -784,6 +810,14 @@ function activate(context) {
           filter: 'codex'
         });
       }
+      if (enabled.cline !== false) {
+        items.push({
+          label: '$(robot) Cline',
+          description: `${counts.cline}`,
+          detail: current === 'cline' ? '✓ Aktiver Filter' : '',
+          filter: 'cline'
+        });
+      }
 
       const picked = await vscode.window.showQuickPick(items, {
         placeHolder: 'Nach Provider filtern...'
@@ -844,7 +878,7 @@ function activate(context) {
         }
         const items = visible.map((s) => ({
           label: (s.isBookmarked ? '📌 ' : '') + (s.title || s.sessionId),
-          description: (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code'))) + (s.project ? ` · [${s.project}]` : ''),
+          description: (s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code')))) + (s.project ? ` · [${s.project}]` : ''),
           session: s
         }));
         const picked = await vscode.window.showQuickPick(items, {
@@ -1040,7 +1074,7 @@ function activate(context) {
         const pick = await vscode.window.showQuickPick(
           visible.map((s) => ({
             label: `[${s.project}] ` + (s.title || s.sessionId.slice(0, 8)),
-            description: s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code')),
+            description: s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code'))),
             detail: s.lastPrompt ? s.lastPrompt.slice(0, 80) : s.sessionId,
             sessionId: s.sessionId
           })),
@@ -1133,7 +1167,7 @@ function activate(context) {
       const visible = model.visibleSessions();
       const now = Date.now();
       const items = visible.map((s) => {
-        const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
+        const providerLabel = s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude')));
         const state = STATES[s.displayState] || { label: s.displayState, icon: 'circle-outline' };
         const isBookmarked = s.isBookmarked ? '📌 ' : '';
         const ticketPrefix = s.ticket ? `[🎫 ${s.ticket}] ` : '';
@@ -1213,6 +1247,16 @@ function activate(context) {
       }
       return vscode.commands.executeCommand('sessionDashboard.showBoard');
     }),
+    vscode.commands.registerCommand('sessionDashboard.clineStatusClick', async () => {
+      const next = model.providerFilter === 'cline' ? 'all' : 'cline';
+      await model.setFilter(next);
+      syncViews();
+      const action = vscode.workspace.getConfiguration('sessionDashboard').get('statusBarClickAction', 'board');
+      if (action === 'quickpick') {
+        return vscode.commands.executeCommand('sessionDashboard.quickMenu');
+      }
+      return vscode.commands.executeCommand('sessionDashboard.showBoard');
+    }),
     vscode.commands.registerCommand('sessionDashboard.quickMenu', async () => {
       const visible = model.visibleSessions();
       const waitingSessions = visible.filter((s) => s.displayState === 'waiting');
@@ -1259,7 +1303,7 @@ function activate(context) {
       if (waitingSessions.length > 0) {
         items.push({ label: 'Wartet auf dich', kind: vscode.QuickPickItemKind.Separator });
         for (const s of waitingSessions) {
-          const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
+          const providerLabel = s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude')));
           const proj = s.project ? `[${s.project}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
@@ -1275,7 +1319,7 @@ function activate(context) {
       if (busySessions.length > 0) {
         items.push({ label: 'Arbeitet', kind: vscode.QuickPickItemKind.Separator });
         for (const s of busySessions) {
-          const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
+          const providerLabel = s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude')));
           const proj = s.project ? `[${s.project}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
@@ -1291,7 +1335,7 @@ function activate(context) {
       if (idleSessions.length > 0) {
         items.push({ label: 'Fertig', kind: vscode.QuickPickItemKind.Separator });
         for (const s of idleSessions) {
-          const providerLabel = s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude'));
+          const providerLabel = s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude')));
           const proj = s.project ? `[${s.project}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
