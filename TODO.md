@@ -2,10 +2,10 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-_Zurzeit keine offenen Aufgaben._
+- Benachrichtung überarbeiten! Icon (z.B. grüner Haken) ganz am Anfang anzeigen, danach nur noch die Aufgabe. mehr wird nicht benötigt. welche Benachrichtigungstexte gibt es aktuell?
 
 ## Erledigt
-- [x] session-dashboard v0.59.0: Tasks-Favoriten mit 1-Klick-Schnellzugriffstabelle auf der Startseite, Schnellmenü-Priorisierung & Quota-Kacheln auf den Board-Tab beschränkt *(27.10.2026)*
+- [x] session-dashboard v0.59.0: Tasks-Favoriten mit 1-Klick-Schnellzugriffstabelle auf voller Breite, Schnellmenü-Priorisierung & Quota-Kacheln auf den Board-Tab beschränkt *(27.10.2026, [Plan](.agents/plans/2026-10-27_session-dashboard-tasks-favoriten-und-quota-board.md))*
 - [x] session-dashboard v0.58.0: Projekt-Tasks Tab & 1-Klick-Ausführung: Bündelung von Build- & Deploy-Tasks (APK bauen, Sync etc.) im 5. Dashboard-Tab ⚡ Tasks mit Projekt-Filtern, Suche, Live-Status sowie Schnellmenü in der Statusleiste *(27.10.2026, [Plan](.agents/plans/2026-10-27_session-dashboard-project-tasks-tab.md))*
 - [x] session-dashboard v0.57.2: Tab-Namen verschlankt (Badges mit Anzahl entfernt, 2. Tab auf „Analyse“ gekürzt, kompaktes Button-Padding) *(27.10.2026)*
 - [x] session-dashboard v0.57.1: Cline-Kachel Titel-Bereinigung & Kürzung auf max. 65 Zeichen, message-basierte Zeitstempel (`inspection.lastEventTime`) gegen voreilige 2-Minuten-Anzeigen und Unterdrückung falscher `failed`-Statuswerte durch Cline Stale Session Reconciler *(26.10.2026)*
