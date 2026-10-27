@@ -1354,7 +1354,7 @@ function activate(context) {
         action: 'search'
       });
       items.push({
-        label: '$(graph) Analyse & Verbrauch öffnen',
+        label: '$(graph) Analyse öffnen',
         action: 'analyse'
       });
       items.push({

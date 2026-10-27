@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.57.2] – 27.10.2026
+
+- **Kompakte Tab-Leiste im Dashboard:** Die oberen Navigationsreiter wurden verschlankt, die redundanten Zähler-Badges auf den Tabs entfernt und der zweite Reiter auf das prägnante „Analyse“ gekürzt, wodurch die Kopfzeile auch in schmaleren Fenstern deutlich mehr Platz bietet.
+
 ## [0.57.1] – 26.10.2026
 
 - **Kompakte Kartentitel und präzise Zeitstempel für Cline:** Titel von Cline-Sessions werden intelligent bereinigt (Pfadangaben und XML-Tags werden entfernt, Frage- und Absichtssätze bevorzugt und sauber auf 65 Zeichen gekürzt). Falsche `failed`-Statusanzeigen durch Clines Hintergrund-Prozessüberwachung beim VS-Code-Neustart werden unterdrückt und die Zeitstempel richten sich exakt nach der tatsächlichen letzten Nachricht.

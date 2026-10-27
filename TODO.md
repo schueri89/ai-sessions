@@ -2,9 +2,10 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-_Zurzeit keine offenen Aufgaben._
+- [ ] Tasks aus einzelnen Projekten (z.B. Build APK) gesammelt anzeigen und ausführbar machen?! ([Plan](.agents/plans/2026-10-27_session-dashboard-project-tasks-tab.md))
 
 ## Erledigt
+- [x] session-dashboard v0.57.2: Tab-Namen verschlankt (Badges mit Anzahl entfernt, 2. Tab auf „Analyse“ gekürzt, kompaktes Button-Padding) *(27.10.2026)*
 - [x] session-dashboard v0.57.1: Cline-Kachel Titel-Bereinigung & Kürzung auf max. 65 Zeichen, message-basierte Zeitstempel (`inspection.lastEventTime`) gegen voreilige 2-Minuten-Anzeigen und Unterdrückung falscher `failed`-Statuswerte durch Cline Stale Session Reconciler *(26.10.2026)*
 - [x] session-dashboard v0.57.0: Cline Provider-Integration (lokale Ollama/Gemma 4 Sessions und alle Cline-Tasks im Dashboard, Transkript-Viewer, Historie & Analyse samt Click-to-Focus auf Cline-Sidebar) *(26.10.2026, [Plan](.agents/plans/2026-10-26_session-dashboard-cline-integration.md))*
 - [x] session-dashboard v0.56.0: Einstellbare Anzeige des letzten Prompts auf Dashboard-Kacheln (`sessionDashboard.showLastPrompt`, Standard: aus; Smart Search Highlight & Hover-Tooltip) *(26.10.2026, [Plan](.agents/plans/2026-10-26_session-dashboard-config-show-last-prompt.md))*
