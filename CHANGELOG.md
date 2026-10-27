@@ -2,6 +2,14 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.59.0] – 27.10.2026
+
+- **Tasks-Favoriten & Quota-Fokussierung:** Wichtige Tasks können mit einem Klick auf den Stern als Favorit markiert werden und stehen auf der Startseite des Tasks-Tabs in einer kompakten Schnellzugriffstabelle mit Direkt-Start und Live-Status bereit; außerdem werden die Quota- und Limit-Kacheln der KI-Anbieter nur noch im Board-Tab angezeigt.
+
+## [0.58.0] – 27.10.2026
+
+- **Projekt-Tasks Tab & 1-Klick-Ausführung:** Build-, Sync- und Deployment-Abläufe aller Projekte (wie `APK bauen`, `App-Icons neu zeichnen` etc.) sind im neuen Dashboard-Reiter „⚡ Tasks“ und über das Statusleisten-Menü zentral gebündelt, lassen sich mit einem einzigen Klick starten und zeigen ihren Ausführungsstatus live im Dashboard an.
+
 ## [0.57.2] – 27.10.2026
 
 - **Kompakte Tab-Leiste im Dashboard:** Die oberen Navigationsreiter wurden verschlankt, die redundanten Zähler-Badges auf den Tabs entfernt und der zweite Reiter auf das prägnante „Analyse“ gekürzt, wodurch die Kopfzeile auch in schmaleren Fenstern deutlich mehr Platz bietet.

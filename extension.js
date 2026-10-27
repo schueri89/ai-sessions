@@ -17,6 +17,7 @@ const { ToastNotifier } = require('./lib/toastNotifier');
 const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quota');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 const { setJenkinsCredentials } = require('./lib/jenkins');
+const { ProjectTasksManager } = require('./lib/projectTasks');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
@@ -635,6 +636,12 @@ function activate(context) {
   model.toastNotifier = toastNotifier;
   const tree = new SessionTreeProvider(model);
   const board = new BoardPanel(model);
+  const tasksManager = new ProjectTasksManager(context);
+  tasksManager.init();
+  board.tasksManager = tasksManager;
+  tasksManager.onDidChange(() => {
+    board.sendTasks();
+  });
   const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
   context.subscriptions.push(
@@ -642,6 +649,7 @@ function activate(context) {
     statusBar,
     soundNotifier,
     toastNotifier,
+    tasksManager,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
         if (board.panel) {
@@ -1363,6 +1371,11 @@ function activate(context) {
         action: 'history'
       });
       items.push({
+        label: '$(play) Projekt-Task ausführen...',
+        description: 'APK bauen, App-Icons, Deploy etc.',
+        action: 'runProjectTask'
+      });
+      items.push({
         label: '$(folder) Nach Projekt filtern...',
         description: model.projectFilter !== 'all' ? `Aktiv: ${model.projectFilter}` : 'Alle',
         action: 'filterProject'
@@ -1386,6 +1399,8 @@ function activate(context) {
           await vscode.commands.executeCommand('sessionDashboard.showAnalyse');
         } else if (picked.action === 'history') {
           await vscode.commands.executeCommand('sessionDashboard.showHistory');
+        } else if (picked.action === 'runProjectTask') {
+          await vscode.commands.executeCommand('sessionDashboard.runProjectTask');
         } else if (picked.action === 'search') {
           await vscode.commands.executeCommand('sessionDashboard.search');
         } else if (picked.action === 'filterProject') {
@@ -1569,6 +1584,122 @@ function activate(context) {
         return;
       }
       board.show(undefined, 'jenkins');
+    }),
+    vscode.commands.registerCommand('sessionDashboard.showTasks', async () => {
+      const enabled = vscode.workspace.getConfiguration('sessionDashboard.tasks').get('enabled', true);
+      if (!enabled) {
+        const choice = await vscode.window.showInformationMessage(
+          'Der Tasks-Tab ist in den Einstellungen deaktiviert.',
+          'Tab aktivieren',
+          'Einstellungen öffnen'
+        );
+        if (choice === 'Tab aktivieren') {
+          await vscode.workspace.getConfiguration('sessionDashboard.tasks').update('enabled', true, vscode.ConfigurationTarget.Global);
+          board.show(undefined, 'tasks');
+        } else if (choice === 'Einstellungen öffnen') {
+          vscode.commands.executeCommand('workbench.action.openSettings', 'sessionDashboard.tasks');
+        }
+        return;
+      }
+      board.show(undefined, 'tasks');
+    }),
+    vscode.commands.registerCommand('sessionDashboard.runProjectTask', async (targetTaskId) => {
+      if (typeof targetTaskId === 'string' && targetTaskId) {
+        try {
+          await tasksManager.executeTask(targetTaskId);
+        } catch (err) {
+          vscode.window.showErrorMessage(`Task-Ausführung fehlgeschlagen: ${err.message}`);
+        }
+        return;
+      }
+
+      const tasks = tasksManager.getAllTasks();
+      if (tasks.length === 0) {
+        vscode.window.showInformationMessage('Keine Tasks in den Projekten unter ROOT gefunden.');
+        return;
+      }
+
+      const items = [];
+      const favTasks = tasks.filter((t) => t.isFavorite);
+      const topLevelTasks = tasks.filter((t) => t.isTopLevel && !t.isFavorite);
+      const subTasks = tasks.filter((t) => !t.isTopLevel && !t.isFavorite);
+
+      if (favTasks.length > 0) {
+        items.push({ label: '⭐ Favoriten', kind: vscode.QuickPickItemKind.Separator });
+        for (const t of favTasks) {
+          const state = t.state || {};
+          let statusIcon = '$(star-full)';
+          let statusDesc = '';
+          if (state.status === 'running') {
+            statusIcon = '$(loading~spin)';
+            statusDesc = ' · ⏳ Läuft...';
+          } else if (state.status === 'success') {
+            statusIcon = '$(check)';
+            statusDesc = ' · ✓ Zuletzt erfolgreich';
+          } else if (state.status === 'error') {
+            statusIcon = '$(error)';
+            statusDesc = ' · ✕ Zuletzt fehlgeschlagen';
+          }
+
+          items.push({
+            label: `${statusIcon} [${t.project}] ${t.label}`,
+            description: (t.detail || '') + statusDesc,
+            detail: t.dependsOn?.length ? `${t.dependsOn.length} Schritte: ${t.dependsOn.join(' ➔ ')}` : undefined,
+            taskId: t.id
+          });
+        }
+      }
+
+      if (topLevelTasks.length > 0) {
+        items.push({ label: 'Haupt-Tasks & Workflows', kind: vscode.QuickPickItemKind.Separator });
+        for (const t of topLevelTasks) {
+        const state = t.state || {};
+        let statusIcon = '$(play)';
+        let statusDesc = '';
+        if (state.status === 'running') {
+          statusIcon = '$(loading~spin)';
+          statusDesc = ' · ⏳ Läuft...';
+        } else if (state.status === 'success') {
+          statusIcon = '$(check)';
+          statusDesc = ' · ✓ Zuletzt erfolgreich';
+        } else if (state.status === 'error') {
+          statusIcon = '$(error)';
+          statusDesc = ' · ✕ Zuletzt fehlgeschlagen';
+        }
+
+        items.push({
+          label: `${statusIcon} [${t.project}] ${t.label}`,
+          description: (t.detail || '') + statusDesc,
+          detail: t.dependsOn?.length ? `${t.dependsOn.length} Schritte: ${t.dependsOn.join(' ➔ ')}` : undefined,
+          taskId: t.id
+        });
+      }
+    }
+
+    if (subTasks.length > 0) {
+      items.push({ label: 'Einzelne Teilschritte', kind: vscode.QuickPickItemKind.Separator });
+        for (const t of subTasks) {
+          items.push({
+            label: `$(terminal) [${t.project}] ${t.label}`,
+            description: t.detail || '',
+            taskId: t.id
+          });
+        }
+      }
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Projekt-Task zum Ausführen wählen...',
+        matchOnDescription: true,
+        matchOnDetail: true
+      });
+
+      if (picked && picked.taskId) {
+        try {
+          await tasksManager.executeTask(picked.taskId);
+        } catch (err) {
+          vscode.window.showErrorMessage(`Task-Ausführung fehlgeschlagen: ${err.message}`);
+        }
+      }
     })
   );
 
