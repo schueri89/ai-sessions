@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.59.1] – 28.10.2026
+
+- **Kompaktere Benachrichtigungen:** VS-Code-Toasts bei fertigen Sessions oder Rückfragen wurden verschlankt und zeigen das Status-Icon (✅ fertig, ❓ Rückfrage, ⚠️ Freigabe) direkt am Anfang, gefolgt vom Projekt und der Aufgabe auf einer einzelnen Zeile ohne redundante Statustexte.
+
 ## [0.59.0] – 27.10.2026
 
 - **Tasks-Favoriten & Quota-Fokussierung:** Wichtige Tasks können mit einem Klick auf den Stern als Favorit markiert werden und stehen auf der Startseite des Tasks-Tabs in einer kompakten Schnellzugriffstabelle mit Direkt-Start und Live-Status bereit; außerdem werden die Quota- und Limit-Kacheln der KI-Anbieter nur noch im Board-Tab angezeigt.

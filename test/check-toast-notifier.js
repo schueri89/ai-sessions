@@ -124,8 +124,7 @@ notifier.evaluate([
   { sessionId: 's1', provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 1, 'Finished task should trigger notification');
-assert.ok(shownMessages[0].msg.includes('[test] Task 1'), 'Toast message should include project and title');
-assert.ok(shownMessages[0].msg.includes('Aufgabe abgeschlossen'), 'Toast message should indicate completion');
+assert.strictEqual(shownMessages[0].msg, '✅ [test] Task 1', 'Toast message should match compact format');
 
 // Subsequent run: s2 is waiting for input
 notifier.evaluate([
@@ -133,7 +132,16 @@ notifier.evaluate([
   { sessionId: 's2', provider: 'antigravity', displayState: 'waiting', waitingFor: 'Rückfrage', project: 'ag-proj', title: 'Task 2', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 2, 'New waiting session should trigger needsInput notification');
-assert.ok(shownMessages[1].msg.includes('Rückfrage wartet auf deine Antwort'), 'Toast message should indicate question');
+assert.strictEqual(shownMessages[1].msg, '❓ [ag-proj] Task 2', 'Toast message should match compact question format');
+
+// Subsequent run: s3 is waiting for permission
+notifier.evaluate([
+  { sessionId: 's1', provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') },
+  { sessionId: 's2', provider: 'antigravity', displayState: 'waiting', waitingFor: 'Rückfrage', project: 'ag-proj', title: 'Task 2', cwd: path.resolve('/mock/workspace/project-a') },
+  { sessionId: 's3', provider: 'copilot', displayState: 'waiting', waitingFor: 'permission', project: 'cop-proj', title: 'Task 3', cwd: path.resolve('/mock/workspace/project-a') }
+]);
+assert.strictEqual(shownMessages.length, 3, 'New waiting session should trigger permission notification');
+assert.strictEqual(shownMessages[2].msg, '⚠️ [cop-proj] Task 3', 'Toast message should match compact permission format');
 
 notifier.dispose();
 console.log('✓ ToastNotifier evaluate tests passed successfully.');
