@@ -132,4 +132,29 @@ assert(!mockStorage['sessionDashboard.favoriteTasks'].includes(sampleTask.id), '
 
 console.log('✓ ProjectTasksManager: state tracking, persistence and change listeners verified');
 console.log('✓ ProjectTasksManager: favorites toggling and globalState persistence verified');
+
+// 6. notifyTaskCompletion test (sound & notifications debouncing)
+let playedSound = null;
+const mockSoundNotifier = {
+  playSound: (type) => { playedSound = type; }
+};
+
+const managerWithSound = new ProjectTasksManager(
+  { globalState: mockGlobalState },
+  { soundNotifier: mockSoundNotifier }
+);
+managerWithSound.refresh();
+
+assert.strictEqual(typeof managerWithSound.notifyTaskCompletion, 'function', 'notifyTaskCompletion method must exist');
+
+// Test success completion
+managerWithSound.notifyTaskCompletion(sampleTask.id, { isSuccess: true, durationMs: 12500 });
+assert.strictEqual(playedSound, 'taskCompleted', 'taskCompleted sound should be triggered on task success');
+
+// Test debounce
+playedSound = null;
+managerWithSound.notifyTaskCompletion(sampleTask.id, { isSuccess: true, durationMs: 13000 });
+assert.strictEqual(playedSound, null, 'Rapid subsequent completion call should be debounced within 2000ms');
+
+console.log('✓ ProjectTasksManager: notifyTaskCompletion sound triggering and debouncing verified');
 console.log('All check-project-tasks tests passed successfully!');

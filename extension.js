@@ -636,7 +636,7 @@ function activate(context) {
   model.toastNotifier = toastNotifier;
   const tree = new SessionTreeProvider(model);
   const board = new BoardPanel(model);
-  const tasksManager = new ProjectTasksManager(context);
+  const tasksManager = new ProjectTasksManager(context, { soundNotifier });
   tasksManager.init();
   board.tasksManager = tasksManager;
   tasksManager.onDidChange(() => {

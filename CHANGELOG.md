@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.60.0] – 29.10.2026
+
+- **Tasks-Verbesserungen & Benachrichtigungen:** Favoriten stehen im Tasks-Tab ab sofort immer an oberster Stelle und lassen sich per Klick platzsparend ein- und ausklappen, beendete Task-Läufe melden sich automatisch per schlanker Benachrichtigung und Sound, die Zeit des letzten Laufs wird bei jedem Task dauerhaft angezeigt und die doppelte Trennlinie auf den Unter-Tabs wurde bereinigt.
+
 ## [0.59.1] – 28.10.2026
 
 - **Kompaktere Benachrichtigungen:** VS-Code-Toasts bei fertigen Sessions oder Rückfragen wurden verschlankt und zeigen das Status-Icon (✅ fertig, ❓ Rückfrage, ⚠️ Freigabe) direkt am Anfang, gefolgt vom Projekt und der Aufgabe auf einer einzelnen Zeile ohne redundante Statustexte.

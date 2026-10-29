@@ -2,9 +2,9 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-_Zurzeit nichts offen._
 
 ## Erledigt
+- [x] session-dashboard v0.60.0: Tasks-Polish & Benachrichtigungen: Favoriten immer zuerst platziert und per Klick ein-/ausklappbar, schlanke Toast- & Sound-Benachrichtigung bei Fertigstellung eines Task-Laufs, dauerhafte Anzeige des letzten Task-Laufs (`lastRun`) in Favoriten-Tabelle und Kacheln samt exaktem Tooltip, und doppelte Trennlinie auf Nicht-Board-Tabs entfernt *(29.10.2026, [Plan](.agents/plans/2026-10-29_session-dashboard-tasks-polish-notifications-and-ui.md))*
 - [x] session-dashboard v0.59.1: Schlanke VS-Code-Benachrichtigungen mit führendem Status-Icon (✅ fertig, ❓ Rückfrage, ⚠️ Freigabe), Projekt-Tag und Aufgabe auf einer Zeile ohne redundante Status-Detailzeile *(28.10.2026)*
 - [x] session-dashboard v0.59.0: Tasks-Favoriten mit 1-Klick-Schnellzugriffstabelle auf voller Breite, Schnellmenü-Priorisierung & Quota-Kacheln auf den Board-Tab beschränkt *(27.10.2026, [Plan](.agents/plans/2026-10-27_session-dashboard-tasks-favoriten-und-quota-board.md))*
 - [x] session-dashboard v0.58.0: Projekt-Tasks Tab & 1-Klick-Ausführung: Bündelung von Build- & Deploy-Tasks (APK bauen, Sync etc.) im 5. Dashboard-Tab ⚡ Tasks mit Projekt-Filtern, Suche, Live-Status sowie Schnellmenü in der Statusleiste *(27.10.2026, [Plan](.agents/plans/2026-10-27_session-dashboard-project-tasks-tab.md))*

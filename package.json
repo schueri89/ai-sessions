@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.59.1",
+  "version": "0.60.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -477,6 +477,11 @@
           "default": true,
           "description": "Sound abspielen, wenn eine Session eine Aufgabe beendet hat."
         },
+        "sessionDashboard.sound.tasks.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sound abspielen, wenn ein Projekt-Task-Lauf beendet wurde."
+        },
         "sessionDashboard.sound.taskCompleted.sound": {
           "type": "string",
           "enum": [
@@ -652,6 +657,11 @@
           "type": "boolean",
           "default": true,
           "description": "Benachrichtigung anzeigen, wenn eine Session eine Aufgabe abschließt."
+        },
+        "sessionDashboard.notifications.tasks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Benachrichtigung anzeigen, wenn ein Projekt-Task-Lauf beendet wurde."
         },
         "sessionDashboard.notifications.needsInput": {
           "type": "boolean",
