@@ -2,13 +2,13 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.64.0] – 01.11.2026
+
+- **Vollständiger Projekt-Scan (Komplett) für Code-Reviews und Security-Audits:** Im Tab „🛡️ Audits“ kann neben der bisherigen Diff-Prüfung ungesicherter Änderungen nun per 1-Klick-Umschalter (sowohl global in der Toolbar als auch individuell auf jeder Projekt-Karte) ein vollständiger Scan (`🌐 Komplett`) ausgelöst werden; das zugrundeliegende Audit-Skript priorisiert architektur- und sicherheitskritische Kern-Dateien (`Application.cfc`, Authentifizierung, APIs, Controller, Services) und analysiert den gesamten Projektcode über lokales Ollama (`gemma4:26b`), wodurch auch unberührte Bestandsprojekte turnusmäßig und vollautomatisch auditiert werden können.
+
 ## [0.63.1] – 01.11.2026
 
 - **Kumulative Audits & Quittierungs-Workflow bei ungeprüften Reviews:** Wenn ein nächtlicher Review an Vortagen nicht geprüft wurde, kumuliert der Audit-Job automatisch alle Code-Änderungen seit dem letzten bestätigten Commit (`last_reviewed_commit..HEAD`) in einen einzigen, zusammenhängenden Tagesbericht pro Projekt; im Tab „🛡️ Audits“ signalisiert ein Badge (`⚠️ Offen (kumulativ)`) unquittierte Reviews; über den neuen Button `✓ Geprüft` können Audits manuell als geprüft quittiert werden, während die 1-Klick-Übergabe `🚀 An KI übergeben` den Prüfstand nun automatisch aktualisiert.
-
-## [0.63.0] – 01.11.2026
-
-- **Vollständiger Projekt-Scan (Komplett) für Code-Reviews und Security-Audits:** Im Tab „🛡️ Audits“ kann neben der bisherigen Diff-Prüfung ungesicherter Änderungen nun per 1-Klick-Umschalter (sowohl global in der Toolbar als auch individuell auf jeder Projekt-Karte) ein vollständiger Scan (`🌐 Komplett`) ausgelöst werden; das zugrundeliegende Audit-Skript priorisiert architektur- und sicherheitskritische Kern-Dateien (`Application.cfc`, Authentifizierung, APIs, Controller, Services) und analysiert den gesamten Projektcode über lokales Ollama (`gemma4:26b`), wodurch auch unberührte Bestandsprojekte turnusmäßig und vollautomatisch auditiert werden können.
 
 ## [0.62.0] – 01.11.2026
 
