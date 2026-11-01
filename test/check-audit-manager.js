@@ -104,11 +104,24 @@ assert(promptWs.includes('Workspace Guards'), 'prompt should reference Workspace
 assert(!promptWs.includes('project-context.md'), 'workspace prompt should not reference specific project-context.md');
 console.log('✓ buildPrompt generates correct prompts adhering to user guidelines');
 
-// 5. dispatchAuditPrompt test (pure mode without vscode)
+// 5. dispatchAuditPrompt test (pure mode without vscode) & auto-quittieren
 manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) => {
   assert(res && res.provider === 'antigravity', 'dispatch should return provider in test mode');
   assert(res.prompt && res.prompt.includes('cf-shared'), 'dispatch should return populated prompt');
   console.log('✓ dispatchAuditPrompt returns correct dispatch payload');
+
+  // 6. State persistence & review tracking
+  const st = manager.loadAuditState();
+  assert(st && st.projects && st.projects['cf-shared'], 'state should include cf-shared');
+  assert.strictEqual(st.projects['cf-shared'].status, 'reviewed', 'cf-shared status should be reviewed');
+  assert(st.projects['cf-shared'].last_reviewed_commit, 'last_reviewed_commit should be set');
+
+  const overviewAfter = manager.getAuditOverview();
+  const cfSharedAfter = overviewAfter.projects.find((p) => p.project === 'cf-shared');
+  assert(cfSharedAfter, 'cf-shared should be present');
+  assert.strictEqual(cfSharedAfter.reviewStatus, 'reviewed', 'overview reviewStatus should reflect reviewed state');
+  console.log('✓ markProjectReviewed persists state and updates reviewStatus in overview');
+
   console.log('All AuditManager tests passed successfully!');
 });
 
