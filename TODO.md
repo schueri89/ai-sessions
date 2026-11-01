@@ -4,6 +4,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 ## Offene Aufgaben
 - [ ] Tasks: "Zuletzt gelaufen" als Datum inkl. Uhrzeit anzeigen und bitte keine andere Schriftart dafür verwenden (gilt auch für die Kacheln)
 - [ ] Tasks: Logik für Standard und Build Badges prüfen
+- [ ] Audits: wie kann ich den Stand zwischen Codereview und Security Review unterscheiden? es gibt ja nur eine Spalte
 - [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
 
 ## Erledigt
