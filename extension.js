@@ -19,6 +19,7 @@ const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format'
 const { setJenkinsCredentials } = require('./lib/jenkins');
 const { ProjectTasksManager } = require('./lib/projectTasks');
 const { AuditManager } = require('./lib/auditManager');
+const { TasksLogManager } = require('./lib/tasksLogManager');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
@@ -648,6 +649,11 @@ function activate(context) {
   auditManager.onDidChange(() => {
     board.sendAudits();
   });
+  const tasksLogManager = new TasksLogManager(context, { soundNotifier, toastNotifier });
+  board.tasksLogManager = tasksLogManager;
+  tasksLogManager.onDidChange(() => {
+    board.sendLogs();
+  });
   const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
   context.subscriptions.push(
@@ -657,6 +663,7 @@ function activate(context) {
     toastNotifier,
     tasksManager,
     auditManager,
+    tasksLogManager,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
         if (board.panel) {
@@ -1731,7 +1738,33 @@ function activate(context) {
       });
       if (!modePick) return;
 
-      auditManager.runAudit(project, modePick.mode, 'unstaged');
+      const scopePick = await vscode.window.showQuickPick([
+        { label: '⚡ Diff (Ungestagte Änderungen)', diff: 'unstaged', description: 'Schneller Review nur für geänderte Dateien' },
+        { label: '🌐 Komplett (Projekt-Scan)', diff: 'full', description: 'Vollständige Prüfung aller relevanten Projektdateien' }
+      ], {
+        placeHolder: `Welcher Umfang soll für ${project} geprüft werden?`
+      });
+      if (!scopePick) return;
+
+      auditManager.runAudit(project, modePick.mode, scopePick.diff);
+    }),
+    vscode.commands.registerCommand('sessionDashboard.showLogs', async () => {
+      const enabled = vscode.workspace.getConfiguration('sessionDashboard.logs').get('enabled', true);
+      if (!enabled) {
+        const choice = await vscode.window.showInformationMessage(
+          'Der Logs-Tab ist in den Einstellungen deaktiviert.',
+          'Tab aktivieren',
+          'Einstellungen öffnen'
+        );
+        if (choice === 'Tab aktivieren') {
+          await vscode.workspace.getConfiguration('sessionDashboard.logs').update('enabled', true, vscode.ConfigurationTarget.Global);
+          board.show(undefined, 'logs');
+        } else if (choice === 'Einstellungen öffnen') {
+          vscode.commands.executeCommand('workbench.action.openSettings', 'sessionDashboard.logs');
+        }
+        return;
+      }
+      board.show(undefined, 'logs');
     })
   );
 

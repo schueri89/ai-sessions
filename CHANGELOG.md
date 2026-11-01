@@ -2,6 +2,18 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.63.0] – 01.11.2026
+
+- **Vollständiger Projekt-Scan (Komplett) für Code-Reviews und Security-Audits:** Im Tab „🛡️ Audits“ kann neben der bisherigen Diff-Prüfung ungesicherter Änderungen nun per 1-Klick-Umschalter (sowohl global in der Toolbar als auch individuell auf jeder Projekt-Karte) ein vollständiger Scan (`🌐 Komplett`) ausgelöst werden; das zugrundeliegende Audit-Skript priorisiert architektur- und sicherheitskritische Kern-Dateien (`Application.cfc`, Authentifizierung, APIs, Controller, Services) und analysiert den gesamten Projektcode über lokales Ollama (`gemma4:26b`), wodurch auch unberührte Bestandsprojekte turnusmäßig und vollautomatisch auditiert werden können.
+
+## [0.62.0] – 01.11.2026
+
+- **Tab 📜 Logs für Windows-Tasks & Backup-Logs:** Neuer Dashboard-Reiter bündelt die nächtlichen Windows Scheduled Tasks (`DevBox-Nightly-BackupSync`, `DevBox-Nightly-Audit`) samt Zeitplan, Status und 1-Klick-Ausführung; der integrierte Log-Viewer visualisiert Logdateien (`backup-sync.log`, `nightly-audit.log`) mit automatischer Farbcodierung für Fehler und Warnungen; bei fehlgeschlagenen Tasks signalisiert ein roter Fehler-Badge direkt am Tab-Button die Anzahl der betroffenen Aufgaben; Zeitstempel werden einheitlich ohne Sekunden (nur Stunden und Minuten) formatiert und Umlaute aus Windows-CLI-Ausgaben robust dekodiert.
+
+## [0.61.1] – 01.11.2026
+
+- **1-Klick-Übergabe an KI-Assistenten:** Aus dem Tab „🛡️ Audits“ und aus den generierten Audit-Berichten können Befunde per 1-Klick-Button `🚀 An KI übergeben` direkt an Google Antigravity, Claude Code, GitHub Copilot, OpenAI Codex oder Cline übergeben werden; bei Google Antigravity (`antigravity.startNewConversation` + `antigravity.addContext`) und Claude Code (`claude-vscode.editor.open` mit `initialPrompt`) wird der dynamische Fix-Prompt direkt ins Eingabefeld übermittelt, bei GitHub Copilot via `workbench.action.chat.open` befüllt.
+
 ## [0.61.0] – 01.11.2026
 
 - **Tab 🛡️ Audits für lokale KI-Reviews:** Code-Reviews und Security-Audits lassen sich im neuen Dashboard-Reiter „🛡️ Audits“ für jedes Teilprojekt mit einem einzigen Klick über lokales Ollama (`gemma4:26b`) starten; Workspace-Guards laufen entkoppelt in einem prominenten Kopf-Banner; Status der Windows-Aufgabenplanung (`DevBox-Nightly-Audit`) wird live eingeblendet; alle Zeitstempel werden im deutschen Format samt Uhrzeit angezeigt.
