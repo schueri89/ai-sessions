@@ -18,6 +18,7 @@ const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quot
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 const { setJenkinsCredentials } = require('./lib/jenkins');
 const { ProjectTasksManager } = require('./lib/projectTasks');
+const { AuditManager } = require('./lib/auditManager');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
@@ -642,6 +643,11 @@ function activate(context) {
   tasksManager.onDidChange(() => {
     board.sendTasks();
   });
+  const auditManager = new AuditManager(context, { soundNotifier, toastNotifier });
+  board.auditManager = auditManager;
+  auditManager.onDidChange(() => {
+    board.sendAudits();
+  });
   const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
   context.subscriptions.push(
@@ -650,6 +656,7 @@ function activate(context) {
     soundNotifier,
     toastNotifier,
     tasksManager,
+    auditManager,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
         if (board.panel) {
@@ -1700,6 +1707,31 @@ function activate(context) {
           vscode.window.showErrorMessage(`Task-Ausführung fehlgeschlagen: ${err.message}`);
         }
       }
+    }),
+    vscode.commands.registerCommand('sessionDashboard.runProjectAudit', async (targetProject) => {
+      let project = targetProject;
+      if (typeof project !== 'string' || !project) {
+        const projects = auditManager.getProjects();
+        if (projects.length === 0) {
+          vscode.window.showInformationMessage('Keine Git-Projekte unter ROOT gefunden.');
+          return;
+        }
+        project = await vscode.window.showQuickPick(projects, {
+          placeHolder: 'Projekt für KI-Audit auswählen...'
+        });
+      }
+      if (!project) return;
+
+      const modePick = await vscode.window.showQuickPick([
+        { label: '▶ Code-Review', mode: 'review', description: 'Prüfung gegen Architektur- & Style-Regeln' },
+        { label: '🛡️ Security-Scan', mode: 'security', description: 'Defensives AppSec-Audit (Lucee / Frontend)' },
+        { label: '⚡ Vollständiges Audit', mode: 'all', description: 'Guards + Code-Review + Security' }
+      ], {
+        placeHolder: `Welche Prüfung soll für ${project} ausgeführt werden?`
+      });
+      if (!modePick) return;
+
+      auditManager.runAudit(project, modePick.mode, 'unstaged');
     })
   );
 

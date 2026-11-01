@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.61.0] – 01.11.2026
+
+- **Tab 🛡️ Audits für lokale KI-Reviews:** Code-Reviews und Security-Audits lassen sich im neuen Dashboard-Reiter „🛡️ Audits“ für jedes Teilprojekt mit einem einzigen Klick über lokales Ollama (`gemma4:26b`) starten; Workspace-Guards laufen entkoppelt in einem prominenten Kopf-Banner; Status der Windows-Aufgabenplanung (`DevBox-Nightly-Audit`) wird live eingeblendet; alle Zeitstempel werden im deutschen Format samt Uhrzeit angezeigt.
+
 ## [0.60.0] – 29.10.2026
 
 - **Tasks-Verbesserungen & Benachrichtigungen:** Favoriten stehen im Tasks-Tab ab sofort immer an oberster Stelle und lassen sich per Klick platzsparend ein- und ausklappen, beendete Task-Läufe melden sich automatisch per schlanker Benachrichtigung und Sound, die Zeit des letzten Laufs wird bei jedem Task dauerhaft angezeigt und die doppelte Trennlinie auf den Unter-Tabs wurde bereinigt.
