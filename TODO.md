@@ -2,9 +2,13 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-_Zurzeit nichts offen._
+- [ ] Tasks: "Zuletzt gelaufen" als Datum inkl. Uhrzeit anzeigen und bitte keine andere Schriftart dafür verwenden (gilt auch für die Kacheln)
+- [ ] Tasks: Logik für Standard und Build Badges prüfen
+- [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
 
 ## Erledigt
+- [x] session-dashboard v0.66.0: Audits-Optimierung: Löschen-Button für Berichte (Tabelle, Accordion & Guards-Banner mit synchronem Löschen der Report-Datei und Status-Bereinigung), Toast- & Sound-Benachrichtigungen bei Fertigstellung analog zu Sessions/Tasks, Korrektur der Falsch-Positiv-Befunderkennung (Ausschluss des Prompt-Footers aus der Analyse) sowie serielle Warteschlange und Token-Streaming in Ollama zur Verhinderung von Timeouts bei parallelen Audit-Läufen *(01.11.2026, [Plan](.agents/plans/2026-11-01_session-dashboard-audits-delete-notifications-status-and-queue.md))*
+- [x] session-dashboard v0.65.0: Tabellarische Ansicht & Status-Filter für lokale KI-Audits: Umstellung von 27 Kacheln auf eine scannbare Datentabelle mit Schnellfilter-Chips (Alle, Befunde, Läuft, Offen, Quittiert, Bestanden, Ungeprüft), flexibler Spaltensortierung (Priorität, Projekt, Ergebnis, Prüfstand, Zeit) und interaktivem Detail-Accordion für Befund-Zusammenfassungen und Direkt-Aktionen *(01.11.2026, [Plan](.agents/plans/2026-11-01_session-dashboard-audits-tabellarische-ansicht.md))*
 - [x] session-dashboard v0.64.0: Vollständiger Projekt-Scan (Komplett) im Tab 🛡️ Audits: 1-Klick-Umschalter (global in der Toolbar & je Karte) für Code-Review und Security-Scan zwischen ⚡ Diff (Änderungen) und 🌐 Komplett (Projekt-Scan), Priorisierung von Kern-Dateien (Application.cfc, Auth, APIs, Services) und intelligentes Batching für lokales Ollama (gemma4:26b) *(01.11.2026)*
 - [x] session-dashboard v0.63.1: Kumulative Audits & Quittierungs-Workflow: Wenn nächtliche Reviews an Vortagen nicht geprüft wurden, akkumuliert das Audit-Skript alle Änderungen seit dem letzten geprüften Commit in einen einzigen Gesamtbericht; im Tab 🛡️ Audits zeigen Badges (`⚠️ Offen`, `✓ Quittiert`) den Status an, neuer Button `✓ Geprüft` zur manuellen Quittierung und automatische Quittierung beim 1-Klick-Senden an die KI *(01.11.2026)*
 - [x] session-dashboard v0.62.0: Neuer Tab 📜 Logs im Session-Dashboard: Übersicht aller nächtlichen Windows Tasks (DevBox-Nightly-BackupSync, DevBox-Nightly-Audit) mit Status, Zeitplan und 1-Klick-Ausführung, integrierter Log-Viewer für backup-sync.log und nightly-audit.log mit Syntax-Farbcodierung für Fehler und Warnungen sowie dynamisches Fehler-Badge (⚠️ Zahl) am Tab bei fehlgeschlagenen Tasks *(01.11.2026, [Plan](.agents/plans/2026-11-01_session-dashboard-logs-tab.md))*

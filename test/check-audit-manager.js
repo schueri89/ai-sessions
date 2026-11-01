@@ -60,7 +60,39 @@ CRITICAL: SQL-Injection without cfqueryparam
 `;
 const statusErr = manager.parseReportStatus(sampleReportError);
 assert.strictEqual(statusErr.status, 'error', 'Status should be error');
-console.log('✓ parseReportStatus accurately classifies passed, warning, and error states');
+
+// Test report with Handover Footer containing the word 'Kritisch'
+const sampleReportWithFooter = `
+# Audit-Report: test-clean-with-footer
+Modus: \`review (Komplett)\` | Modell: \`gemma4:26b\`
+
+## 🔍 2. Code Review
+Keine Beanstandungen oder Auffälligkeiten im geprüften Code festgestellt.
+
+---
+## 🚀 Übergabe an KI-Assistenten (Claude Code / Antigravity / Copilot / Codex)
+> **Prompt für Behebung:**
+> 1. Lies den Bericht und prüfe alle gemeldeten Befunde (Schweregrade: Kritisch / Hoch / Mittel).
+`;
+const statusWithFooter = manager.parseReportStatus(sampleReportWithFooter);
+assert.strictEqual(statusWithFooter.status, 'passed', 'Clean report with footer must be passed, not error!');
+assert.strictEqual(statusWithFooter.summary, 'Bestanden (Keine Risiken)', 'Summary must be Bestanden (Keine Risiken)');
+
+// Test report with Ollama Timeout error
+const sampleReportTimeout = `
+# Audit-Report: test-timeout
+Modus: \`review\` | Modell: \`gemma4:26b\`
+
+## 🔍 2. Code Review
+ERROR: Request to Ollama failed: timed out
+
+---
+## 🚀 Übergabe an KI-Assistenten
+`;
+const statusTimeout = manager.parseReportStatus(sampleReportTimeout);
+assert.strictEqual(statusTimeout.status, 'error', 'Timeout report must be error');
+assert.strictEqual(statusTimeout.summary, 'Ollama Timeout (Zeitüberschreitung)', 'Timeout summary must indicate Ollama Timeout');
+console.log('✓ parseReportStatus accurately classifies passed, warning, error, footer-exclusion, and timeout states');
 
 // 3. getAuditOverview & time formatting
 const formattedDate = manager.formatGermanDate(Date.now());
@@ -122,6 +154,43 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
   assert.strictEqual(cfSharedAfter.reviewStatus, 'reviewed', 'overview reviewStatus should reflect reviewed state');
   console.log('✓ markProjectReviewed persists state and updates reviewStatus in overview');
 
-  console.log('All AuditManager tests passed successfully!');
+  // 7. Queue tracking in overview
+  manager.auditQueue.push({ projectName: 'ai-sessions', mode: 'review', diff: 'unstaged' });
+  const qOverview = manager.getAuditOverview();
+  const aiItem = qOverview.projects.find((p) => p.project === 'ai-sessions');
+  assert(aiItem && aiItem.isQueued, 'ai-sessions should be marked isQueued');
+  assert.strictEqual(aiItem.queuePosition, 1, 'queuePosition should be 1');
+  manager.auditQueue = [];
+  console.log('✓ auditQueue and queuePosition verified in getAuditOverview');
+
+  // 8. notifyAuditCompletion and soundNotifier trigger
+  let soundTriggered = false;
+  let playedEvent = '';
+  const notifierManager = new AuditManager({}, {
+    soundNotifier: {
+      playSound: (evt) => {
+        soundTriggered = true;
+        playedEvent = evt;
+      }
+    }
+  });
+  notifierManager.notifyAuditCompletion('ai-sessions', { isSuccess: true, status: 'passed', durationMs: 12000 });
+  assert(soundTriggered, 'soundNotifier.playSound should have been triggered');
+  assert.strictEqual(playedEvent, 'taskCompleted', 'playedEvent should be taskCompleted');
+  console.log('✓ notifyAuditCompletion plays taskCompleted sound');
+
+  // 9. deleteReport functionality
+  const fs = require('fs');
+  const path = require('path');
+  const dummyReport = path.join(manager.getReportsDir(), '2099-01-01_dummy-test_audit.md');
+  fs.writeFileSync(dummyReport, '# Dummy Report', 'utf8');
+  assert(fs.existsSync(dummyReport), 'dummy report should exist');
+  manager.deleteReport('dummy-test', dummyReport).then((deleted) => {
+    assert(deleted, 'deleteReport should return true');
+    assert(!fs.existsSync(dummyReport), 'dummy report should be deleted from disk');
+    console.log('✓ deleteReport successfully removes report file and updates state');
+
+    console.log('All AuditManager tests passed successfully!');
+  });
 });
 

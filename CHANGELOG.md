@@ -2,6 +2,14 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.66.0] – 01.11.2026
+
+- **Audits: Löschen-Button für Berichte, Fertigstellungs-Benachrichtigungen, bereinigte Befund-Erkennung & serielle Queue gegen Timeouts:** Im Tab „🛡️ Audits“ können Berichtsdateien über einen neuen Löschen-Button (`🗑️`) in der Tabelle, im Detail-Accordion und im Guards-Banner direkt von der Festplatte gelöscht werden; bei Abschluss eines Audits informieren nun schlanke Toast- und Sound-Benachrichtigungen analog zu Sessions und Projekt-Tasks über das Ergebnis (Bestanden, Prüfbedarf oder Befunde); die Status-Erkennung filtert den Prompt-Footer heraus, sodass fehlerfreie Projekte nicht mehr fälschlich als Befunde markiert werden; gleichzeitige Audit-Starts werden in einer seriellen Warteschlange (`⏳ Warteschlange`) abgearbeitet und API-Anfragen an Ollama streamen Tokens live, wodurch Überlastungen und Socket-Timeouts zuverlässig verhindert werden.
+
+## [0.65.0] – 01.11.2026
+
+- **Tabellarische Ansicht & Status-Filter für lokale KI-Audits:** Der Tab „🛡️ Audits“ wurde von der unübersichtlichen Kachelansicht auf eine kompakte, scannbare Datentabelle umgestellt; Schnellfilter-Chips in der Toolbar (`Alle`, `🚨 Befunde`, `⏳ Läuft`, `⚠️ Offen`, `✓ Quittiert`, `✅ Bestanden`, `⚪ Noch kein Audit`) bündeln den aktuellen Handlungsbedarf auf einen Klick, Tabellenköpfe unterstützen flexible Spaltensortierung (Standard: Befunde und aktive Läufe ganz oben) und ein Klick auf eine beliebige Zeile öffnet ein interaktives Accordion mit ausführlicher Befund-Zusammenfassung und Direkt-Aktionen.
+
 ## [0.64.0] – 01.11.2026
 
 - **Vollständiger Projekt-Scan (Komplett) für Code-Reviews und Security-Audits:** Im Tab „🛡️ Audits“ kann neben der bisherigen Diff-Prüfung ungesicherter Änderungen nun per 1-Klick-Umschalter (sowohl global in der Toolbar als auch individuell auf jeder Projekt-Karte) ein vollständiger Scan (`🌐 Komplett`) ausgelöst werden; das zugrundeliegende Audit-Skript priorisiert architektur- und sicherheitskritische Kern-Dateien (`Application.cfc`, Authentifizierung, APIs, Controller, Services) und analysiert den gesamten Projektcode über lokales Ollama (`gemma4:26b`), wodurch auch unberührte Bestandsprojekte turnusmäßig und vollautomatisch auditiert werden können.
