@@ -54,6 +54,13 @@ if (fs.existsSync(autoHubTasksFile)) {
   const prodTask = tasks.find((t) => t.label === 'APK bauen (PROD)');
   assert(prodTask, 'Task "APK bauen (PROD)" should be found');
   assert.strictEqual(prodTask.isTopLevel, true, '"APK bauen (PROD)" should be top-level (has dependsOn)');
+  assert.strictEqual(prodTask.isBuild, true, '"APK bauen (PROD)" should be classified as build task via label heuristic');
+  assert.strictEqual(prodTask.isDefault, false, '"APK bauen (PROD)" is not default build task');
+
+  const devWebTask = tasks.find((t) => t.label === 'Web-Build (DEV)');
+  assert(devWebTask, 'Task "Web-Build (DEV)" should be found');
+  assert.strictEqual(devWebTask.isBuild, true, '"Web-Build (DEV)" should be classified as build task via label heuristic');
+  assert.strictEqual(devWebTask.isDefault, false, '"Web-Build (DEV)" is not default build task');
 
   const stepTask = tasks.find((t) => t.label === 'APK 1/5 – Web-Build (nativ, WLAN)');
   assert(stepTask, 'Step task "APK 1/5 – Web-Build (nativ, WLAN)" should be found');

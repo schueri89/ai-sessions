@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.67.1] – 02.11.2026
+
+- **Tasks: Datumsanzeige inkl. Uhrzeit für letzten Lauf & Standard-Build-Badges:** Im Tab „⚡ Tasks“ wird der letzte Ausführungszeitpunkt in der Favoriten-Tabelle sowie auf den Task-Kacheln ab sofort als Datum und Uhrzeit (`DD.MM.YYYY, HH:mm`) in der regulären Editor-Oberflächenschrift statt relativer Zeitangabe in Monospace dargestellt; Standard-Build-Tasks tragen nun ein klares kombiniertes Badge `[Standard-Build]`, während sekundäre Build-Tasks (`APK bauen (PROD)`, `Web-Build (DEV)`, `AAB bauen (Play)`) über eine optimierte Erkennung zuverlässig das `[Build]`-Badge erhalten.
+
 ## [0.67.0] – 02.11.2026
 
 - **Audits: Vollständige Scans ohne Datei-Beschränkung & KI-Modellauswahl:** Im Tab „🛡️ Audits“ scannen Komplett-Reviews und Security-Audits nun ausnahmslos alle Quellcode-Dateien des Projekts in automatischen Batches statt nach 2 Abschnitten abzubrechen; auch große Git-Diffs werden bei Bedarf intelligent in Abschnitte aufgeteilt, sodass keine geänderten Zeilen mehr gekürzt werden; über ein neues Modell-Dropdown in der Toolbar kann neben dem Standardmodell `gemma4:26b` auch das leichtere `gemma4:e4b` ausgewählt werden, wobei die Voreinstellung auch über die neue Konfiguration `sessionDashboard.audits.defaultModel` steuerbar ist.
