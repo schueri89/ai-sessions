@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.66.1] – 02.11.2026
+
+- **Audits: Unterstützung für deutschsprachige Gesamtbewertungen:** Die Statuserkennung im Tab „🛡️ Audits“ erkennt ab sofort auch deutschsprachige Beurteilungen wie „ÄNDERUNGEN ERFORDERLICH“ zuverlässig als Prüfbedarf und Warnung.
+
 ## [0.66.0] – 01.11.2026
 
 - **Audits: Löschen-Button für Berichte, Fertigstellungs-Benachrichtigungen, bereinigte Befund-Erkennung & serielle Queue gegen Timeouts:** Im Tab „🛡️ Audits“ können Berichtsdateien über einen neuen Löschen-Button (`🗑️`) in der Tabelle, im Detail-Accordion und im Guards-Banner direkt von der Festplatte gelöscht werden; bei Abschluss eines Audits informieren nun schlanke Toast- und Sound-Benachrichtigungen analog zu Sessions und Projekt-Tasks über das Ergebnis (Bestanden, Prüfbedarf oder Befunde); die Status-Erkennung filtert den Prompt-Footer heraus, sodass fehlerfreie Projekte nicht mehr fälschlich als Befunde markiert werden; gleichzeitige Audit-Starts werden in einer seriellen Warteschlange (`⏳ Warteschlange`) abgearbeitet und API-Anfragen an Ollama streamen Tokens live, wodurch Überlastungen und Socket-Timeouts zuverlässig verhindert werden.
