@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.67.2] – 02.11.2026
+
+- **Tasks: Feste Fußzeilen-Ausrichtung am unteren Kachelrand:** Auf den Task-Kacheln im Tab „⚡ Tasks“ ist die Fußzeile (Trennlinie, Status, letzter Ausführungszeitpunkt und Ausführen-Button) ab sofort dauerhaft an der Unterkante der Karte verankert, sodass alle Kacheln einer Reihe unabhängig von Textlänge oder Badges eine einheitliche, bündige Grundlinie aufweisen.
+
 ## [0.67.1] – 02.11.2026
 
 - **Tasks: Datumsanzeige inkl. Uhrzeit für letzten Lauf & Standard-Build-Badges:** Im Tab „⚡ Tasks“ wird der letzte Ausführungszeitpunkt in der Favoriten-Tabelle sowie auf den Task-Kacheln ab sofort als Datum und Uhrzeit (`DD.MM.YYYY, HH:mm`) in der regulären Editor-Oberflächenschrift statt relativer Zeitangabe in Monospace dargestellt; Standard-Build-Tasks tragen nun ein klares kombiniertes Badge `[Standard-Build]`, während sekundäre Build-Tasks (`APK bauen (PROD)`, `Web-Build (DEV)`, `AAB bauen (Play)`) über eine optimierte Erkennung zuverlässig das `[Build]`-Badge erhalten.
