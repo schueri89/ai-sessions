@@ -51,6 +51,17 @@ WARNUNG: Fehlender Scope
 const statusWarn = manager.parseReportStatus(sampleReportWarning);
 assert.strictEqual(statusWarn.status, 'warning', 'Status should be warning');
 
+const sampleReportGermanChangesRequested = `
+# Audit-Report: test-de
+Modus: \`all\` | Modell: \`gemma4:26b\`
+
+## 🔍 2. Code Review
+### Gesamtbewertung
+ÄNDERUNGEN ERFORDERLICH
+`;
+const statusGermanChangesRequested = manager.parseReportStatus(sampleReportGermanChangesRequested);
+assert.strictEqual(statusGermanChangesRequested.status, 'warning', 'Status should be warning for ÄNDERUNGEN ERFORDERLICH');
+
 const sampleReportError = `
 # Audit-Report: test
 Modus: \`security\` | Modell: \`gemma4:26b\`
