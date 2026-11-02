@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.69.0] – 02.11.2026
+
+- **Audits: Lade-Animation, Fortschrittsbalken mit Live-Dauer, Reload-Persistenz, Abbrechen-Button & UI-Polish:** Im Tab „🛡️ Audits“ zeigt ein animierter Lade-Spinner beim ersten Laden und bei Aktualisierungen den Ladezustand an; während ein Review läuft, visualisieren ein blauer Shimmer-Fortschrittsbalken und ein sekündlich mitlaufender Live-Timer den Fortschritt in Zeile, Kachel und Banner; aktive Audits werden über VS-Code-Neustarts und Window-Reloads hinweg anhand persistenter Metadaten und OS-Prozesserkennung nahtlos weiterverfolgt; laufende Audits oder Aufgaben in der Warteschlange können per Klick auf `⏹ Abbrechen` unverzüglich beendet werden; im Accordion wurden doppelte Start-Buttons unter den Kacheln entfernt und im Workspace-Banner die Buttons präzise mit `📄 Bericht öffnen` und `🗑️ Bericht löschen` beschriftet.
+
 ## [0.68.0] – 02.11.2026
 
 - **Audits: Getrennte Spalten für Code-Review & Security-Audit, separate Berichtsdateien & Logs-Fix:** Im Tab „🛡️ Audits“ werden Code-Review und Security-Audit ab sofort in zwei dedizierten Ergebnis-Spalten mit individuellem Status, Scan-Zeitpunkt und direktem Bericht-Link dargestellt; Reviews und Security-Audits schreiben getrennte Berichte (`_review.md` und `_security.md`), sodass manuelle Läufe keine Vorab-Ergebnisse mehr überschreiben; ein smarter `🚀 KI`-Button übergibt bei beiden vorhandenen Berichten standardmäßig beide Prüfungen gemeinsam oder bietet gezielte Einzelauswahl; im Tab „📜 Logs“ bleibt das ausgewählte zweite Log auch bei periodischen Hintergrund-Updates stabil geöffnet.

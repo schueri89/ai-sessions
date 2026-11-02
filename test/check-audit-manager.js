@@ -210,6 +210,36 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
     assert(!fs.existsSync(dummyReport), 'dummy report should be deleted from disk');
     console.log('✓ deleteReport successfully removes report file and updates state');
 
+    // 10. Process Persistence & isPidAlive
+    assert.strictEqual(manager.isPidAlive(process.pid), true, 'Current process PID should be alive');
+    assert.strictEqual(manager.isPidAlive(9999999), false, 'Non-existent PID should not be alive');
+    console.log('✓ isPidAlive correctly verifies OS process state');
+
+    // 11. addRunningState & removeRunningState
+    manager.addRunningState({ pid: process.pid, project: 'test-persist', mode: 'review', diff: 'full', model: 'gemma4:26b', startTime: Date.now() });
+    const runState = manager.loadRunningState();
+    const foundEntry = runState.processes.find((p) => p.project === 'test-persist');
+    assert(foundEntry, 'test-persist entry should be persisted in audit-running.json');
+    assert.strictEqual(foundEntry.pid, process.pid, 'Persisted PID should match');
+
+    manager.removeRunningState('test-persist');
+    const runStateAfter = manager.loadRunningState();
+    assert(!runStateAfter.processes.some((p) => p.project === 'test-persist'), 'test-persist should be removed from audit-running.json');
+    console.log('✓ addRunningState & removeRunningState persist and clean up audit-running.json');
+
+    // 12. cancelAudit (queued & running)
+    manager.auditQueue.push({ projectName: 'cancel-queue-test', mode: 'review', diff: 'unstaged' });
+    assert(manager.auditQueue.some((q) => q.projectName === 'cancel-queue-test'), 'item should be queued');
+    const cancelledQueue = manager.cancelAudit('cancel-queue-test');
+    assert.strictEqual(cancelledQueue, true, 'cancelAudit should return true for queued item');
+    assert(!manager.auditQueue.some((q) => q.projectName === 'cancel-queue-test'), 'item should be removed from queue');
+
+    manager.runningProjects.set('cancel-run-test', { pid: 9999999, mode: 'review', diff: 'unstaged', startTime: Date.now() });
+    const cancelledRun = manager.cancelAudit('cancel-run-test');
+    assert.strictEqual(cancelledRun, true, 'cancelAudit should return true for running item');
+    assert(!manager.runningProjects.has('cancel-run-test'), 'item should be removed from runningProjects');
+    console.log('✓ cancelAudit removes queued tasks and cleans up running audits');
+
     console.log('All AuditManager tests passed successfully!');
   });
 });
