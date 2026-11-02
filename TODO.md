@@ -3,11 +3,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] Changelog: Ausnahme von der Tagesregel prüfen (jede Version eigener Eintrag statt Bündelung je Tag)
-- [ ] Audits: wie kann ich den Stand zwischen Codereview und Security Review unterscheiden? es gibt ja nur eine Spalte
-- [ ] Logs: wenn ich das 2.Log öffne, wird kurz deren Inhalt angezeigt.. nach wenigen Sekunden kommt aber der Inhalt vom 1.Log wieder. Ausgewählt ist aber weiterhin das 2.Log
 - [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
 
 ## Erledigt
+- [x] session-dashboard v0.68.0: Audits: Getrennte Spalten für Code-Review und Security-Audit, separate Berichtsdateien (_review.md / _security.md) und intelligenter KI-Übergabe-Button (Default: "Beide übergeben"); Logs: aktives Log im Backend und Frontend fixiert (kein Zurückspringen auf das 1. Log mehr) *(02.11.2026, [Plan](.agents/plans/2026-11-02_session-dashboard-audits-separate-reports-and-logs-fix.md))*
 - [x] session-dashboard v0.67.2: Tasks: Feste Fußzeilen-Ausrichtung am unteren Kachelrand (Trennlinie, Status, Datum und Ausführen-Button bündig unten via margin-top: auto) *(02.11.2026)*
 - [x] session-dashboard v0.67.1: Tasks: "Zuletzt gelaufen" als Datum inkl. Uhrzeit in Standard-Schriftart (Favoriten-Tabelle & Kacheln), kombiniertes Badge [Standard-Build] für Standard-Build-Tasks und erweiterte Build-Erkennung für sekundäre Builds (PROD, Web-Build) *(02.11.2026)*
 - [x] session-dashboard v0.67.0: Vollständige Projekt-Scans ohne Datei-Beschränkung (Diff & Komplett) & KI-Modellauswahl (gemma4:26b / gemma4:e4b) *(02.11.2026)*

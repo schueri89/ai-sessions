@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.68.0] – 02.11.2026
+
+- **Audits: Getrennte Spalten für Code-Review & Security-Audit, separate Berichtsdateien & Logs-Fix:** Im Tab „🛡️ Audits“ werden Code-Review und Security-Audit ab sofort in zwei dedizierten Ergebnis-Spalten mit individuellem Status, Scan-Zeitpunkt und direktem Bericht-Link dargestellt; Reviews und Security-Audits schreiben getrennte Berichte (`_review.md` und `_security.md`), sodass manuelle Läufe keine Vorab-Ergebnisse mehr überschreiben; ein smarter `🚀 KI`-Button übergibt bei beiden vorhandenen Berichten standardmäßig beide Prüfungen gemeinsam oder bietet gezielte Einzelauswahl; im Tab „📜 Logs“ bleibt das ausgewählte zweite Log auch bei periodischen Hintergrund-Updates stabil geöffnet.
+
 ## [0.67.2] – 02.11.2026
 
 - **Tasks: Feste Fußzeilen-Ausrichtung am unteren Kachelrand:** Auf den Task-Kacheln im Tab „⚡ Tasks“ ist die Fußzeile (Trennlinie, Status, letzter Ausführungszeitpunkt und Ausführen-Button) ab sofort dauerhaft an der Unterkante der Karte verankert, sodass alle Kacheln einer Reihe unabhängig von Textlänge oder Badges eine einheitliche, bündige Grundlinie aufweisen.

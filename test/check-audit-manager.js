@@ -137,13 +137,19 @@ manager.runningProjects.delete('cf-shared');
 console.log(`✓ getAuditOverview returned ${overview.projects.length} project status entries (task registered: ${overview.scheduledTask.isRegistered})`);
 
 // 4. buildPrompt test
-const promptProj = manager.buildPrompt('cf-shared', 'C:/reports/2026-11-01_cf-shared_audit.md');
+const promptProj = manager.buildPrompt('cf-shared', 'C:/reports/2026-11-01_cf-shared_review.md');
 assert(promptProj.includes('das Projekt cf-shared'), 'prompt should reference project');
 assert(promptProj.includes('cf-shared/.agents/project-context.md'), 'prompt should reference project-context.md');
 assert(promptProj.includes('.agents/global-core.md'), 'prompt should reference global-core.md');
-assert(promptProj.includes('C:/reports/2026-11-01_cf-shared_audit.md'), 'prompt should include report path');
+assert(promptProj.includes('C:/reports/2026-11-01_cf-shared_review.md'), 'prompt should include report path');
 assert(promptProj.includes('Erstelle bei Bedarf einen Implementierungsplan'), 'prompt should include step 3');
 assert(promptProj.includes('Halte dich dabei strikt an das globale Regelwerk'), 'prompt should include step 4');
+
+// Combined prompt with multiple report paths
+const promptBoth = manager.buildPrompt('cf-shared', ['C:/reports/2026-11-01_cf-shared_security.md', 'C:/reports/2026-11-01_cf-shared_review.md']);
+assert(promptBoth.includes('Berichtsdateien:'), 'prompt should list multiple report files');
+assert(promptBoth.includes('2026-11-01_cf-shared_security.md'), 'prompt should include sec report');
+assert(promptBoth.includes('2026-11-01_cf-shared_review.md'), 'prompt should include cr report');
 
 const promptWs = manager.buildPrompt('workspace', 'C:/reports/workspace_guards.md');
 assert(promptWs.includes('Workspace Guards'), 'prompt should reference Workspace Guards');
@@ -196,7 +202,7 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
   // 9. deleteReport functionality
   const fs = require('fs');
   const path = require('path');
-  const dummyReport = path.join(manager.getReportsDir(), '2099-01-01_dummy-test_audit.md');
+  const dummyReport = path.join(manager.getReportsDir(), '2099-01-01_dummy-test_review.md');
   fs.writeFileSync(dummyReport, '# Dummy Report', 'utf8');
   assert(fs.existsSync(dummyReport), 'dummy report should exist');
   manager.deleteReport('dummy-test', dummyReport).then((deleted) => {

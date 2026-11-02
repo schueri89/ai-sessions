@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.67.2",
+  "version": "0.68.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
