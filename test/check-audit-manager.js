@@ -113,6 +113,9 @@ assert(/\b\d{2}\.\d{2}\.\d{4}\s+\d{2}:\d{2}\b/.test(formattedDate), `formatGerma
 const overview = manager.getAuditOverview();
 assert(overview && typeof overview === 'object', 'overview should be an object');
 assert(Array.isArray(overview.projects), 'overview.projects should be an array');
+assert(Array.isArray(overview.availableModels), 'overview should include availableModels');
+assert.strictEqual(overview.defaultModel, 'gemma4:26b', 'defaultModel should be gemma4:26b');
+assert(overview.availableModels.includes('gemma4:26b'), 'availableModels should include gemma4:26b');
 assert(overview.scheduledTask && typeof overview.scheduledTask === 'object', 'scheduledTask should be present');
 assert(typeof overview.scheduledTask.isRegistered === 'boolean', 'isRegistered should be a boolean');
 assert.strictEqual(overview.scheduledTask.taskName, 'DevBox-Nightly-Audit', 'taskName should match');

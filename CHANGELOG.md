@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.67.0] – 02.11.2026
+
+- **Audits: Vollständige Scans ohne Datei-Beschränkung & KI-Modellauswahl:** Im Tab „🛡️ Audits“ scannen Komplett-Reviews und Security-Audits nun ausnahmslos alle Quellcode-Dateien des Projekts in automatischen Batches statt nach 2 Abschnitten abzubrechen; auch große Git-Diffs werden bei Bedarf intelligent in Abschnitte aufgeteilt, sodass keine geänderten Zeilen mehr gekürzt werden; über ein neues Modell-Dropdown in der Toolbar kann neben dem Standardmodell `gemma4:26b` auch das leichtere `gemma4:e4b` ausgewählt werden, wobei die Voreinstellung auch über die neue Konfiguration `sessionDashboard.audits.defaultModel` steuerbar ist.
+
 ## [0.66.1] – 02.11.2026
 
 - **Audits: Unterstützung für deutschsprachige Gesamtbewertungen:** Die Statuserkennung im Tab „🛡️ Audits“ erkennt ab sofort auch deutschsprachige Beurteilungen wie „ÄNDERUNGEN ERFORDERLICH“ zuverlässig als Prüfbedarf und Warnung.
