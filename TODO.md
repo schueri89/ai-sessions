@@ -2,10 +2,10 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-- [ ] Changelog: Ausnahme von der Tagesregel prüfen (jede Version eigener Eintrag statt Bündelung je Tag)
 - [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
 
 ## Erledigt
+- [x] Changelog: Ausnahme von der Tagesregel geprüft und beibehalten (jede Version eigener Eintrag statt Bündelung je Tag; bauartbedingt erforderlich durch VSIX-Packaging & direkte Installation im Editor) *(02.11.2026)*
 - [x] session-dashboard v0.68.0: Audits: Getrennte Spalten für Code-Review und Security-Audit, separate Berichtsdateien (_review.md / _security.md) und intelligenter KI-Übergabe-Button (Default: "Beide übergeben"); Logs: aktives Log im Backend und Frontend fixiert (kein Zurückspringen auf das 1. Log mehr) *(02.11.2026, [Plan](.agents/plans/2026-11-02_session-dashboard-audits-separate-reports-and-logs-fix.md))*
 - [x] session-dashboard v0.67.2: Tasks: Feste Fußzeilen-Ausrichtung am unteren Kachelrand (Trennlinie, Status, Datum und Ausführen-Button bündig unten via margin-top: auto) *(02.11.2026)*
 - [x] session-dashboard v0.67.1: Tasks: "Zuletzt gelaufen" als Datum inkl. Uhrzeit in Standard-Schriftart (Favoriten-Tabelle & Kacheln), kombiniertes Badge [Standard-Build] für Standard-Build-Tasks und erweiterte Build-Erkennung für sekundäre Builds (PROD, Web-Build) *(02.11.2026)*
