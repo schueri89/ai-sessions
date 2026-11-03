@@ -174,14 +174,65 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
   assert.strictEqual(cfSharedAfter.reviewStatus, 'reviewed', 'overview reviewStatus should reflect reviewed state');
   console.log('✓ markProjectReviewed persists state and updates reviewStatus in overview');
 
+  // 6b. Separate CR and Security Review acknowledgment
+  const testState = manager.loadAuditState();
+  testState.projects['sep-test'] = {
+    status: 'pending',
+    cr_status: 'pending',
+    sec_status: 'pending'
+  };
+  manager.saveAuditState(testState);
+  manager.markProjectReviewed('sep-test', 'cr');
+  const stAfterCr = manager.loadAuditState();
+  assert.strictEqual(stAfterCr.projects['sep-test'].cr_status, 'reviewed', 'sep-test cr_status should be reviewed');
+  assert.strictEqual(stAfterCr.projects['sep-test'].sec_status, 'pending', 'sep-test sec_status should still be pending');
+
+  manager.markProjectReviewed('sep-test', 'sec');
+  const stAfterSec = manager.loadAuditState();
+  assert.strictEqual(stAfterSec.projects['sep-test'].cr_status, 'reviewed', 'sep-test cr_status should be reviewed');
+  assert.strictEqual(stAfterSec.projects['sep-test'].sec_status, 'reviewed', 'sep-test sec_status should be reviewed');
+  assert.strictEqual(stAfterSec.projects['sep-test'].status, 'reviewed', 'sep-test overall status should be reviewed');
+  delete stAfterSec.projects['sep-test'];
+  manager.saveAuditState(stAfterSec);
+  console.log('✓ markProjectReviewed supports separate cr and sec acknowledgment');
+
   // 7. Queue tracking in overview
-  manager.auditQueue.push({ projectName: 'ai-sessions', mode: 'review', diff: 'unstaged' });
+  const initialUserQueue = manager.auditQueue.slice();
+  manager.auditQueue = [{ projectName: 'ai-sessions', mode: 'review', diff: 'unstaged' }];
   const qOverview = manager.getAuditOverview();
   const aiItem = qOverview.projects.find((p) => p.project === 'ai-sessions');
   assert(aiItem && aiItem.isQueued, 'ai-sessions should be marked isQueued');
+  assert(aiItem.isCrQueued, 'ai-sessions should be marked isCrQueued');
+  assert.strictEqual(aiItem.crQueuePosition, 1, 'crQueuePosition should be 1');
   assert.strictEqual(aiItem.queuePosition, 1, 'queuePosition should be 1');
   manager.auditQueue = [];
   console.log('✓ auditQueue and queuePosition verified in getAuditOverview');
+
+  // 7b. Multi-audit queueing (cross-project, cross-mode & guards)
+  manager.runningProjects.set('proj-active', { mode: 'review', diff: 'unstaged', startTime: Date.now(), pid: 12345 });
+  manager.runAudit('proj-active', 'security', 'unstaged');
+  assert.strictEqual(manager.auditQueue.length, 1, 'security for active project should be queued');
+  assert.strictEqual(manager.auditQueue[0].mode, 'security', 'queued mode should be security');
+
+  manager.runAudit('proj-second', 'review', 'unstaged');
+  assert.strictEqual(manager.auditQueue.length, 2, 'second project should be queued at position 2');
+
+  manager.runWorkspaceGuards();
+  assert.strictEqual(manager.auditQueue.length, 3, 'workspace guards should be queued at position 3');
+  assert.strictEqual(manager.auditQueue[2].mode, 'guards', 'third item mode should be guards');
+
+  const guardsState = manager.getWorkspaceGuards();
+  assert.strictEqual(guardsState.isQueued, true, 'getWorkspaceGuards should report isQueued = true');
+  assert.strictEqual(guardsState.queuePosition, 3, 'getWorkspaceGuards queuePosition should be 3');
+
+  manager.cancelAudit('proj-active', 'security');
+  assert.strictEqual(manager.auditQueue.length, 2, 'queue length should be 2 after cancelling security');
+  assert.strictEqual(manager.auditQueue[0].projectName, 'proj-second', 'first queue item should now be proj-second');
+
+  manager.runningProjects.delete('proj-active');
+  manager.auditQueue = initialUserQueue;
+  manager.saveQueueState();
+  console.log('✓ multi-audit sequential queue (cross-project, cross-mode & guards) verified');
 
   // 8. notifyAuditCompletion and soundNotifier trigger
   let soundTriggered = false;

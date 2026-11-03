@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.71.0] – 03.11.2026
+
+- **Audits: Getrenntes Quittieren von Code-Review & Security-Audit, serielle Warteschlange & aufgeräumte Zeilen-Aktionen:** Im Tab „🛡️ Audits“ können Code-Reviews und Security-Audits nun unabhängig voneinander geprüft und quittiert werden; bei ausgeklappten Projekten ersetzt jeweils ein direkter grüner Quittieren-Button in der entsprechenden Review-Karte den bisherigen globalen Button, das Abbrechen bzw. Entfernen aus der Warteschlange ist gezielt im ausgeklappten Zustand pro Review-Typ erreichbar, und mehrere gestartete Audits oder Workspace-Guards reihen sich automatisch in eine serielle Warteschlange ein, anstatt parallel ausgeführt zu werden.
+
 ## [0.70.0] – 03.11.2026
 
 - **Kategorisierte Einstellungen:** Die Einstellungen der Extension sind ab sofort in sieben übersichtliche Themenbereiche gegliedert (Allgemein, Statusleiste & Limits, KI-Provider, Sounds, Benachrichtigungen, Dashboard-Tabs und Integrationen) und lassen sich im VS-Code-Einstellungseditor über das Inhaltsverzeichnis links sowie über formatierte Abschnittsüberschriften gezielt ansteuern.

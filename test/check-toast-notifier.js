@@ -111,34 +111,39 @@ const notifier = new ToastNotifier({}, (s) => {
   openedSession = s;
 });
 
+const testIdPrefix = `test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const sId1 = `${testIdPrefix}-s1`;
+const sId2 = `${testIdPrefix}-s2`;
+const sId3 = `${testIdPrefix}-s3`;
+
 // Initial run: should NOT trigger any notifications
 shownMessages = [];
 const sInit = [
-  { sessionId: 's1', provider: 'claude', displayState: 'busy', project: 'test', title: 'Task 1' }
+  { sessionId: sId1, provider: 'claude', displayState: 'busy', project: 'test', title: 'Task 1' }
 ];
 notifier.evaluate(sInit);
 assert.strictEqual(shownMessages.length, 0, 'Initial run must suppress notifications');
 
 // Subsequent run: s1 changes from busy -> idle
 notifier.evaluate([
-  { sessionId: 's1', provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') }
+  { sessionId: sId1, provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 1, 'Finished task should trigger notification');
 assert.strictEqual(shownMessages[0].msg, '✅ [test] Task 1', 'Toast message should match compact format');
 
 // Subsequent run: s2 is waiting for input
 notifier.evaluate([
-  { sessionId: 's1', provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') },
-  { sessionId: 's2', provider: 'antigravity', displayState: 'waiting', waitingFor: 'Rückfrage', project: 'ag-proj', title: 'Task 2', cwd: path.resolve('/mock/workspace/project-a') }
+  { sessionId: sId1, provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') },
+  { sessionId: sId2, provider: 'antigravity', displayState: 'waiting', waitingFor: 'Rückfrage', project: 'ag-proj', title: 'Task 2', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 2, 'New waiting session should trigger needsInput notification');
 assert.strictEqual(shownMessages[1].msg, '❓ [ag-proj] Task 2', 'Toast message should match compact question format');
 
 // Subsequent run: s3 is waiting for permission
 notifier.evaluate([
-  { sessionId: 's1', provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') },
-  { sessionId: 's2', provider: 'antigravity', displayState: 'waiting', waitingFor: 'Rückfrage', project: 'ag-proj', title: 'Task 2', cwd: path.resolve('/mock/workspace/project-a') },
-  { sessionId: 's3', provider: 'copilot', displayState: 'waiting', waitingFor: 'permission', project: 'cop-proj', title: 'Task 3', cwd: path.resolve('/mock/workspace/project-a') }
+  { sessionId: sId1, provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') },
+  { sessionId: sId2, provider: 'antigravity', displayState: 'waiting', waitingFor: 'Rückfrage', project: 'ag-proj', title: 'Task 2', cwd: path.resolve('/mock/workspace/project-a') },
+  { sessionId: sId3, provider: 'copilot', displayState: 'waiting', waitingFor: 'permission', project: 'cop-proj', title: 'Task 3', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 3, 'New waiting session should trigger permission notification');
 assert.strictEqual(shownMessages[2].msg, '⚠️ [cop-proj] Task 3', 'Toast message should match compact permission format');
