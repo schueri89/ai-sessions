@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.69.2] – 03.11.2026
+
+- **Sessions: Kalendertaggenaue Zeitanzeige bei Limits auf Kacheln:** Wenn ein Session-Limit aktiv ist, wird auf den Kacheln und in den Details rein die Uhrzeit nur noch dann angezeigt, wenn das Limit am selben Tag abläuft; die irritierende 24-Stunden-Regel wurde entfernt, sodass Limits mit Ablauf am Folgetag oder an späteren Tagen immer unmissverständlich inklusive Wochentag (z. B. „Mi 02:30 Uhr“) dargestellt werden.
+
 ## [0.69.1] – 03.11.2026
 
 - **Audits: Waiter-Icon-Zentrierung & echte Reload-Persistenz bei Fenster-Neuladen:** Das rotierende Waiter-Icon (Lade-Spinner) in den Status-Badges des Audits-Tabs ist dank `box-sizing: border-box`, Pixel-Ausrichtung und Inline-Flex-Box vertikal exakt mit Text und Live-Timer zentriert; laufende Audit-Prozesse werden ab sofort mit `detached: true` gestartet und bei Window-Reloads (F1) nicht mehr durch die Extension-Bereinigung (`dispose()`) abgebrochen, sondern schreiben ihre Ausgaben in Logdateien und werden beim Neuladen der Benutzeroberfläche nahtlos weitergeführt.
