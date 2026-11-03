@@ -3,6 +3,9 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
+- [ ] Audits: aktuell gibt es nur Button "Geprüft quittieren"... aber wäre es nicht schlauer, wenn ich Codereview und Security-Review getrennt abhaken kann?
+- [ ] Audits: wenn Projekt ausgeklappt, soll der grüne globale Button "Quittieren" weg... hier reicht es, wenn man dann pro Review-Typ einen eigenen grünen Button hätte
+- [ ] Audits: Warteschlage erstellen, wenn mehrere Audits gestartet werden (anstatt paralell sie abzuarbeiten)
 
 ## Erledigt
 - [x] session-dashboard v0.69.0: Audits Polish & Prozesssteuerung: Lade-Animation (`#audits-loader`) analog der anderen Tabs, animierter Fortschrittsbalken und Live-Dauer-Timer bei laufenden Reviews/Guards, nahtlose Prozessüberwachung über VS-Code-Reloads und Neustarts hinweg (`audit-running.json` & OS-Reconciler), 1-Klick-Abbruchfunktion (`⏹ Abbrechen`), Entfernung redundanter Start-Buttons unter den Kacheln und Button-Beschriftungen im Workspace-Banner (`📄 Bericht öffnen`, `🗑️ Bericht löschen`) *(02.11.2026, [Plan](.agents/plans/2026-11-02_session-dashboard-audits-progress-cancel-and-ui-polish.md))*

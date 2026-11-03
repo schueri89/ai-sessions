@@ -240,7 +240,9 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
     assert(!manager.runningProjects.has('cancel-run-test'), 'item should be removed from runningProjects');
     console.log('✓ cancelAudit removes queued tasks and cleans up running audits');
 
+    manager.dispose();
     console.log('All AuditManager tests passed successfully!');
+    process.exit(0);
   });
 });
 
