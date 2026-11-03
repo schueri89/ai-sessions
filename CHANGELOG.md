@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.70.0] – 03.11.2026
+
+- **Kategorisierte Einstellungen:** Die Einstellungen der Extension sind ab sofort in sieben übersichtliche Themenbereiche gegliedert (Allgemein, Statusleiste & Limits, KI-Provider, Sounds, Benachrichtigungen, Dashboard-Tabs und Integrationen) und lassen sich im VS-Code-Einstellungseditor über das Inhaltsverzeichnis links sowie über formatierte Abschnittsüberschriften gezielt ansteuern.
+
 ## [0.69.2] – 03.11.2026
 
 - **Sessions: Kalendertaggenaue Zeitanzeige bei Limits auf Kacheln:** Wenn ein Session-Limit aktiv ist, wird auf den Kacheln und in den Details rein die Uhrzeit nur noch dann angezeigt, wenn das Limit am selben Tag abläuft; die irritierende 24-Stunden-Regel wurde entfernt, sodass Limits mit Ablauf am Folgetag oder an späteren Tagen immer unmissverständlich inklusive Wochentag (z. B. „Mi 02:30 Uhr“) dargestellt werden.

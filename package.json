@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.69.2",
+  "version": "0.70.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -245,18 +245,18 @@
         "title": "Projekt manuell zuweisen...",
         "category": "Session Dashboard",
         "icon": "$(folder)"
-			},
-			{
-				"command": "sessionDashboard.showJenkins",
-				"title": "Jenkins Deploy-Jobs anzeigen",
-				"category": "Session Dashboard",
-				"icon": "$(rocket)"
-			},
-			{
-				"command": "sessionDashboard.jenkinsSetCredentials",
-				"title": "Jenkins-Zugangsdaten hinterlegen...",
-				"category": "Session Dashboard",
-				"icon": "$(key)"
+      },
+      {
+        "command": "sessionDashboard.showJenkins",
+        "title": "Jenkins Deploy-Jobs anzeigen",
+        "category": "Session Dashboard",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "sessionDashboard.jenkinsSetCredentials",
+        "title": "Jenkins-Zugangsdaten hinterlegen...",
+        "category": "Session Dashboard",
+        "icon": "$(key)"
       },
       {
         "command": "sessionDashboard.runProjectTask",
@@ -361,428 +361,467 @@
         }
       ]
     },
-    "configuration": {
-      "title": "Session Dashboard",
-      "properties": {
-        "sessionDashboard.statusBarClickAction": {
-          "type": "string",
-          "enum": [
-            "board",
-            "quickpick",
-            "firstWaiting"
-          ],
-          "enumDescriptions": [
-            "Öffnet die Dashboard-Übersicht (Standard)",
-            "Öffnet das Schnellmenü mit direktem Zugriff",
-            "Öffnet direkt die erste wartende Session"
-          ],
-          "default": "board",
-          "description": "Aktion beim Klick auf das Statusleisten-Widget."
-        },
-        "sessionDashboard.autoPinTab": {
-          "type": "boolean",
-          "default": true,
-          "description": "Dashboard-Tab beim Öffnen automatisch anpinnen."
-        },
-        "sessionDashboard.showLastPrompt": {
-          "type": "boolean",
-          "default": false,
-          "description": "Letzten Benutzer-Prompt auf den Dashboard-Kacheln anzeigen (Standard: deaktiviert für kompaktere Kacheln)."
-        },
-        "sessionDashboard.openOnStartup": {
-          "type": "boolean",
-          "default": false,
-          "description": "Dashboard beim Starten von VS Code automatisch im Editor öffnen."
-        },
-        "sessionDashboard.statusBarUsage": {
-          "type": "string",
-          "enum": [
-            "compact",
-            "text",
-            "5h",
-            "both",
-            "detailed",
-            "off"
-          ],
-          "enumDescriptions": [
-            "Icons kompakt: $(dashboard-claude) X% · $(dashboard-antigravity) Y% · $(dashboard-codex) Z% · $(copilot) M% (Standard)",
-            "Text kompakt: Claude: X% · AG: Y% · Codex: Z% · Copilot: M%",
-            "Kurzzeit-Fenster beschriftet: $(dashboard-claude) X% (5h) · $(dashboard-antigravity) Y% (5h) · $(dashboard-codex) Z% (5h) · $(copilot) M% (Monat)",
-            "5h & 7d / Monat & Budget kombiniert: $(dashboard-claude) X%/Y% · $(dashboard-antigravity) A%/B%[/C%] · $(dashboard-codex) C%/D% · $(copilot) M%/B%",
-            "Ausführlich mit Beschriftung: $(dashboard-claude) X% (5h) · Y% (7d) · $(dashboard-antigravity) A% (5h) · B% (7d) · $(dashboard-codex) C% (5h) · D% (7d) · $(copilot) M% (Monat) · B% (Budget)",
-            "Usage in Statusleiste ausblenden (nur beim Hover)"
-          ],
-          "default": "compact",
-          "description": "Format der getrennten Quota-/Limit-Verbrauchsanzeige in der Statusleiste (Footerbar)."
-        },
-        "sessionDashboard.quotaWarningThreshold": {
-          "type": "number",
-          "default": 75,
-          "minimum": 1,
-          "maximum": 100,
-          "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon gelb hinterlegt wird (Warnung)."
-        },
-        "sessionDashboard.quotaErrorThreshold": {
-          "type": "number",
-          "default": 95,
-          "minimum": 1,
-          "maximum": 100,
-          "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon rot hinterlegt wird (Kritisch/Limit)."
-        },
-        "sessionDashboard.providers.claude": {
-          "type": "boolean",
-          "default": true,
-          "description": "Claude-Code-Sessions erfassen und anzeigen."
-        },
-        "sessionDashboard.providers.antigravity": {
-          "type": "boolean",
-          "default": true,
-          "description": "Google-Antigravity-Sessions erfassen und anzeigen."
-        },
-        "sessionDashboard.providers.copilot": {
-          "type": "boolean",
-          "default": true,
-          "description": "GitHub-Copilot-Sessions erfassen und anzeigen."
-        },
-        "sessionDashboard.providers.codex": {
-          "type": "boolean",
-          "default": true,
-          "description": "OpenAI-Codex-Sessions erfassen und anzeigen."
-        },
-        "sessionDashboard.providers.cline": {
-          "type": "boolean",
-          "default": true,
-          "description": "Cline-Sessions erfassen und anzeigen."
-        },
-        "sessionDashboard.sound.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Akustische Benachrichtigungen für Session-Ereignisse aktivieren."
-        },
-        "sessionDashboard.sound.providers.claude": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sounds für Claude-Code-Sessions abspielen."
-        },
-        "sessionDashboard.sound.providers.antigravity": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sounds für Google-Antigravity-Sessions abspielen."
-        },
-        "sessionDashboard.sound.providers.copilot": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sounds für GitHub-Copilot-Sessions abspielen."
-        },
-        "sessionDashboard.sound.providers.codex": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sounds für OpenAI-Codex-Sessions abspielen."
-        },
-        "sessionDashboard.sound.providers.cline": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sounds für Cline-Sessions abspielen."
-        },
-        "sessionDashboard.sound.taskCompleted.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sound abspielen, wenn eine Session eine Aufgabe beendet hat."
-        },
-        "sessionDashboard.sound.tasks.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sound abspielen, wenn ein Projekt-Task-Lauf beendet wurde."
-        },
-        "sessionDashboard.sound.audits.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sound abspielen, wenn ein KI-Audit-Lauf beendet wurde."
-        },
-        "sessionDashboard.sound.taskCompleted.sound": {
-          "type": "string",
-          "enum": [
-            "tada",
-            "ding",
-            "chimes",
-            "notify",
-            "chord",
-            "ringin",
-            "Windows Notify",
-            "Windows Background",
-            "Hero",
-            "Glass",
-            "Ping",
-            "Pop",
-            "none"
-          ],
-          "enumDescriptions": [
-            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
-            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
-            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
-            "Notify / Pop (Moderne Benachrichtigung)",
-            "Chord / Submarine (Klassischer System-Akkord)",
-            "Ringin / Blow (Signalton / Klingeln)",
-            "Windows Notify (Voller Benachrichtigungston)",
-            "Windows Background (Sehr sanfter Hintergrundton)",
-            "Hero (macOS Fanfare)",
-            "Glass (macOS Glockenton)",
-            "Ping (macOS Sonar-Ping)",
-            "Pop (macOS Blase / Klick)",
-            "Kein Sound (Stumm für dieses Ereignis)"
-          ],
-          "default": "tada",
-          "description": "Sound beim Beenden einer Aufgabe (Task).",
-          "markdownDescription": "Sound beim Beenden einer Aufgabe (Task).\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22taskCompleted%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
-        },
-        "sessionDashboard.sound.idleReminder.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sound als Reminder abspielen, wenn eine Session nach Fertigstellung im Leerlauf auf Eingabe wartet (z. B. Claudes idle_prompt nach etwa 60 Sekunden)."
-        },
-        "sessionDashboard.sound.idleReminder.sound": {
-          "type": "string",
-          "enum": [
-            "tada",
-            "ding",
-            "chimes",
-            "notify",
-            "chord",
-            "ringin",
-            "Windows Notify",
-            "Windows Background",
-            "Hero",
-            "Glass",
-            "Ping",
-            "Pop",
-            "none"
-          ],
-          "enumDescriptions": [
-            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
-            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
-            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
-            "Notify / Pop (Moderne Benachrichtigung)",
-            "Chord / Submarine (Klassischer System-Akkord)",
-            "Ringin / Blow (Signalton / Klingeln)",
-            "Windows Notify (Voller Benachrichtigungston)",
-            "Windows Background (Sehr sanfter Hintergrundton)",
-            "Hero (macOS Fanfare)",
-            "Glass (macOS Glockenton)",
-            "Ping (macOS Sonar-Ping)",
-            "Pop (macOS Blase / Klick)",
-            "Kein Sound (Stumm für dieses Ereignis)"
-          ],
-          "default": "ding",
-          "description": "Sound für den Leerlauf-Reminder (Windows: ding, notify etc. / macOS: Ping, Pop etc. / Linux: message.oga).",
-          "markdownDescription": "Sound als Reminder abspielen, wenn eine Session nach Fertigstellung im Leerlauf auf Eingabe wartet.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22idleReminder%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
-        },
-        "sessionDashboard.sound.idleReminder.delaySeconds": {
-          "type": "number",
-          "default": 60,
-          "minimum": 10,
-          "maximum": 600,
-          "description": "Verzögerung in Sekunden ab Beginn des Leerlaufs bis zum Reminder-Ton (Standard: 60 Sekunden)."
-        },
-        "sessionDashboard.sound.needsInput.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sound abspielen, wenn eine Session auf Benutzereingabe oder Rückfrage wartet."
-        },
-        "sessionDashboard.sound.needsInput.sound": {
-          "type": "string",
-          "enum": [
-            "tada",
-            "ding",
-            "chimes",
-            "notify",
-            "chord",
-            "ringin",
-            "Windows Notify",
-            "Windows Background",
-            "Hero",
-            "Glass",
-            "Ping",
-            "Pop",
-            "none"
-          ],
-          "enumDescriptions": [
-            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
-            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
-            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
-            "Notify / Pop (Moderne Benachrichtigung)",
-            "Chord / Submarine (Klassischer System-Akkord)",
-            "Ringin / Blow (Signalton / Klingeln)",
-            "Windows Notify (Voller Benachrichtigungston)",
-            "Windows Background (Sehr sanfter Hintergrundton)",
-            "Hero (macOS Fanfare)",
-            "Glass (macOS Glockenton)",
-            "Ping (macOS Sonar-Ping)",
-            "Pop (macOS Blase / Klick)",
-            "Kein Sound (Stumm für dieses Ereignis)"
-          ],
-          "default": "chimes",
-          "description": "Sound bei Rückfrage / benötigter Zustimmung.",
-          "markdownDescription": "Sound bei Rückfrage oder benötigter Zustimmung (Tool-Approval, Prompt).\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22needsInput%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
-        },
-        "sessionDashboard.sound.limitAvailable.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Sound abspielen, wenn ein Rate-Limit abgelaufen ist oder Kontingent wieder verfügbar ist."
-        },
-        "sessionDashboard.sound.limitAvailable.sound": {
-          "type": "string",
-          "enum": [
-            "tada",
-            "ding",
-            "chimes",
-            "notify",
-            "chord",
-            "ringin",
-            "Windows Notify",
-            "Windows Background",
-            "Hero",
-            "Glass",
-            "Ping",
-            "Pop",
-            "none"
-          ],
-          "enumDescriptions": [
-            "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
-            "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
-            "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
-            "Notify / Pop (Moderne Benachrichtigung)",
-            "Chord / Submarine (Klassischer System-Akkord)",
-            "Ringin / Blow (Signalton / Klingeln)",
-            "Windows Notify (Voller Benachrichtigungston)",
-            "Windows Background (Sehr sanfter Hintergrundton)",
-            "Hero (macOS Fanfare)",
-            "Glass (macOS Glockenton)",
-            "Ping (macOS Sonar-Ping)",
-            "Pop (macOS Blase / Klick)",
-            "Kein Sound (Stumm für dieses Ereignis)"
-          ],
-          "default": "chimes",
-          "description": "Sound wenn Kontingent/Limit wieder frei ist (Standard: chimes, wie bei Rückfrage).",
-          "markdownDescription": "Sound wenn Kontingent oder Rate-Limit wieder frei ist.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22limitAvailable%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
-        },
-        "sessionDashboard.notifications.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Visuelle Benachrichtigungen (Toasts) bei Fertigstellung und Rückfragen anzeigen."
-        },
-        "sessionDashboard.notifications.taskCompleted": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigung anzeigen, wenn eine Session eine Aufgabe abschließt."
-        },
-        "sessionDashboard.notifications.tasks": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigung anzeigen, wenn ein Projekt-Task-Lauf beendet wurde."
-        },
-        "sessionDashboard.notifications.audits": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigung anzeigen, wenn ein KI-Audit-Lauf beendet wurde."
-        },
-        "sessionDashboard.notifications.needsInput": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigung anzeigen, wenn eine Session auf Eingabe oder Freigabe wartet."
-        },
-        "sessionDashboard.notifications.providers.claude": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigungen für Claude-Code-Sessions anzeigen."
-        },
-        "sessionDashboard.notifications.providers.antigravity": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigungen für Google-Antigravity-Sessions anzeigen."
-        },
-        "sessionDashboard.notifications.providers.copilot": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigungen für GitHub-Copilot-Sessions anzeigen."
-        },
-        "sessionDashboard.notifications.providers.codex": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigungen für OpenAI-Codex-Sessions anzeigen."
-        },
-        "sessionDashboard.notifications.providers.cline": {
-          "type": "boolean",
-          "default": true,
-          "description": "Benachrichtigungen für Cline-Sessions anzeigen."
-        },
-        "sessionDashboard.jiraBaseUrl": {
-          "type": "string",
-          "default": "",
-          "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
-        },
-        "sessionDashboard.jenkins.enabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Deploy-Tab (Jenkins) im Session-Dashboard anzeigen."
-        },
-        "sessionDashboard.jenkins.baseUrl": {
-          "type": "string",
-          "default": "",
-          "pattern": "^(https://.*)?$",
-          "description": "Basis-URL des Jenkins-Servers (nur https), z. B. 'https://jenkins.beispiel.local:8443'. Wird im Tab 'Deploys' verwendet."
-        },
-        "sessionDashboard.jenkins.user": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Jenkins-Benutzername. Der API-Token wird verschlüsselt im VS Code Secret Storage abgelegt: [🔑 Zugangsdaten hinterlegen...](command:sessionDashboard.jenkinsSetCredentials)"
-        },
-        "sessionDashboard.jenkins.jobFilter": {
-          "type": "string",
-          "default": "deploy",
-          "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung) auf den vollen Jobnamen inkl. Ordner, der einen Job als Deploy-Job kennzeichnet. Leer = alle Jobs."
-        },
-        "sessionDashboard.projectDetection": {
-          "type": "string",
-          "enum": [
-            "auto",
-            "exact",
-            "manual"
-          ],
-          "default": "auto",
-          "enumDescriptions": [
-            "Vollständige automatische Erkennung über Workspaces, Transkripte und Textsuche in Prompts/Titeln.",
-            "Präzise Erkennung nur über Verzeichnisse und Workspaces (CWD). Keine unsichere Textsuche in Prompts/Titeln.",
-            "Keine automatische Zuweisung. Sessions ohne manuellen Eintrag erscheinen als 'Nicht zugewiesen'."
-          ],
-          "description": "Modus für die Erkennung und Zuweisung von Projekten zu KI-Sessions."
-        },
-        "sessionDashboard.tasks.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Tab '⚡ Tasks' für Projekt-Tasks (APK bauen, Sync etc.) im Session-Dashboard anzeigen."
-        },
-        "sessionDashboard.tasks.onlyTopLevelDefault": {
-          "type": "boolean",
-          "default": true,
-          "description": "Im Tasks-Tab standardmäßig nur Haupt-Tasks (übergeordnete Workflows) anzeigen."
-        },
-        "sessionDashboard.audits.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Tab '🛡️ Audits' für manuelle und automatische KI-Audits (Code-Review, Security) im Session-Dashboard anzeigen."
-        },
-        "sessionDashboard.audits.defaultModel": {
-          "type": "string",
-          "default": "gemma4:26b",
-          "description": "Standard-KI-Modell für lokale Code-Reviews und Security-Audits via Ollama (z. B. gemma4:26b oder gemma4:e4b)."
-        },
-        "sessionDashboard.logs.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Tab '📜 Logs' für Windows-Tasks und Backup-Logs im Session-Dashboard anzeigen."
+    "configuration": [
+      {
+        "title": "Allgemein",
+        "order": 1,
+        "properties": {
+          "sessionDashboard.openOnStartup": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dashboard beim Starten von VS Code automatisch im Editor öffnen."
+          },
+          "sessionDashboard.autoPinTab": {
+            "type": "boolean",
+            "default": true,
+            "description": "Dashboard-Tab beim Öffnen automatisch anpinnen."
+          },
+          "sessionDashboard.showLastPrompt": {
+            "type": "boolean",
+            "default": false,
+            "description": "Letzten Benutzer-Prompt auf den Dashboard-Kacheln anzeigen (Standard: deaktiviert für kompaktere Kacheln)."
+          },
+          "sessionDashboard.projectDetection": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "exact",
+              "manual"
+            ],
+            "default": "auto",
+            "enumDescriptions": [
+              "Vollständige automatische Erkennung über Workspaces, Transkripte und Textsuche in Prompts/Titeln.",
+              "Präzise Erkennung nur über Verzeichnisse und Workspaces (CWD). Keine unsichere Textsuche in Prompts/Titeln.",
+              "Keine automatische Zuweisung. Sessions ohne manuellen Eintrag erscheinen als 'Nicht zugewiesen'."
+            ],
+            "description": "Modus für die Erkennung und Zuweisung von Projekten zu KI-Sessions."
+          }
+        }
+      },
+      {
+        "title": "Statusleiste & Limits",
+        "order": 2,
+        "properties": {
+          "sessionDashboard.statusBarClickAction": {
+            "type": "string",
+            "enum": [
+              "board",
+              "quickpick",
+              "firstWaiting"
+            ],
+            "enumDescriptions": [
+              "Öffnet die Dashboard-Übersicht (Standard)",
+              "Öffnet das Schnellmenü mit direktem Zugriff",
+              "Öffnet direkt die erste wartende Session"
+            ],
+            "default": "board",
+            "description": "Aktion beim Klick auf das Statusleisten-Widget."
+          },
+          "sessionDashboard.statusBarUsage": {
+            "type": "string",
+            "enum": [
+              "compact",
+              "text",
+              "5h",
+              "both",
+              "detailed",
+              "off"
+            ],
+            "enumDescriptions": [
+              "Icons kompakt: $(dashboard-claude) X% · $(dashboard-antigravity) Y% · $(dashboard-codex) Z% · $(copilot) M% (Standard)",
+              "Text kompakt: Claude: X% · AG: Y% · Codex: Z% · Copilot: M%",
+              "Kurzzeit-Fenster beschriftet: $(dashboard-claude) X% (5h) · $(dashboard-antigravity) Y% (5h) · $(dashboard-codex) Z% (5h) · $(copilot) M% (Monat)",
+              "5h & 7d / Monat & Budget kombiniert: $(dashboard-claude) X%/Y% · $(dashboard-antigravity) A%/B%[/C%] · $(dashboard-codex) C%/D% · $(copilot) M%/B%",
+              "Ausführlich mit Beschriftung: $(dashboard-claude) X% (5h) · Y% (7d) · $(dashboard-antigravity) A% (5h) · B% (7d) · $(dashboard-codex) C% (5h) · D% (7d) · $(copilot) M% (Monat) · B% (Budget)",
+              "Usage in Statusleiste ausblenden (nur beim Hover)"
+            ],
+            "default": "compact",
+            "description": "Format der getrennten Quota-/Limit-Verbrauchsanzeige in der Statusleiste (Footerbar)."
+          },
+          "sessionDashboard.quotaWarningThreshold": {
+            "type": "number",
+            "default": 75,
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon gelb hinterlegt wird (Warnung)."
+          },
+          "sessionDashboard.quotaErrorThreshold": {
+            "type": "number",
+            "default": 95,
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Auslastungsschwelle in Prozent, ab der das Statusleisten-Icon rot hinterlegt wird (Kritisch/Limit)."
+          }
+        }
+      },
+      {
+        "title": "KI-Provider",
+        "order": 3,
+        "properties": {
+          "sessionDashboard.providers.claude": {
+            "type": "boolean",
+            "default": true,
+            "description": "Claude-Code-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.antigravity": {
+            "type": "boolean",
+            "default": true,
+            "description": "Google-Antigravity-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.copilot": {
+            "type": "boolean",
+            "default": true,
+            "description": "GitHub-Copilot-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.codex": {
+            "type": "boolean",
+            "default": true,
+            "description": "OpenAI-Codex-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.cline": {
+            "type": "boolean",
+            "default": true,
+            "description": "Cline-Sessions erfassen und anzeigen."
+          }
+        }
+      },
+      {
+        "title": "Sounds",
+        "order": 4,
+        "properties": {
+          "sessionDashboard.sound.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Akustische Benachrichtigungen für Session-Ereignisse aktivieren."
+          },
+          "sessionDashboard.sound.providers.claude": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sounds für Claude-Code-Sessions abspielen."
+          },
+          "sessionDashboard.sound.providers.antigravity": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sounds für Google-Antigravity-Sessions abspielen."
+          },
+          "sessionDashboard.sound.providers.copilot": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sounds für GitHub-Copilot-Sessions abspielen."
+          },
+          "sessionDashboard.sound.providers.codex": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sounds für OpenAI-Codex-Sessions abspielen."
+          },
+          "sessionDashboard.sound.providers.cline": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sounds für Cline-Sessions abspielen."
+          },
+          "sessionDashboard.sound.taskCompleted.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn eine Session eine Aufgabe beendet hat."
+          },
+          "sessionDashboard.sound.taskCompleted.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "ding",
+              "chimes",
+              "notify",
+              "chord",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "enumDescriptions": [
+              "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+              "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+              "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+              "Notify / Pop (Moderne Benachrichtigung)",
+              "Chord / Submarine (Klassischer System-Akkord)",
+              "Ringin / Blow (Signalton / Klingeln)",
+              "Windows Notify (Voller Benachrichtigungston)",
+              "Windows Background (Sehr sanfter Hintergrundton)",
+              "Hero (macOS Fanfare)",
+              "Glass (macOS Glockenton)",
+              "Ping (macOS Sonar-Ping)",
+              "Pop (macOS Blase / Klick)",
+              "Kein Sound (Stumm für dieses Ereignis)"
+            ],
+            "default": "tada",
+            "description": "Sound beim Beenden einer Aufgabe (Task).",
+            "markdownDescription": "Sound beim Beenden einer Aufgabe (Task).\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22taskCompleted%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
+          },
+          "sessionDashboard.sound.idleReminder.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound als Reminder abspielen, wenn eine Session nach Fertigstellung im Leerlauf auf Eingabe wartet (z. B. Claudes idle_prompt nach etwa 60 Sekunden)."
+          },
+          "sessionDashboard.sound.idleReminder.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "ding",
+              "chimes",
+              "notify",
+              "chord",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "enumDescriptions": [
+              "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+              "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+              "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+              "Notify / Pop (Moderne Benachrichtigung)",
+              "Chord / Submarine (Klassischer System-Akkord)",
+              "Ringin / Blow (Signalton / Klingeln)",
+              "Windows Notify (Voller Benachrichtigungston)",
+              "Windows Background (Sehr sanfter Hintergrundton)",
+              "Hero (macOS Fanfare)",
+              "Glass (macOS Glockenton)",
+              "Ping (macOS Sonar-Ping)",
+              "Pop (macOS Blase / Klick)",
+              "Kein Sound (Stumm für dieses Ereignis)"
+            ],
+            "default": "ding",
+            "description": "Sound für den Leerlauf-Reminder (Windows: ding, notify etc. / macOS: Ping, Pop etc. / Linux: message.oga).",
+            "markdownDescription": "Sound als Reminder abspielen, wenn eine Session nach Fertigstellung im Leerlauf auf Eingabe wartet.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22idleReminder%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
+          },
+          "sessionDashboard.sound.idleReminder.delaySeconds": {
+            "type": "number",
+            "default": 60,
+            "minimum": 10,
+            "maximum": 600,
+            "description": "Verzögerung in Sekunden ab Beginn des Leerlaufs bis zum Reminder-Ton (Standard: 60 Sekunden)."
+          },
+          "sessionDashboard.sound.needsInput.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn eine Session auf Benutzereingabe oder Rückfrage wartet."
+          },
+          "sessionDashboard.sound.needsInput.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "ding",
+              "chimes",
+              "notify",
+              "chord",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "enumDescriptions": [
+              "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+              "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+              "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+              "Notify / Pop (Moderne Benachrichtigung)",
+              "Chord / Submarine (Klassischer System-Akkord)",
+              "Ringin / Blow (Signalton / Klingeln)",
+              "Windows Notify (Voller Benachrichtigungston)",
+              "Windows Background (Sehr sanfter Hintergrundton)",
+              "Hero (macOS Fanfare)",
+              "Glass (macOS Glockenton)",
+              "Ping (macOS Sonar-Ping)",
+              "Pop (macOS Blase / Klick)",
+              "Kein Sound (Stumm für dieses Ereignis)"
+            ],
+            "default": "chimes",
+            "description": "Sound bei Rückfrage / benötigter Zustimmung.",
+            "markdownDescription": "Sound bei Rückfrage oder benötigter Zustimmung (Tool-Approval, Prompt).\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22needsInput%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
+          },
+          "sessionDashboard.sound.limitAvailable.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn ein Rate-Limit abgelaufen ist oder Kontingent wieder verfügbar ist."
+          },
+          "sessionDashboard.sound.limitAvailable.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "ding",
+              "chimes",
+              "notify",
+              "chord",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "enumDescriptions": [
+              "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+              "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+              "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+              "Notify / Pop (Moderne Benachrichtigung)",
+              "Chord / Submarine (Klassischer System-Akkord)",
+              "Ringin / Blow (Signalton / Klingeln)",
+              "Windows Notify (Voller Benachrichtigungston)",
+              "Windows Background (Sehr sanfter Hintergrundton)",
+              "Hero (macOS Fanfare)",
+              "Glass (macOS Glockenton)",
+              "Ping (macOS Sonar-Ping)",
+              "Pop (macOS Blase / Klick)",
+              "Kein Sound (Stumm für dieses Ereignis)"
+            ],
+            "default": "chimes",
+            "description": "Sound wenn Kontingent/Limit wieder frei ist (Standard: chimes, wie bei Rückfrage).",
+            "markdownDescription": "Sound wenn Kontingent oder Rate-Limit wieder frei ist.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22limitAvailable%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
+          },
+          "sessionDashboard.sound.tasks.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn ein Projekt-Task-Lauf beendet wurde."
+          },
+          "sessionDashboard.sound.audits.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn ein KI-Audit-Lauf beendet wurde."
+          }
+        }
+      },
+      {
+        "title": "Benachrichtigungen",
+        "order": 5,
+        "properties": {
+          "sessionDashboard.notifications.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Visuelle Benachrichtigungen (Toasts) bei Fertigstellung und Rückfragen anzeigen."
+          },
+          "sessionDashboard.notifications.providers.claude": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigungen für Claude-Code-Sessions anzeigen."
+          },
+          "sessionDashboard.notifications.providers.antigravity": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigungen für Google-Antigravity-Sessions anzeigen."
+          },
+          "sessionDashboard.notifications.providers.copilot": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigungen für GitHub-Copilot-Sessions anzeigen."
+          },
+          "sessionDashboard.notifications.providers.codex": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigungen für OpenAI-Codex-Sessions anzeigen."
+          },
+          "sessionDashboard.notifications.providers.cline": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigungen für Cline-Sessions anzeigen."
+          },
+          "sessionDashboard.notifications.taskCompleted": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigung anzeigen, wenn eine Session eine Aufgabe abschließt."
+          },
+          "sessionDashboard.notifications.needsInput": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigung anzeigen, wenn eine Session auf Eingabe oder Freigabe wartet."
+          },
+          "sessionDashboard.notifications.tasks": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigung anzeigen, wenn ein Projekt-Task-Lauf beendet wurde."
+          },
+          "sessionDashboard.notifications.audits": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigung anzeigen, wenn ein KI-Audit-Lauf beendet wurde."
+          }
+        }
+      },
+      {
+        "title": "Dashboard-Tabs",
+        "order": 6,
+        "properties": {
+          "sessionDashboard.tasks.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tab '⚡ Tasks' für Projekt-Tasks (APK bauen, Sync etc.) im Session-Dashboard anzeigen."
+          },
+          "sessionDashboard.tasks.onlyTopLevelDefault": {
+            "type": "boolean",
+            "default": true,
+            "description": "Im Tasks-Tab standardmäßig nur Haupt-Tasks (übergeordnete Workflows) anzeigen."
+          },
+          "sessionDashboard.audits.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tab '🛡️ Audits' für manuelle und automatische KI-Audits (Code-Review, Security) im Session-Dashboard anzeigen."
+          },
+          "sessionDashboard.audits.defaultModel": {
+            "type": "string",
+            "default": "gemma4:26b",
+            "description": "Standard-KI-Modell für lokale Code-Reviews und Security-Audits via Ollama (z. B. gemma4:26b oder gemma4:e4b)."
+          },
+          "sessionDashboard.logs.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tab '📜 Logs' für Windows-Tasks und Backup-Logs im Session-Dashboard anzeigen."
+          }
+        }
+      },
+      {
+        "title": "Integrationen",
+        "order": 7,
+        "properties": {
+          "sessionDashboard.jiraBaseUrl": {
+            "type": "string",
+            "default": "",
+            "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
+          },
+          "sessionDashboard.jenkins.enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Deploy-Tab (Jenkins) im Session-Dashboard anzeigen."
+          },
+          "sessionDashboard.jenkins.baseUrl": {
+            "type": "string",
+            "default": "",
+            "pattern": "^(https://.*)?$",
+            "description": "Basis-URL des Jenkins-Servers (nur https), z. B. 'https://jenkins.beispiel.local:8443'. Wird im Tab 'Deploys' verwendet."
+          },
+          "sessionDashboard.jenkins.user": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Jenkins-Benutzername. Der API-Token wird verschlüsselt im VS Code Secret Storage abgelegt: [🔑 Zugangsdaten hinterlegen...](command:sessionDashboard.jenkinsSetCredentials)"
+          },
+          "sessionDashboard.jenkins.jobFilter": {
+            "type": "string",
+            "default": "deploy",
+            "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung) auf den vollen Jobnamen inkl. Ordner, der einen Job als Deploy-Job kennzeichnet. Leer = alle Jobs."
+          }
         }
       }
-    }
+    ]
   },
   "scripts": {
     "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/providers/cline.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/jenkins.js && node --check lib/projectTasks.js && node --check lib/auditManager.js && node --check lib/tasksLogManager.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js && node test/check-claude-cost.js && node test/check-cache-efficiency.js && node test/check-history-pagination-and-diff.js && node test/check-show-last-prompt.js && node test/check-cline-integration.js && node test/check-project-tasks.js && node test/check-audit-manager.js && node test/check-tasks-log-manager.js && node test/check-format-limit-reset.js",

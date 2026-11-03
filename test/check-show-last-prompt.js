@@ -9,7 +9,10 @@ console.log('Testing sessionDashboard.showLastPrompt setting & board rendering l
 // 1. package.json validation
 const pkgPath = path.join(__dirname, '..', 'package.json');
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-const props = pkg.contributes?.configuration?.properties || {};
+const cfg = pkg.contributes?.configuration;
+const props = Array.isArray(cfg)
+  ? Object.assign({}, ...cfg.map((c) => c.properties || {}))
+  : (cfg?.properties || {});
 
 assert(props['sessionDashboard.showLastPrompt'], 'Setting sessionDashboard.showLastPrompt must exist in package.json');
 assert.strictEqual(props['sessionDashboard.showLastPrompt'].type, 'boolean', 'Setting type must be boolean');
