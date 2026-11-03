@@ -6,6 +6,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Audits: aktuell gibt es nur Button "Geprüft quittieren"... aber wäre es nicht schlauer, wenn ich Codereview und Security-Review getrennt abhaken kann?
 - [ ] Audits: wenn Projekt ausgeklappt, soll der grüne globale Button "Quittieren" weg... hier reicht es, wenn man dann pro Review-Typ einen eigenen grünen Button hätte
 - [ ] Audits: Warteschlage erstellen, wenn mehrere Audits gestartet werden (anstatt paralell sie abzuarbeiten)
+- [ ] Sessions: bitte Tab "Board" in Sessions umbenennen - die Tabs Analyse und Historie gehören auch zu den Sessions... daher würde ich sie eher innerhalb des Sessions-Tabs sehen?! ggf. als Links/Buttons ganz rechts, wo aktuell die Freitextsuche ist? die Freitextsuche könnte man ganz links unter dem Filter anzeigen
 
 ## Erledigt
 - [x] session-dashboard v0.69.2: Sessions: Wenn ein Limit aktiv ist, wird rein die Uhrzeit nur noch bei Ablauf am selben Kalendertag auf Kacheln angezeigt; 24-Stunden-Regel entfernt und durch kalendertaggenaue Prüfung ersetzt *(03.11.2026)*
