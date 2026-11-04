@@ -4,9 +4,9 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 ## Offene Aufgaben
 - [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
 - [ ] beide Reviews in einem Durchlaufen?! sollte Zeit verkürzen statt 2 komplette Code-Scans
-- [ ] Sessions-Historie: könnte man den oberen Teil mit den Filtern und den neuen Buttons so angleichen, dass es ähnlich ist zum 1.Tab "Board"? aktuell ist das eine andere Farbe und die 3 Navi-Buttons springen nach unten/oben
 
 ## Erledigt
+- [x] session-dashboard v0.72.1: Sessions-Historie & Analyse Toolbar-Harmonisierung (optische und strukturelle Angleichung an das Board, kein Kasten-Hintergrund mehr in der Historie und exakte Positionierung der 3 Navi-Buttons ohne vertikales Springen) *(04.11.2026)*
 - [x] session-dashboard v0.72.0: Sessions-Tab Restrukturierung (Board in Sessions umbenannt, Analyse & Historie als Sub-Navigation rechts integriert, Freitextsuche linksbündig unter Filter verlegt) und selektive JIRA-Kartenanzeige (JIRA-Button & Ticketnummer nur bei konfigurierter JIRA-Basis-URL aktiv) *(03.11.2026, [Plan](.agents/plans/2026-11-03_session-dashboard-sessions-tab-and-jira-activation.md))*
 - [x] session-dashboard v0.71.0: Audits: Getrenntes Quittieren von Code-Review und Security-Audit, kartenbezogene Quittieren-Buttons bei ausgeklappten Projekten (Entfernung des globalen Quittieren-Buttons) und serielle Warteschlange für alle Audits und Workspace-Guards *(03.11.2026, [Plan](.agents/plans/2026-11-03_session-dashboard-audits-separate-review-quittierung-and-queue.md))*
 - [x] session-dashboard v0.70.0: Einstellungen: Strukturierung aller 50 Settings in 7 logische Kategorien im VS-Code-Einstellungseditor (Allgemein, Statusleiste & Limits, KI-Provider, Sounds, Benachrichtigungen, Dashboard-Tabs, Integrationen) mit nativer Baum-Navigation und formatierter Abschnittsgliederung *(03.11.2026, [Plan](.agents/plans/2026-11-03_session-dashboard-settings-kategorien.md))*

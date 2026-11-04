@@ -51,6 +51,11 @@ assert(htmlNoJira.includes('data-submode="board"'), 'subnav must have board butt
 assert(htmlNoJira.includes('data-submode="analyse"'), 'subnav must have analyse button');
 assert(htmlNoJira.includes('data-submode="history"'), 'subnav must have history button');
 
+// Harmonized toolbar layout in History & Analyse
+assert(htmlNoJira.includes('class="history-secondary-row"'), 'history-secondary-row must exist');
+assert(htmlNoJira.includes('class="analyse-secondary-row"'), 'analyse-secondary-row must exist');
+assert(!htmlNoJira.match(/\.history-toolbar\s*\{[^}]*editorWidget-background/), 'history-toolbar must NOT use editorWidget-background box styling');
+
 // Search row verification (placed under filter-group in .search-row)
 assert(htmlNoJira.includes('class="search-row"'), 'search-row must exist under toolbar-main');
 const searchRowIdx = htmlNoJira.indexOf('class="search-row"');

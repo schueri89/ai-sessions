@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.72.1] – 04.11.2026
+
+- **Harmonisierte Toolbar in Historie & Analyse:** Die Filter- und Navigationsleisten in den Unteransichten „Historie“ und „Analyse“ wurden optisch und strukturell exakt an das Sessions-Board angeglichen; die drei Sub-Navigationsbuttons und Provider-Filter sitzen ab sofort in allen Ansichten stabil an derselben horizontalen Position ohne vertikales Springen und ohne abweichenden Kasten-Hintergrund.
+
 ## [0.72.0] – 03.11.2026
 
 - **Sessions-Tab Restrukturierung & selektive JIRA-Anzeige:** Der bisherige Tab „Board“ heißt ab sofort „Sessions“, die Tabs „Analyse“ und „Historie“ wurden als direkte Unteransichten rechts in die Sessions-Leiste integriert und die Freitextsuche linksbündig unter die Filter verlegt; auf den Kacheln werden JIRA-Buttons und Ticketnummern ab sofort nur noch angezeigt, wenn auch eine JIRA-Basis-URL in den Einstellungen hinterlegt und damit JIRA aktiviert wurde.
