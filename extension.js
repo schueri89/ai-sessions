@@ -1580,8 +1580,19 @@ function activate(context) {
         }
       }
     }),
-    vscode.commands.registerCommand('sessionDashboard.openSettings', () => {
-      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:schueri.ai-sessions');
+    vscode.commands.registerCommand('sessionDashboard.openSettings', (target) => {
+      let query = '@ext:schueri.ai-sessions';
+      if (typeof target === 'string' && target.trim()) {
+        const t = target.trim();
+        if (t === 'tasks') query = 'sessionDashboard.tasks';
+        else if (t === 'audits') query = 'sessionDashboard.audits';
+        else if (t === 'logs') query = 'sessionDashboard.logs';
+        else if (t === 'jenkins' || t === 'deploys') query = 'sessionDashboard.jenkins';
+        else if (t === 'sessions' || t === 'board' || t === 'history' || t === 'analyse') query = '@ext:schueri.ai-sessions';
+        else if (t.startsWith('@') || t.startsWith('sessionDashboard')) query = t;
+        else query = `sessionDashboard.${t}`;
+      }
+      vscode.commands.executeCommand('workbench.action.openSettings', query);
     }),
     vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', () => setJenkinsCredentials(context.secrets)),
     vscode.commands.registerCommand('sessionDashboard.showJenkins', async () => {

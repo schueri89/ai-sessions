@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.73.0] – 04.11.2026
+
+- **Tab-basierte Einstellungen & kontextuelle Tab-Navigation:** Alle Einstellungen der Extension sind ab sofort exakt nach den Reitern des Dashboards gegliedert (Tab: Sessions, Tab: Tasks, Tab: Audits, Tab: Logs, Tab: Deploys, Statusleiste & Limits, Sounds, Benachrichtigungen, Allgemein); ein Klick auf das globale Zahnrad ⚙️ oben rechts öffnet automatisch die Einstellungen des aktuell aktiven Tabs, und in den Toolbars von Tasks, Audits, Logs und Deploys erlaubt jeweils ein eigener ⚙️-Button den direkten Sprung in die passenden Einstellungen.
+
 ## [0.72.1] – 04.11.2026
 
 - **Harmonisierte Toolbar in Historie & Analyse:** Die Filter- und Navigationsleisten in den Unteransichten „Historie“ und „Analyse“ wurden optisch und strukturell exakt an das Sessions-Board angeglichen; die drei Sub-Navigationsbuttons und Provider-Filter sitzen ab sofort in allen Ansichten stabil an derselben horizontalen Position ohne vertikales Springen und ohne abweichenden Kasten-Hintergrund.

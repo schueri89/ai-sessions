@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.72.1",
+  "version": "0.73.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -363,18 +363,33 @@
     },
     "configuration": [
       {
-        "title": "Allgemein",
+        "title": "Tab: Sessions",
         "order": 1,
         "properties": {
-          "sessionDashboard.openOnStartup": {
-            "type": "boolean",
-            "default": false,
-            "description": "Dashboard beim Starten von VS Code automatisch im Editor öffnen."
-          },
-          "sessionDashboard.autoPinTab": {
+          "sessionDashboard.providers.claude": {
             "type": "boolean",
             "default": true,
-            "description": "Dashboard-Tab beim Öffnen automatisch anpinnen."
+            "description": "Claude-Code-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.antigravity": {
+            "type": "boolean",
+            "default": true,
+            "description": "Google-Antigravity-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.copilot": {
+            "type": "boolean",
+            "default": true,
+            "description": "GitHub-Copilot-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.codex": {
+            "type": "boolean",
+            "default": true,
+            "description": "OpenAI-Codex-Sessions erfassen und anzeigen."
+          },
+          "sessionDashboard.providers.cline": {
+            "type": "boolean",
+            "default": true,
+            "description": "Cline-Sessions erfassen und anzeigen."
           },
           "sessionDashboard.showLastPrompt": {
             "type": "boolean",
@@ -395,12 +410,107 @@
               "Keine automatische Zuweisung. Sessions ohne manuellen Eintrag erscheinen als 'Nicht zugewiesen'."
             ],
             "description": "Modus für die Erkennung und Zuweisung von Projekten zu KI-Sessions."
+          },
+          "sessionDashboard.jiraBaseUrl": {
+            "type": "string",
+            "default": "",
+            "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
+          }
+        }
+      },
+      {
+        "title": "Tab: Tasks",
+        "order": 2,
+        "properties": {
+          "sessionDashboard.tasks.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tab '⚡ Tasks' für Projekt-Tasks (APK bauen, Sync etc.) im Session-Dashboard anzeigen."
+          },
+          "sessionDashboard.tasks.onlyTopLevelDefault": {
+            "type": "boolean",
+            "default": true,
+            "description": "Im Tasks-Tab standardmäßig nur Haupt-Tasks (übergeordnete Workflows) anzeigen."
+          },
+          "sessionDashboard.sound.tasks.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn ein Projekt-Task-Lauf beendet wurde."
+          },
+          "sessionDashboard.notifications.tasks": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigung anzeigen, wenn ein Projekt-Task-Lauf beendet wurde."
+          }
+        }
+      },
+      {
+        "title": "Tab: Audits",
+        "order": 3,
+        "properties": {
+          "sessionDashboard.audits.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tab '🛡️ Audits' für manuelle und automatische KI-Audits (Code-Review, Security) im Session-Dashboard anzeigen."
+          },
+          "sessionDashboard.audits.defaultModel": {
+            "type": "string",
+            "default": "gemma4:26b",
+            "description": "Standard-KI-Modell für lokale Code-Reviews und Security-Audits via Ollama (z. B. gemma4:26b oder gemma4:e4b)."
+          },
+          "sessionDashboard.sound.audits.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn ein KI-Audit-Lauf beendet wurde."
+          },
+          "sessionDashboard.notifications.audits": {
+            "type": "boolean",
+            "default": true,
+            "description": "Benachrichtigung anzeigen, wenn ein KI-Audit-Lauf beendet wurde."
+          }
+        }
+      },
+      {
+        "title": "Tab: Logs",
+        "order": 4,
+        "properties": {
+          "sessionDashboard.logs.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Tab '📜 Logs' für Windows-Tasks und Backup-Logs im Session-Dashboard anzeigen."
+          }
+        }
+      },
+      {
+        "title": "Tab: Deploys",
+        "order": 5,
+        "properties": {
+          "sessionDashboard.jenkins.enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Deploy-Tab (Jenkins) im Session-Dashboard anzeigen."
+          },
+          "sessionDashboard.jenkins.baseUrl": {
+            "type": "string",
+            "default": "",
+            "pattern": "^(https://.*)?$",
+            "description": "Basis-URL des Jenkins-Servers (nur https), z. B. 'https://jenkins.beispiel.local:8443'. Wird im Tab 'Deploys' verwendet."
+          },
+          "sessionDashboard.jenkins.user": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Jenkins-Benutzername. Der API-Token wird verschlüsselt im VS Code Secret Storage abgelegt: [🔑 Zugangsdaten hinterlegen...](command:sessionDashboard.jenkinsSetCredentials)"
+          },
+          "sessionDashboard.jenkins.jobFilter": {
+            "type": "string",
+            "default": "deploy",
+            "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung) auf den vollen Jobnamen inkl. Ordner, der einen Job als Deploy-Job kennzeichnet. Leer = alle Jobs."
           }
         }
       },
       {
         "title": "Statusleiste & Limits",
-        "order": 2,
+        "order": 6,
         "properties": {
           "sessionDashboard.statusBarClickAction": {
             "type": "string",
@@ -455,39 +565,8 @@
         }
       },
       {
-        "title": "KI-Provider",
-        "order": 3,
-        "properties": {
-          "sessionDashboard.providers.claude": {
-            "type": "boolean",
-            "default": true,
-            "description": "Claude-Code-Sessions erfassen und anzeigen."
-          },
-          "sessionDashboard.providers.antigravity": {
-            "type": "boolean",
-            "default": true,
-            "description": "Google-Antigravity-Sessions erfassen und anzeigen."
-          },
-          "sessionDashboard.providers.copilot": {
-            "type": "boolean",
-            "default": true,
-            "description": "GitHub-Copilot-Sessions erfassen und anzeigen."
-          },
-          "sessionDashboard.providers.codex": {
-            "type": "boolean",
-            "default": true,
-            "description": "OpenAI-Codex-Sessions erfassen und anzeigen."
-          },
-          "sessionDashboard.providers.cline": {
-            "type": "boolean",
-            "default": true,
-            "description": "Cline-Sessions erfassen und anzeigen."
-          }
-        }
-      },
-      {
         "title": "Sounds",
-        "order": 4,
+        "order": 7,
         "properties": {
           "sessionDashboard.sound.enabled": {
             "type": "boolean",
@@ -689,22 +768,12 @@
             "default": "chimes",
             "description": "Sound wenn Kontingent/Limit wieder frei ist (Standard: chimes, wie bei Rückfrage).",
             "markdownDescription": "Sound wenn Kontingent oder Rate-Limit wieder frei ist.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22limitAvailable%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
-          },
-          "sessionDashboard.sound.tasks.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "Sound abspielen, wenn ein Projekt-Task-Lauf beendet wurde."
-          },
-          "sessionDashboard.sound.audits.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "Sound abspielen, wenn ein KI-Audit-Lauf beendet wurde."
           }
         }
       },
       {
         "title": "Benachrichtigungen",
-        "order": 5,
+        "order": 8,
         "properties": {
           "sessionDashboard.notifications.enabled": {
             "type": "boolean",
@@ -745,86 +814,29 @@
             "type": "boolean",
             "default": true,
             "description": "Benachrichtigung anzeigen, wenn eine Session auf Eingabe oder Freigabe wartet."
-          },
-          "sessionDashboard.notifications.tasks": {
-            "type": "boolean",
-            "default": true,
-            "description": "Benachrichtigung anzeigen, wenn ein Projekt-Task-Lauf beendet wurde."
-          },
-          "sessionDashboard.notifications.audits": {
-            "type": "boolean",
-            "default": true,
-            "description": "Benachrichtigung anzeigen, wenn ein KI-Audit-Lauf beendet wurde."
           }
         }
       },
       {
-        "title": "Dashboard-Tabs",
-        "order": 6,
+        "title": "Allgemein",
+        "order": 9,
         "properties": {
-          "sessionDashboard.tasks.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "Tab '⚡ Tasks' für Projekt-Tasks (APK bauen, Sync etc.) im Session-Dashboard anzeigen."
-          },
-          "sessionDashboard.tasks.onlyTopLevelDefault": {
-            "type": "boolean",
-            "default": true,
-            "description": "Im Tasks-Tab standardmäßig nur Haupt-Tasks (übergeordnete Workflows) anzeigen."
-          },
-          "sessionDashboard.audits.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "Tab '🛡️ Audits' für manuelle und automatische KI-Audits (Code-Review, Security) im Session-Dashboard anzeigen."
-          },
-          "sessionDashboard.audits.defaultModel": {
-            "type": "string",
-            "default": "gemma4:26b",
-            "description": "Standard-KI-Modell für lokale Code-Reviews und Security-Audits via Ollama (z. B. gemma4:26b oder gemma4:e4b)."
-          },
-          "sessionDashboard.logs.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "Tab '📜 Logs' für Windows-Tasks und Backup-Logs im Session-Dashboard anzeigen."
-          }
-        }
-      },
-      {
-        "title": "Integrationen",
-        "order": 7,
-        "properties": {
-          "sessionDashboard.jiraBaseUrl": {
-            "type": "string",
-            "default": "",
-            "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
-          },
-          "sessionDashboard.jenkins.enabled": {
+          "sessionDashboard.openOnStartup": {
             "type": "boolean",
             "default": false,
-            "description": "Deploy-Tab (Jenkins) im Session-Dashboard anzeigen."
+            "description": "Dashboard beim Starten von VS Code automatisch im Editor öffnen."
           },
-          "sessionDashboard.jenkins.baseUrl": {
-            "type": "string",
-            "default": "",
-            "pattern": "^(https://.*)?$",
-            "description": "Basis-URL des Jenkins-Servers (nur https), z. B. 'https://jenkins.beispiel.local:8443'. Wird im Tab 'Deploys' verwendet."
-          },
-          "sessionDashboard.jenkins.user": {
-            "type": "string",
-            "default": "",
-            "markdownDescription": "Jenkins-Benutzername. Der API-Token wird verschlüsselt im VS Code Secret Storage abgelegt: [🔑 Zugangsdaten hinterlegen...](command:sessionDashboard.jenkinsSetCredentials)"
-          },
-          "sessionDashboard.jenkins.jobFilter": {
-            "type": "string",
-            "default": "deploy",
-            "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung) auf den vollen Jobnamen inkl. Ordner, der einen Job als Deploy-Job kennzeichnet. Leer = alle Jobs."
+          "sessionDashboard.autoPinTab": {
+            "type": "boolean",
+            "default": true,
+            "description": "Dashboard-Tab beim Öffnen automatisch anpinnen."
           }
         }
       }
     ]
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/providers/cline.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/jenkins.js && node --check lib/projectTasks.js && node --check lib/auditManager.js && node --check lib/tasksLogManager.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js && node test/check-claude-cost.js && node test/check-cache-efficiency.js && node test/check-history-pagination-and-diff.js && node test/check-show-last-prompt.js && node test/check-cline-integration.js && node test/check-project-tasks.js && node test/check-audit-manager.js && node test/check-tasks-log-manager.js && node test/check-format-limit-reset.js && node test/check-sessions-tab-and-jira.js",
+    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/providers/cline.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/jenkins.js && node --check lib/projectTasks.js && node --check lib/auditManager.js && node --check lib/tasksLogManager.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js && node test/check-claude-cost.js && node test/check-cache-efficiency.js && node test/check-history-pagination-and-diff.js && node test/check-show-last-prompt.js && node test/check-cline-integration.js && node test/check-project-tasks.js && node test/check-audit-manager.js && node test/check-tasks-log-manager.js && node test/check-format-limit-reset.js && node test/check-sessions-tab-and-jira.js && node test/check-settings-categories-and-context.js",
     "package": "node -e \"const fs=require('fs');fs.mkdirSync('vsix',{recursive:true})\" && vsce package --skip-license --allow-missing-repository --out vsix/"
   },
   "devDependencies": {
