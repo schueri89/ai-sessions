@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.71.0] – 04.11.2026
+
+- **Deploys: Favoriten-Pipelines:** Pipelines lassen sich per Stern als Favorit markieren und erscheinen dann in einem eigenen Block ganz oben, unabhängig vom Deploy-Filter.
+- **Deploys: Gesamtdauer je Pipeline:** Die Spalte „Dauer“ zeigt für Pipelines die Summe der letzten Build-Dauer aller Jobs.
+- **Filter-Buttons bleiben aktiv:** Ein Klick auf einen Button in Deploys, Tasks, Audits oder Logs hebt die Auswahl anderer Filtergruppen (z. B. „Gruppierung“) nicht mehr auf, bleibt nicht mehr hervorgehoben und setzt den Zeitraum der Historie nicht mehr zurück.
+
 ## [0.70.0] – 03.11.2026
 
 - **Kategorisierte Einstellungen:** Die Einstellungen der Extension sind ab sofort in sieben übersichtliche Themenbereiche gegliedert (Allgemein, Statusleiste & Limits, KI-Provider, Sounds, Benachrichtigungen, Dashboard-Tabs und Integrationen) und lassen sich im VS-Code-Einstellungseditor über das Inhaltsverzeichnis links sowie über formatierte Abschnittsüberschriften gezielt ansteuern.
