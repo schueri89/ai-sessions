@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.72.0] – 04.11.2026
+
+- **Deploys: Benachrichtigung bei eigenen Builds:** Ist ein selbst in Jenkins gestarteter Build fertig, erscheinen Hinweis und Sound wie bei Tasks und Audits – auch für die dadurch ausgelösten Folge-Jobs, mit Ergebnis und Dauer.
+- **Deploys: Übersicht aktualisiert sich selbst:** Der Reiter fragt Jenkins im Hintergrund regelmäßig ab (jede Minute, während eines eigenen Builds alle 15 Sekunden).
+
 ## [0.71.1] – 04.11.2026
 
 - **Deploys: Weitere Pipelines einklappbar:** Der Block „Alle weiteren Pipelines“ unter den Favoriten lässt sich per Klick ein- und ausklappen; der Zustand bleibt erhalten.

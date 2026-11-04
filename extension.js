@@ -17,6 +17,7 @@ const { ToastNotifier } = require('./lib/toastNotifier');
 const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quota');
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 const { setJenkinsCredentials } = require('./lib/jenkins');
+const { JenkinsWatcher } = require('./lib/jenkinsWatcher');
 const { ProjectTasksManager } = require('./lib/projectTasks');
 const { AuditManager } = require('./lib/auditManager');
 const { TasksLogManager } = require('./lib/tasksLogManager');
@@ -654,6 +655,12 @@ function activate(context) {
   tasksLogManager.onDidChange(() => {
     board.sendLogs();
   });
+  const jenkinsWatcher = new JenkinsWatcher(context.secrets, {
+    soundNotifier,
+    onData: (data) => board.postJenkinsData(data)
+  });
+  board.jenkinsWatcher = jenkinsWatcher;
+  jenkinsWatcher.restart();
   const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
   context.subscriptions.push(
@@ -664,6 +671,7 @@ function activate(context) {
     tasksManager,
     auditManager,
     tasksLogManager,
+    jenkinsWatcher,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
         if (board.panel) {
@@ -772,6 +780,7 @@ function activate(context) {
       }
       if (e.affectsConfiguration('sessionDashboard.jenkins')) {
         board.onJenkinsConfigChanged();
+        jenkinsWatcher.restart();
       }
       if (e.affectsConfiguration('sessionDashboard.projectDetection')) {
         update(true);
@@ -1580,7 +1589,11 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.openSettings', () => {
       vscode.commands.executeCommand('workbench.action.openSettings', '@ext:schueri.ai-sessions');
     }),
-    vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', () => setJenkinsCredentials(context.secrets)),
+    vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', async () => {
+      const changed = await setJenkinsCredentials(context.secrets);
+      if (changed) jenkinsWatcher.restart();
+      return changed;
+    }),
     vscode.commands.registerCommand('sessionDashboard.showJenkins', async () => {
       const enabled = vscode.workspace.getConfiguration('sessionDashboard.jenkins').get('enabled', false);
       if (!enabled) {
