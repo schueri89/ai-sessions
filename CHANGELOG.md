@@ -2,6 +2,14 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.73.1] – 04.11.2026
+
+- **Releases: Veröffentlichte eingeklappt:** Der Block „Veröffentlicht“ ist beim Öffnen eingeklappt und lässt sich per Klick ein- und ausklappen.
+
+## [0.73.0] – 04.11.2026
+
+- **Neuer Tab „Releases“:** Zeigt die JIRA-Lösungsversionen als Zeitachse – kommende Releases oben, veröffentlichte darunter – mit Status, Projekt, Start- und Release-Datum, Fortschritt der Vorgänge und Button zum Öffnen in JIRA. Projekte und Zugangsdatei sind in den Einstellungen wählbar, der Tab ist standardmäßig aus.
+
 ## [0.72.0] – 04.11.2026
 
 - **Deploys: Benachrichtigung bei eigenen Builds:** Ist ein selbst in Jenkins gestarteter Build fertig, erscheinen Hinweis und Sound wie bei Tasks und Audits – auch für die dadurch ausgelösten Folge-Jobs, mit Ergebnis und Dauer.

@@ -10,6 +10,8 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Sessions: Button für JIRA Ticketnummer anzeigen, wenn auch JIRA-Link hinterlegt (=aktiviert) wurde
 
 ## Erledigt
+- [x] session-dashboard v0.73.1: Releases: Block „Veröffentlicht“ standardmäßig eingeklappt, per Klick ein-/ausklappbar *(04.11.2026)*
+- [x] session-dashboard v0.73.0: Neuer Tab „🏷️ Releases“: JIRA-Lösungsversionen (ohne Archiv) als Zeitachse, kommende oben / veröffentlichte darunter, Status, Start/Release, Fortschritt, Öffnen-Button; Zugangsdaten aus JSON-Datei außerhalb des Repos, Projekte per Setting (leer = alle) *(04.11.2026, [Plan](.agents/plans/2026-11-04_session-dashboard-releases-tab.md))*
 - [x] session-dashboard v0.72.0: Deploys: Toast- & Sound-Benachrichtigung, wenn ein selbst gestarteter Jenkins-Build (inkl. Downstream-Jobs über UpstreamCause) fertig ist; Hintergrund-Polling (60s / 15s bei eigenem laufenden Build) aktualisiert die Übersicht live; neue Settings `notifications.jenkins` und `sound.jenkins.enabled` *(04.11.2026)*
 - [x] session-dashboard v0.71.1: Deploys: Block „Alle weiteren Pipelines“ ein-/ausklappbar (Zustand persistiert) *(04.11.2026)*
 - [x] session-dashboard v0.71.0: Deploys: Pipelines als Favoriten (eigener Block oben, ignoriert Deploy-Filter), Gesamtdauer je Pipeline in „Dauer“; Bugfix: Historie-Klickhandler griff auf alle `.history-filter-btn` und deaktivierte dadurch fremde Filtergruppen *(04.11.2026)*

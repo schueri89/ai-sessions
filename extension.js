@@ -782,6 +782,9 @@ function activate(context) {
         board.onJenkinsConfigChanged();
         jenkinsWatcher.restart();
       }
+      if (e.affectsConfiguration('sessionDashboard.releases')) {
+        board.onReleasesConfigChanged();
+      }
       if (e.affectsConfiguration('sessionDashboard.projectDetection')) {
         update(true);
       }
