@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.72.0] – 03.11.2026
+
+- **Sessions-Tab Restrukturierung & selektive JIRA-Anzeige:** Der bisherige Tab „Board“ heißt ab sofort „Sessions“, die Tabs „Analyse“ und „Historie“ wurden als direkte Unteransichten rechts in die Sessions-Leiste integriert und die Freitextsuche linksbündig unter die Filter verlegt; auf den Kacheln werden JIRA-Buttons und Ticketnummern ab sofort nur noch angezeigt, wenn auch eine JIRA-Basis-URL in den Einstellungen hinterlegt und damit JIRA aktiviert wurde.
+
 ## [0.71.0] – 03.11.2026
 
 - **Audits: Getrenntes Quittieren von Code-Review & Security-Audit, serielle Warteschlange & aufgeräumte Zeilen-Aktionen:** Im Tab „🛡️ Audits“ können Code-Reviews und Security-Audits nun unabhängig voneinander geprüft und quittiert werden; bei ausgeklappten Projekten ersetzt jeweils ein direkter grüner Quittieren-Button in der entsprechenden Review-Karte den bisherigen globalen Button, das Abbrechen bzw. Entfernen aus der Warteschlange ist gezielt im ausgeklappten Zustand pro Review-Typ erreichbar, und mehrere gestartete Audits oder Workspace-Guards reihen sich automatisch in eine serielle Warteschlange ein, anstatt parallel ausgeführt zu werden.

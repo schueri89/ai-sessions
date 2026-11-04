@@ -770,6 +770,9 @@ function activate(context) {
       if (e.affectsConfiguration('sessionDashboard.showLastPrompt')) {
         board.update();
       }
+      if (e.affectsConfiguration('sessionDashboard.jiraBaseUrl')) {
+        board.update();
+      }
       if (e.affectsConfiguration('sessionDashboard.jenkins')) {
         board.onJenkinsConfigChanged();
       }
