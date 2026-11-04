@@ -11,7 +11,7 @@ Module.prototype.require = function (id) {
   return origRequire.apply(this, arguments);
 };
 
-const { fetchReleases, isJiraReleaseUrl, normalizeVersion, splitReleases, versionStatus } = require('../lib/jiraReleases');
+const { fetchReleases, isJiraReleaseUrl, normalizeVersion, splitReleases, versionStatus, isoWeek, countIssueProgress } = require('../lib/jiraReleases');
 
 console.log('Testing lib/jiraReleases.js (status, progress, ordering)...');
 
@@ -53,6 +53,26 @@ assert.deepStrictEqual(released.map((x) => x.name), ['r-new', 'r-old', 'r-nodate
 console.log('✓ splitReleases (upcoming ascending, released newest first, undated last)');
 
 assert.strictEqual(isJiraReleaseUrl('https://ehoi.atlassian.net/projects/X/versions/1'), false, 'no URL accepted before a successful fetch');
+
+assert.deepStrictEqual(isoWeek('2026-11-04'), { key: '2026-W45', label: 'KW 45/2026 · 02.11.–08.11.2026' });
+assert.strictEqual(isoWeek('2027-01-01').key, '2026-W53', 'Friday 01.01.2027 belongs to KW 53/2026');
+assert.strictEqual(isoWeek('2024-12-30').key, '2025-W01', 'Monday 30.12.2024 belongs to KW 1/2025');
+assert.strictEqual(isoWeek(''), null);
+assert.strictEqual(v.week.key, '2026-W45');
+console.log('✓ isoWeek (week, year boundaries, label)');
+
+const issue = (name, category, ...ids) => ({ fields: { status: { name, statusCategory: { key: category } }, fixVersions: ids.map((id) => ({ id })) } });
+const progress = countIssueProgress([
+  issue('Ready for Live', 'indeterminate', '1'),
+  issue('live', 'indeterminate', '1'),
+  issue('Geschlossen', 'done', '1', '2'),
+  issue('Codereview', 'indeterminate', '1'),
+  issue('Offen', 'new', '2'),
+  issue('Ready for Live', 'indeterminate', '99')
+], ['1', '2'], ['Ready for Live', 'Live']);
+assert.deepStrictEqual(progress.get('1'), { toDo: 0, inProgress: 1, done: 3 }, 'ready statuses (case-insensitive) + done count green');
+assert.deepStrictEqual(progress.get('2'), { toDo: 1, inProgress: 0, done: 1 }, 'issue with several fix versions counted in each');
+console.log('✓ countIssueProgress (ready statuses, done category, multiple fix versions)');
 
 fetchReleases().then((data) => {
   assert.strictEqual(data.state, 'unconfigured', 'missing credentials file setting');

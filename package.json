@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.73.2",
+  "version": "0.74.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -846,6 +846,17 @@
             },
             "default": [],
             "description": "JIRA-Projekt-Keys, deren Lösungsversionen im Tab 'Releases' erscheinen (z. B. 'EHFE'). Leer = alle sichtbaren Projekte."
+          },
+          "sessionDashboard.releases.readyStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "Ready for Live",
+              "Live"
+            ],
+            "description": "JIRA-Status, die im Fortschrittsbalken kommender Releases zusätzlich zu erledigten Vorgängen als fertig (grün) zählen. Groß-/Kleinschreibung egal."
           }
         }
       }

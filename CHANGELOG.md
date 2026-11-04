@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.74.0] – 04.11.2026
+
+- **Releases: Gruppiert nach Kalenderwoche:** Versionen mit Release in derselben KW stehen unter einer gemeinsamen Zwischenzeile (z. B. „KW 45/2026 · 02.11.–08.11.2026“); die aktuelle Woche ist hervorgehoben.
+- **Releases: „Ready for Live“ zählt als fertig:** Im Fortschrittsbalken kommender Releases zählen neben erledigten auch Vorgänge in „Ready for Live“ und „Live“ zum grünen Teil; die Status sind in den Einstellungen anpassbar.
+
 ## [0.73.2] – 04.11.2026
 
 - **Deploys: Dauer in Minuten und Sekunden:** Die Spalte „Dauer“ zeigt Jobs und Pipelines sekundengenau (z. B. „3m 07s“); bei laufenden Jobs zählt sie live mit, wie lange der Build schon läuft.

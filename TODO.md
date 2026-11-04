@@ -10,6 +10,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Sessions: Button für JIRA Ticketnummer anzeigen, wenn auch JIRA-Link hinterlegt (=aktiviert) wurde
 
 ## Erledigt
+- [x] session-dashboard v0.74.0: Releases: Gruppierung nach Kalenderwoche des Release-Datums (aktuelle KW hervorgehoben); Fortschritt kommender Releases per Status (Setting `releases.readyStatuses`, Standard Ready for Live/Live = grün) *(04.11.2026)*
 - [x] session-dashboard v0.73.2: Deploys: Dauer in Min & Sek. (Jobs & Pipelines), laufende Jobs mit live hochzählender Dauer seit Build-Start *(04.11.2026)*
 - [x] session-dashboard v0.73.1: Releases: Block „Veröffentlicht“ standardmäßig eingeklappt, per Klick ein-/ausklappbar *(04.11.2026)*
 - [x] session-dashboard v0.73.0: Neuer Tab „🏷️ Releases“: JIRA-Lösungsversionen (ohne Archiv) als Zeitachse, kommende oben / veröffentlichte darunter, Status, Start/Release, Fortschritt, Öffnen-Button; Zugangsdaten aus JSON-Datei außerhalb des Repos, Projekte per Setting (leer = alle) *(04.11.2026, [Plan](.agents/plans/2026-11-04_session-dashboard-releases-tab.md))*
