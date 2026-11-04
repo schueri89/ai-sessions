@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.73.2] – 04.11.2026
+
+- **Deploys: Dauer in Minuten und Sekunden:** Die Spalte „Dauer“ zeigt Jobs und Pipelines sekundengenau (z. B. „3m 07s“); bei laufenden Jobs zählt sie live mit, wie lange der Build schon läuft.
+
 ## [0.73.1] – 04.11.2026
 
 - **Releases: Veröffentlichte eingeklappt:** Der Block „Veröffentlicht“ ist beim Öffnen eingeklappt und lässt sich per Klick ein- und ausklappen.
