@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.71.1] – 04.11.2026
+
+- **Deploys: Weitere Pipelines einklappbar:** Der Block „Alle weiteren Pipelines“ unter den Favoriten lässt sich per Klick ein- und ausklappen; der Zustand bleibt erhalten.
+
 ## [0.71.0] – 04.11.2026
 
 - **Deploys: Favoriten-Pipelines:** Pipelines lassen sich per Stern als Favorit markieren und erscheinen dann in einem eigenen Block ganz oben, unabhängig vom Deploy-Filter.

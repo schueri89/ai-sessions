@@ -10,6 +10,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Sessions: Button für JIRA Ticketnummer anzeigen, wenn auch JIRA-Link hinterlegt (=aktiviert) wurde
 
 ## Erledigt
+- [x] session-dashboard v0.71.1: Deploys: Block „Alle weiteren Pipelines“ ein-/ausklappbar (Zustand persistiert) *(04.11.2026)*
 - [x] session-dashboard v0.71.0: Deploys: Pipelines als Favoriten (eigener Block oben, ignoriert Deploy-Filter), Gesamtdauer je Pipeline in „Dauer“; Bugfix: Historie-Klickhandler griff auf alle `.history-filter-btn` und deaktivierte dadurch fremde Filtergruppen *(04.11.2026)*
 - [x] session-dashboard v0.70.0: Einstellungen: Strukturierung aller 50 Settings in 7 logische Kategorien im VS-Code-Einstellungseditor (Allgemein, Statusleiste & Limits, KI-Provider, Sounds, Benachrichtigungen, Dashboard-Tabs, Integrationen) mit nativer Baum-Navigation und formatierter Abschnittsgliederung *(03.11.2026, [Plan](.agents/plans/2026-11-03_session-dashboard-settings-kategorien.md))*
 - [x] session-dashboard v0.69.2: Sessions: Wenn ein Limit aktiv ist, wird rein die Uhrzeit nur noch bei Ablauf am selben Kalendertag auf Kacheln angezeigt; 24-Stunden-Regel entfernt und durch kalendertaggenaue Prüfung ersetzt *(03.11.2026)*
