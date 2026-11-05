@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.75.0] – 05.11.2026
+
+- **Update-Hinweis:** Die Extension prüft stündlich, ob auf GitHub eine neue Version veröffentlicht ist, und bietet sie zum Installieren, zum Ansehen der Änderungen oder zum Überspringen an; schlägt die Prüfung fehl, erscheint ein kurzer Hinweis.
+- **Nach Updates suchen:** Neuer Befehl für die Prüfung auf Knopfdruck; die automatische Prüfung lässt sich in den Einstellungen abschalten.
+
 ## [0.74.0] – 04.11.2026
 
 - **Releases: Gruppiert nach Kalenderwoche:** Versionen mit Release in derselben KW stehen unter einer gemeinsamen Zwischenzeile (z. B. „KW 45/2026 · 02.11.–08.11.2026“); die aktuelle Woche ist hervorgehoben.

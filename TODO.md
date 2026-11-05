@@ -10,6 +10,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Sessions: Button für JIRA Ticketnummer anzeigen, wenn auch JIRA-Link hinterlegt (=aktiviert) wurde
 
 ## Erledigt
+- [x] session-dashboard v0.75.0: Update-Prüfung gegen GitHub Releases (stündlich + Befehl „Nach Updates suchen“, Installieren/Changelog/Überspringen, Hinweis bei Fehlschlag, Setting `updateCheck.enabled`); GitHub Action baut bei Tag `vX.Y.Z` die VSIX und hängt sie samt Changelog-Eintrag an den Release *(05.11.2026)*
 - [x] session-dashboard v0.74.0: Releases: Gruppierung nach Kalenderwoche des Release-Datums (aktuelle KW hervorgehoben); Fortschritt kommender Releases per Status (Setting `releases.readyStatuses`, Standard Ready for Live/Live = grün) *(04.11.2026)*
 - [x] session-dashboard v0.73.2: Deploys: Dauer in Min & Sek. (Jobs & Pipelines), laufende Jobs mit live hochzählender Dauer seit Build-Start *(04.11.2026)*
 - [x] session-dashboard v0.73.1: Releases: Block „Veröffentlicht“ standardmäßig eingeklappt, per Klick ein-/ausklappbar *(04.11.2026)*
