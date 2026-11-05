@@ -25,6 +25,9 @@ Alle fachlichen Regeln, Datenstrukturen und Architekturvorgaben stehen in
   (`versionierung.md`) und Changelog-Eintrag (`changelog.md`) vorschlagen. Gepusht wird nur auf
   ausdrückliche Ansage, im Chat wird nie danach gefragt. Änderungen ausschließlich in diesem
   Projektverzeichnis ausführen und pro Projekt separat committen.
+  Mit jedem Push einer neuen Version wird zusätzlich das Tag `vX.Y.Z` (= `version` aus `package.json`)
+  gesetzt und gepusht; das löst den GitHub Release samt VSIX aus, über den die Nutzer das Update
+  angeboten bekommen.
 - **Fail Fast statt vorsichtiger Programmierung**: Keine defensiven `try/catch`-Kapselungen
   um Schnittstellen, Datenbankabfragen oder Services („damit nichts abstürzt“) und keine stillen
   Fallbacks auf Altdaten oder leere Defaults. Fehler müssen direkt sichtbar werden. Fallbacks
