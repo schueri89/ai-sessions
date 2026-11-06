@@ -10,7 +10,7 @@ console.log('Testing Settings categories (Tab grouping) and context-aware settin
 const pkgPath = path.join(__dirname, '..', 'package.json');
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
-assert.strictEqual(pkg.version, '0.73.0', 'package.json version must be 0.73.0');
+assert.strictEqual(pkg.version, '0.74.0', 'package.json version must be 0.74.0');
 
 const cfg = pkg.contributes?.configuration;
 assert(Array.isArray(cfg), 'contributes.configuration must be an array of categories');

@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.74.0] – 06.11.2026
+
+- **Kombinierte Audits & überarbeitete Aktionsbuttons:** In der Tabelle des Tabs „🛡️ Audits“ startet ein neuer Button „⚡ Code+Sec“ beide Prüfungen (Code-Review und Security-Scan) in einem gemeinsamen, schnellen Single-Pass-Durchlauf analog zum nächtlichen Daily Audit; die bisherigen Schaltflächen wurden in „💻 Code“, „🛡️ Sec“ und „⚡ Code+Sec“ umbenannt.
+- **Schnelleres Standard-KI-Modell:** Als Standard-Modell für lokale Code-Reviews und Security-Audits ist in den Einstellungen und in der Modellauswahl der Toolbar ab sofort das reaktionsschnellere `gemma4:e4b` voreingestellt.
+
 ## [0.73.0] – 04.11.2026
 
 - **Tab-basierte Einstellungen & kontextuelle Tab-Navigation:** Alle Einstellungen der Extension sind ab sofort exakt nach den Reitern des Dashboards gegliedert (Tab: Sessions, Tab: Tasks, Tab: Audits, Tab: Logs, Tab: Deploys, Statusleiste & Limits, Sounds, Benachrichtigungen, Allgemein); ein Klick auf das globale Zahnrad ⚙️ oben rechts öffnet automatisch die Einstellungen des aktuell aktiven Tabs, und in den Toolbars von Tasks, Audits, Logs und Deploys erlaubt jeweils ein eigener ⚙️-Button den direkten Sprung in die passenden Einstellungen.
