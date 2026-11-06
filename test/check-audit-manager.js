@@ -157,6 +157,9 @@ assert(!promptWs.includes('project-context.md'), 'workspace prompt should not re
 console.log('✓ buildPrompt generates correct prompts adhering to user guidelines');
 
 // 5. dispatchAuditPrompt test (pure mode without vscode) & auto-quittieren
+const preDispatchState = manager.loadAuditState();
+const originalCfSharedState = preDispatchState.projects['cf-shared'] ? JSON.parse(JSON.stringify(preDispatchState.projects['cf-shared'])) : null;
+
 manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) => {
   assert(res && res.provider === 'antigravity', 'dispatch should return provider in test mode');
   assert(res.prompt && res.prompt.includes('cf-shared'), 'dispatch should return populated prompt');
@@ -172,6 +175,15 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
   const cfSharedAfter = overviewAfter.projects.find((p) => p.project === 'cf-shared');
   assert(cfSharedAfter, 'cf-shared should be present');
   assert.strictEqual(cfSharedAfter.reviewStatus, 'reviewed', 'overview reviewStatus should reflect reviewed state');
+
+  // Restore original state of cf-shared so unit test does not overwrite persistent state
+  const restoredState = manager.loadAuditState();
+  if (originalCfSharedState) {
+    restoredState.projects['cf-shared'] = originalCfSharedState;
+  } else {
+    delete restoredState.projects['cf-shared'];
+  }
+  manager.saveAuditState(restoredState);
   console.log('✓ markProjectReviewed persists state and updates reviewStatus in overview');
 
   // 6b. Separate CR and Security Review acknowledgment
@@ -195,6 +207,49 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
   delete stAfterSec.projects['sep-test'];
   manager.saveAuditState(stAfterSec);
   console.log('✓ markProjectReviewed supports separate cr and sec acknowledgment');
+
+  // 6c. Reconciliation of stale reviewed reports & commit changes
+  assert.strictEqual(manager.parseGermanDateToMs('04.11.2026 23:36'), new Date(2026, 10, 4, 23, 36).getTime(), 'parseGermanDateToMs should correctly parse DD.MM.YYYY HH:mm');
+
+  const recState = manager.loadAuditState();
+  recState.projects['rec-test'] = {
+    status: 'reviewed',
+    cr_status: 'reviewed',
+    cr_reviewed_at: '01.11.2026 10:00',
+    cr_reviewed_time: 1730451600000,
+    cr_reviewed_commit: 'aaaaaaa',
+    last_review_commit: 'bbbbbbb',
+    sec_status: 'reviewed',
+    sec_reviewed_at: '01.11.2026 10:00',
+    sec_reviewed_time: 1730451600000,
+    sec_reviewed_commit: 'aaaaaaa',
+    last_security_commit: 'aaaaaaa'
+  };
+  manager.saveAuditState(recState);
+
+  // Set mock report in cachedReports
+  const origGetProjects = manager.getProjects.bind(manager);
+  manager.getProjects = () => ['rec-test', ...origGetProjects()];
+  manager.cachedReports = new Map([
+    ['rec-test', {
+      project: 'rec-test',
+      cr: { filePath: 'dummy_cr.md', mtimeMs: 1730451600000 + 10000, status: 'passed', summary: 'ok' },
+      sec: { filePath: 'dummy_sec.md', mtimeMs: 1730451600000, status: 'passed', summary: 'ok' }
+    }]
+  ]);
+  const recOverview = manager.getAuditOverview();
+  const recItem = recOverview.projects.find((p) => p.project === 'rec-test');
+  assert(recItem, 'rec-test must exist in overview');
+  assert.strictEqual(recItem.crReviewStatus, 'pending', 'crReviewStatus must be pending due to newer report mtimeMs and commit change');
+  assert.strictEqual(recItem.secReviewStatus, 'reviewed', 'secReviewStatus should remain reviewed as it is not stale');
+  assert.strictEqual(recItem.reviewStatus, 'pending', 'overall reviewStatus must be pending when cr is pending');
+
+  const recCleanState = manager.loadAuditState();
+  delete recCleanState.projects['rec-test'];
+  manager.saveAuditState(recCleanState);
+  manager.getProjects = origGetProjects;
+  manager.getReports(true);
+  console.log('✓ reconciliation accurately flips stale reviewed status to pending on new reports or commit changes');
 
   // 7. Queue tracking in overview
   const initialUserQueue = manager.auditQueue.slice();
@@ -290,6 +345,40 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
     assert.strictEqual(cancelledRun, true, 'cancelAudit should return true for running item');
     assert(!manager.runningProjects.has('cancel-run-test'), 'item should be removed from runningProjects');
     console.log('✓ cancelAudit removes queued tasks and cleans up running audits');
+
+    // 13. Daily Audits toggle & state tracking
+    const initialDaily = manager.toggleDailyAudit('daily-test-proj', true);
+    assert.strictEqual(initialDaily, true, 'toggleDailyAudit should return true');
+    const stateDailyOn = manager.loadAuditState();
+    assert.strictEqual(stateDailyOn.projects['daily-test-proj'].daily_active, true, 'daily_active in state should be true');
+
+    const toggledDaily = manager.toggleDailyAudit('daily-test-proj');
+    assert.strictEqual(toggledDaily, false, 'toggleDailyAudit without second param should toggle to false');
+    const stateDailyOff = manager.loadAuditState();
+    assert.strictEqual(stateDailyOff.projects['daily-test-proj'].daily_active, false, 'daily_active in state should be false');
+
+    // Clean up test entry
+    delete stateDailyOff.projects['daily-test-proj'];
+    manager.saveAuditState(stateDailyOff);
+
+    // Verify dailyActive property & dailyActiveCount in getAuditOverview
+    const dailyOverview = manager.getAuditOverview();
+    assert(typeof dailyOverview.dailyActiveCount === 'number', 'overview should contain dailyActiveCount');
+    for (const p of dailyOverview.projects) {
+      assert(typeof p.dailyActive === 'boolean', `project ${p.project} should have dailyActive boolean`);
+    }
+    console.log(`✓ Daily Audit toggle & dailyActiveCount (${dailyOverview.dailyActiveCount}) verified`);
+
+    // 14. Nightly Model & syncAuditConfig
+    const nightlyModel = manager.getNightlyModel();
+    assert.strictEqual(nightlyModel, 'gemma4:e4b', 'getNightlyModel should default to gemma4:e4b in tests');
+    manager.syncAuditConfig();
+    const syncedState = manager.loadAuditState();
+    assert(syncedState.config, 'synced state should contain config object');
+    assert.strictEqual(syncedState.config.nightly_model, 'gemma4:e4b', 'syncedState.config.nightly_model should match');
+    const scheduledTask = manager.getScheduledTask();
+    assert.strictEqual(scheduledTask.nightlyModel, 'gemma4:e4b', 'scheduledTask should include nightlyModel');
+    console.log(`✓ Nightly Model (${nightlyModel}) and syncAuditConfig verified`);
 
     manager.dispose();
     console.log('All AuditManager tests passed successfully!');

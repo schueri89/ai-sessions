@@ -776,6 +776,12 @@ function activate(context) {
       if (e.affectsConfiguration('sessionDashboard.jenkins')) {
         board.onJenkinsConfigChanged();
       }
+      if (e.affectsConfiguration('sessionDashboard.audits')) {
+        if (auditManager) {
+          auditManager.syncAuditConfig();
+        }
+        board.update();
+      }
       if (e.affectsConfiguration('sessionDashboard.projectDetection')) {
         update(true);
       }

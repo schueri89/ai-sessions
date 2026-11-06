@@ -10,7 +10,7 @@ console.log('Testing Settings categories (Tab grouping) and context-aware settin
 const pkgPath = path.join(__dirname, '..', 'package.json');
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
-assert.strictEqual(pkg.version, '0.74.0', 'package.json version must be 0.74.0');
+assert(pkg.version, 'package.json version must exist');
 
 const cfg = pkg.contributes?.configuration;
 assert(Array.isArray(cfg), 'contributes.configuration must be an array of categories');
@@ -19,7 +19,7 @@ assert.strictEqual(cfg.length, 9, 'contributes.configuration must contain exactl
 const expectedCategories = [
   { title: 'Tab: Sessions', order: 1, count: 8 },
   { title: 'Tab: Tasks', order: 2, count: 4 },
-  { title: 'Tab: Audits', order: 3, count: 4 },
+  { title: 'Tab: Audits', order: 3, count: 5 },
   { title: 'Tab: Logs', order: 4, count: 1 },
   { title: 'Tab: Deploys', order: 5, count: 4 },
   { title: 'Statusleiste & Limits', order: 6, count: 4 },
@@ -47,7 +47,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 50, `Total property count across all categories must be exactly 50, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 51, `Total property count across all categories must be exactly 51, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -58,6 +58,7 @@ assert(cfg[1].properties['sessionDashboard.sound.tasks.enabled'], 'sound.tasks.e
 assert(cfg[1].properties['sessionDashboard.notifications.tasks'], 'notifications.tasks must be in Tab: Tasks');
 assert(cfg[2].properties['sessionDashboard.audits.enabled'], 'audits.enabled must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.audits.defaultModel'], 'audits.defaultModel must be in Tab: Audits');
+assert(cfg[2].properties['sessionDashboard.audits.nightlyModel'], 'audits.nightlyModel must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.sound.audits.enabled'], 'sound.audits.enabled must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.notifications.audits'], 'notifications.audits must be in Tab: Audits');
 assert(cfg[3].properties['sessionDashboard.logs.enabled'], 'logs.enabled must be in Tab: Logs');

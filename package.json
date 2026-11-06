@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.74.0",
+  "version": "0.77.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -457,6 +457,11 @@
             "type": "string",
             "default": "gemma4:e4b",
             "description": "Standard-KI-Modell für lokale Code-Reviews und Security-Audits via Ollama (z. B. gemma4:e4b oder gemma4:26b)."
+          },
+          "sessionDashboard.audits.nightlyModel": {
+            "type": "string",
+            "default": "gemma4:e4b",
+            "description": "Standard-KI-Modell für den automatisierten nächtlichen Gesamtlauf via Scheduled Task (DevBox-Nightly-Audit). Standard: gemma4:e4b (schnell, GPU-beschleunigt)."
           },
           "sessionDashboard.sound.audits.enabled": {
             "type": "boolean",

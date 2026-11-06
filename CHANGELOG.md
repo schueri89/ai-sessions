@@ -2,6 +2,21 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.77.0] – 06.11.2026
+
+- **Prüfstand-Ermittlung & Automatische Quittierungs-Reconciliation:** Im Tab „🛡️ Audits“ wird der Prüfstand nach neu abgeschlossenen Code-Reviews oder Security-Audits ab sofort automatisch und zuverlässig auf „⚠️ Offen“ zurückgesetzt, selbst wenn das Projekt zuvor quittiert war; die Statusermittlung gleicht Berichtszeitstempel und Git-Commit-Stände dynamisch mit dem letzten Quittierungszeitpunkt ab, und sowohl das CLI-Skript `project-audit.py` als auch Ad-hoc-Läufe über das Dashboard synchronisieren die Teilzustände (`cr_status` und `sec_status`) nun durchgängig.
+
+## [0.76.0] – 06.11.2026
+
+- **Dynamisches KI-Modell für nächtliche Audits:** Neue Einstellung `sessionDashboard.audits.nightlyModel` in der Kategorie „Tab: Audits“ zur freien Wahl des Modells für den automatisierten Gesamtlauf (z. B. `gemma4:e4b` vs. `gemma4:26b`); das gewählte Modell wird synchron in `audit-state.json` hinterlegt und vom nächtlichen Scheduled Task (`run-nightly-audit.ps1`) dynamisch ausgewertet.
+- **Transparente Anzeige im Dashboard:** Im Workspace-Guards-Banner des Tabs „🛡️ Audits“ wird neben dem nächsten Ausführungszeitpunkt des Nightly Audits ab sofort auch das scharfgeschaltete Modell transparent angezeigt.
+
+## [0.75.0] – 06.11.2026
+
+- **Selektive Daily Audits (Projekt-Aktivierung):** Im Tab „🛡️ Audits“ können Projekte für den automatisierten nächtlichen Gesamtlauf (04:30 Uhr) gezielt aktiviert oder deaktiviert werden; in der Tabelle erlaubt eine neue Spalte „Daily“ mit 1-Klick-Toggle (📅) sowie ein Schalter im Accordion-Detailbereich die flexible Steuerung pro Projekt.
+- **Daily-Filter & Toolbar-Zähler:** Ein neuer Schnellfilter-Chip „📅 Daily“ in der Toolbar filtert die Tabelle sofort auf alle aktuell aktivierten Projekte, und die Statistik-Zeile zeigt stets die Anzahl aktiver Vorhaben an.
+- **CLI & Scheduled Task Integration:** Das Skript `project-audit.py` unterstützt ab sofort `--project active` (sowie `--set-daily <projekt> on|off`), und der nächtliche Task `DevBox-Nightly-Audit` (`run-nightly-audit.ps1`) prüft künftig nur noch die scharfgeschalteten Projekte anstelle des gesamten 27-Repository-Bestands.
+
 ## [0.74.0] – 06.11.2026
 
 - **Kombinierte Audits & überarbeitete Aktionsbuttons:** In der Tabelle des Tabs „🛡️ Audits“ startet ein neuer Button „⚡ Code+Sec“ beide Prüfungen (Code-Review und Security-Scan) in einem gemeinsamen, schnellen Single-Pass-Durchlauf analog zum nächtlichen Daily Audit; die bisherigen Schaltflächen wurden in „💻 Code“, „🛡️ Sec“ und „⚡ Code+Sec“ umbenannt.
