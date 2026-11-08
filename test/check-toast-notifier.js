@@ -129,7 +129,7 @@ notifier.evaluate([
   { sessionId: sId1, provider: 'claude', displayState: 'idle', project: 'test', title: 'Task 1', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 1, 'Finished task should trigger notification');
-assert.strictEqual(shownMessages[0].msg, '✅ [test] Task 1', 'Toast message should match compact format');
+assert.strictEqual(shownMessages[0].msg, '✅ [💬 test] Task 1', 'Toast message should match compact format');
 
 // Subsequent run: s2 is waiting for input
 notifier.evaluate([
@@ -137,7 +137,7 @@ notifier.evaluate([
   { sessionId: sId2, provider: 'antigravity', displayState: 'waiting', waitingFor: 'Rückfrage', project: 'ag-proj', title: 'Task 2', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 2, 'New waiting session should trigger needsInput notification');
-assert.strictEqual(shownMessages[1].msg, '❓ [ag-proj] Task 2', 'Toast message should match compact question format');
+assert.strictEqual(shownMessages[1].msg, '❓ [💬 ag-proj] Task 2', 'Toast message should match compact question format');
 
 // Subsequent run: s3 is waiting for permission
 notifier.evaluate([
@@ -146,7 +146,7 @@ notifier.evaluate([
   { sessionId: sId3, provider: 'copilot', displayState: 'waiting', waitingFor: 'permission', project: 'cop-proj', title: 'Task 3', cwd: path.resolve('/mock/workspace/project-a') }
 ]);
 assert.strictEqual(shownMessages.length, 3, 'New waiting session should trigger permission notification');
-assert.strictEqual(shownMessages[2].msg, '⚠️ [cop-proj] Task 3', 'Toast message should match compact permission format');
+assert.strictEqual(shownMessages[2].msg, '⚠️ [💬 cop-proj] Task 3', 'Toast message should match compact permission format');
 
 notifier.dispose();
 console.log('✓ ToastNotifier evaluate tests passed successfully.');

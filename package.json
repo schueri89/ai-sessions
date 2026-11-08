@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.77.0",
+  "version": "0.78.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -415,6 +415,24 @@
             "type": "string",
             "default": "",
             "description": "Basis-URL für JIRA (z. B. 'https://ihre-firma.atlassian.net/browse/' oder 'https://jira.beispiel.de/browse/{ticket}'). Sessions können Tickets zugewiesen und per Button direkt im Browser geöffnet werden."
+          },
+          "sessionDashboard.board.columnCardLimit": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 5,
+            "maximum": 200,
+            "description": "Maximale Anzahl an Session-Karten, die in einer Kanban-Spalte angezeigt werden, bevor der Button 'Mehr anzeigen' erscheint."
+          },
+          "sessionDashboard.history.pageSize": {
+            "type": "integer",
+            "enum": [
+              10,
+              25,
+              50,
+              100
+            ],
+            "default": 25,
+            "description": "Standard-Anzahl der Sessions pro Seite in der Historie-Tabelle."
           }
         }
       },
@@ -436,6 +454,26 @@
             "type": "boolean",
             "default": true,
             "description": "Sound abspielen, wenn ein Projekt-Task-Lauf beendet wurde."
+          },
+          "sessionDashboard.sound.tasks.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "ding",
+              "chimes",
+              "notify",
+              "chord",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "default": "tada",
+            "description": "Sound beim Beenden eines Projekt-Tasks."
           },
           "sessionDashboard.notifications.tasks": {
             "type": "boolean",
@@ -463,10 +501,35 @@
             "default": "gemma4:e4b",
             "description": "Standard-KI-Modell für den automatisierten nächtlichen Gesamtlauf via Scheduled Task (DevBox-Nightly-Audit). Standard: gemma4:e4b (schnell, GPU-beschleunigt)."
           },
+          "sessionDashboard.audits.scheduledTaskName": {
+            "type": "string",
+            "default": "DevBox-Nightly-Audit",
+            "description": "Name des Windows Scheduled Tasks für die nächtlichen automatischen Audits."
+          },
           "sessionDashboard.sound.audits.enabled": {
             "type": "boolean",
             "default": true,
             "description": "Sound abspielen, wenn ein KI-Audit-Lauf beendet wurde."
+          },
+          "sessionDashboard.sound.audits.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "ding",
+              "chimes",
+              "notify",
+              "chord",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "default": "tada",
+            "description": "Sound beim Beenden eines KI-Audits."
           },
           "sessionDashboard.notifications.audits": {
             "type": "boolean",
@@ -483,6 +546,57 @@
             "type": "boolean",
             "default": true,
             "description": "Tab '📜 Logs' für Windows-Tasks und Backup-Logs im Session-Dashboard anzeigen."
+          },
+          "sessionDashboard.logs.maxCharacters": {
+            "type": "integer",
+            "default": 200000,
+            "minimum": 10000,
+            "maximum": 1000000,
+            "description": "Maximale Anzahl an Zeichen, die im Log-Viewer für eine Datei geladen werden."
+          },
+          "sessionDashboard.logs.tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "taskName": {
+                  "type": "string",
+                  "description": "Name des Windows Tasks"
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "Anzeigename im Dashboard"
+                },
+                "associatedLog": {
+                  "type": "string",
+                  "description": "Zugehörige Logdatei unter reports/"
+                },
+                "defaultSchedule": {
+                  "type": "string",
+                  "description": "Standard-Zeitplan"
+                }
+              },
+              "required": [
+                "taskName",
+                "displayName",
+                "associatedLog"
+              ]
+            },
+            "default": [
+              {
+                "taskName": "DevBox-Nightly-BackupSync",
+                "displayName": "Google Drive Backup & Sync",
+                "associatedLog": "backup-sync.log",
+                "defaultSchedule": "Täglich 03:00 Uhr"
+              },
+              {
+                "taskName": "DevBox-Nightly-Audit",
+                "displayName": "Lokale KI-Audits (Code-Review & Security)",
+                "associatedLog": "nightly-audit.log",
+                "defaultSchedule": "Täglich 04:30 Uhr"
+              }
+            ],
+            "description": "Liste der Windows-Tasks, die im Tab 'Logs' überwacht und ausgeführt werden können."
           }
         }
       },
@@ -831,10 +945,28 @@
             "default": false,
             "description": "Dashboard beim Starten von VS Code automatisch im Editor öffnen."
           },
+          "sessionDashboard.defaultTab": {
+            "type": "string",
+            "enum": [
+              "sessions",
+              "tasks",
+              "audits",
+              "logs",
+              "history",
+              "analyse"
+            ],
+            "default": "sessions",
+            "description": "Standardmäßig geöffneter Tab beim Starten des Session-Dashboards."
+          },
           "sessionDashboard.autoPinTab": {
             "type": "boolean",
             "default": true,
             "description": "Dashboard-Tab beim Öffnen automatisch anpinnen."
+          },
+          "sessionDashboard.rootDirectory": {
+            "type": "string",
+            "default": "",
+            "description": "Haupt-Projektverzeichnis für Projekt-Scans, Audits und Tasks. Bleibt das Feld leer, wird automatisch das aktive Workspace-Verzeichnis verwendet."
           }
         }
       }

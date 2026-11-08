@@ -153,6 +153,7 @@ const managerWithSound = new ProjectTasksManager(
 managerWithSound.refresh();
 
 assert.strictEqual(typeof managerWithSound.notifyTaskCompletion, 'function', 'notifyTaskCompletion method must exist');
+assert.strictEqual(typeof managerWithSound.showTerminal, 'function', 'showTerminal method must exist');
 
 // Test success completion
 managerWithSound.notifyTaskCompletion(sampleTask.id, { isSuccess: true, durationMs: 12500 });

@@ -988,7 +988,7 @@ function activate(context) {
         await update(true);
       }
     }),
-    vscode.commands.registerCommand('sessionDashboard.showBoard', (query) => board.show(typeof query === 'string' ? query : undefined, 'board')),
+    vscode.commands.registerCommand('sessionDashboard.showBoard', (query) => board.show(typeof query === 'string' ? query : undefined, undefined)),
     vscode.commands.registerCommand('sessionDashboard.showAnalyse', () => board.show(undefined, 'analyse')),
     vscode.commands.registerCommand('sessionDashboard.showHistory', () => board.show(undefined, 'history')),
     vscode.commands.registerCommand('sessionDashboard.assignTicket', async (arg) => {
