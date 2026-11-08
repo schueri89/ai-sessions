@@ -2,15 +2,17 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
-## [0.78.0] – 08.11.2026
-
-- **Rubriken-Differenzierung & Aktions-Buttons in Benachrichtigungen:** Alle Benachrichtigungen (Toasts) zeigen im Projekt-Tag ab sofort das Icon des zugehörigen Tabs (`[💬 <Projekt>]` für Sessions, `[⚡ <Projekt>]` für Tasks, `[🛡️ <Projekt>]` für Audits und `[📜 Logs]` für Task-Logs); Tasks bieten neu einen 1-Klick-Button „Terminal anzeigen“ zum direkten Fokus des Task-Terminals und Audits einen Button „Bericht öffnen“ für die sofortige Berichtsvorschau im Editor.
+## [0.79.0] – 08.11.2026
 
 - **Dynamische Einstellungen & vollständige Pfad-Entkopplung:** Sämtliche hart codierten Pfade auf das lokale `webapps/ROOT`-Verzeichnis wurden eliminiert; die Projekt- und Root-Erkennung erfolgt ab sofort dynamisch über die geöffnete VS-Code-Arbeitsumgebung bzw. das aktuelle Arbeitsverzeichnis (mit Prüfung auf `.agents` bzw. `.git`) und kann bei Bedarf flexibel über die neue Einstellung `sessionDashboard.rootDirectory` konfiguriert werden.
 - **Harmonisierte Quota-Schwellenwerte:** Die Warn- und Fehler-Schwellenwerte auf den Quota-Karten im Dashboard (Claude, Antigravity, Copilot, Codex und Kontext-Tokenleiste) wurden mit der Statusleiste synchronisiert und reagieren ab sofort dynamisch auf die Einstellungen `sessionDashboard.quotaWarningThreshold` und `sessionDashboard.quotaErrorThreshold`.
 - **Flexible UI- & Board-Konfiguration:** Neue Einstellungen für das Dashboard: `sessionDashboard.board.columnCardLimit` (konfigurierbares Kachellimit pro Kanban-Spalte vor dem Aufklappen), `sessionDashboard.history.pageSize` (wählbare Standard-Seitengröße für die Historie-Tabelle, synchronisiert mit der Dropdown-Auswahl im Dashboard) sowie `sessionDashboard.defaultTab` (wählbarer Start-Tab beim Öffnen des Dashboards oder beim Editor-Start: Sessions, Analyse, Historie, Tasks, Audits, Logs oder Deploys).
 - **Sound- & Benachrichtigungsauswahl für Tasks & Audits:** Für abgeschlossene Projekt-Tasks und lokale KI-Audits kann über `sessionDashboard.sound.tasks.sound` und `sessionDashboard.sound.audits.sound` der Signalton ab sofort frei aus den verfügbaren Sounds (Tada, Ding, Chimes) gewählt werden.
 - **Anpassbare Task-Logs & Scheduled-Task-Namen:** Über `sessionDashboard.audits.scheduledTaskName` lässt sich der Name des Windows Tasks für das nächtliche Audit anpassen; `sessionDashboard.logs.tasks` und `sessionDashboard.logs.maxCharacters` erlauben die freie Definition der überwachten Tasks sowie die Begrenzung der geladenen Log-Zeichen.
+
+## [0.78.0] – 08.11.2026
+
+- **Rubriken-Differenzierung & Aktions-Buttons in Benachrichtigungen:** Alle Benachrichtigungen (Toasts) zeigen im Projekt-Tag ab sofort das Icon des zugehörigen Tabs (`[💬 <Projekt>]` für Sessions, `[⚡ <Projekt>]` für Tasks, `[🛡️ <Projekt>]` für Audits und `[📜 Logs]` für Task-Logs); Tasks bieten neu einen 1-Klick-Button „Terminal anzeigen“ zum direkten Fokus des Task-Terminals und Audits einen Button „Bericht öffnen“ für die sofortige Berichtsvorschau im Editor.
 
 ## [0.77.0] – 06.11.2026
 

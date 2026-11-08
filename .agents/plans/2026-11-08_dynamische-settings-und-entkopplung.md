@@ -1,7 +1,7 @@
 # Implementierungsplan: Dynamische Settings & Entkopplung hartcodierter Stellen
 
 **Datum:** 08.11.2026  
-**Version:** v0.78.0  
+**Version:** v0.79.0  
 **Ziel:** 
 Entkopplung hartcodierter Werte im Plugin `ai-sessions` und Bereitstellung dynamischer VS-Code-Einstellungen (`contributes.configuration`) in 5 zentralen Bereichen:
 1. **Quota-Schwellenwerte:** Vereinheitlichung der Warn- und Fehler-Schwellenwerte zwischen Statusleiste und Dashboard-Karten (`quotaWarningThreshold` & `quotaErrorThreshold`).
