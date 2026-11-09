@@ -386,7 +386,72 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
     assert.strictEqual(scheduledTask.nightlyModel, 'gemma4:e4b', 'scheduledTask should include nightlyModel');
     console.log(`✓ Nightly Model (${nightlyModel}) and syncAuditConfig verified`);
 
+    // 15. Progress Notification & Cancellation Hook
+    let withProgressCalled = false;
+    let progressOpts = null;
+    let fakeToken = null;
+    let fakeProgressMessages = [];
+
+    const fakeVscode = {
+      ProgressLocation: { Notification: 15 },
+      workspace: {
+        getConfiguration: () => ({
+          get: (key, def) => def
+        })
+      },
+      window: {
+        withProgress: (opts, task) => {
+          withProgressCalled = true;
+          progressOpts = opts;
+          const fakeProgress = {
+            report: (msg) => fakeProgressMessages.push(msg)
+          };
+          fakeToken = {
+            onCancellationRequested: (cb) => {
+              fakeToken._onCancel = cb;
+            }
+          };
+          return task(fakeProgress, fakeToken);
+        },
+        showInformationMessage: () => {}
+      }
+    };
+
+    const progressManager = new AuditManager({}, { vscode: fakeVscode });
+    progressManager.runningProjects.set('test-prog-proj', {
+      mode: 'review',
+      startTime: Date.now()
+    });
+
+    progressManager.startAuditProgressNotification('test-prog-proj', {
+      mode: 'review',
+      diff: 'unstaged',
+      model: 'gemma4:26b',
+      isGuards: false
+    });
+
+    assert.strictEqual(withProgressCalled, true, 'withProgress must be called when progress notification enabled');
+    assert.strictEqual(progressOpts.cancellable, true, 'ProgressNotification must be cancellable');
+    assert(progressOpts.title.includes('test-prog-proj'), 'Title must include project name');
+    assert(fakeProgressMessages.length > 0, 'Initial message must be reported');
+    assert.strictEqual(typeof fakeToken._onCancel, 'function', 'Cancellation listener must be registered');
+
+    // Trigger cancellation
+    let cancelCalled = false;
+    const origCancelAudit = progressManager.cancelAudit.bind(progressManager);
+    progressManager.cancelAudit = (proj, mode) => {
+      cancelCalled = true;
+      assert.strictEqual(proj, 'test-prog-proj');
+      assert.strictEqual(mode, 'review');
+      return origCancelAudit(proj, mode);
+    };
+
+    fakeToken._onCancel();
+    assert.strictEqual(cancelCalled, true, 'token.onCancellationRequested must invoke cancelAudit()');
+    console.log('✓ startAuditProgressNotification & cancellation hook verified');
+
     manager.dispose();
+    progressManager.dispose();
     console.log('All AuditManager tests passed successfully!');
     process.exit(0);
   });

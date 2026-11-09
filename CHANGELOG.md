@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.84.0] – 09.11.2026
+
+- **Fortschritts-Benachrichtigungen für KI-Audits:** Laufende Code-Reviews, Security-Scans und Workspace-Guards zeigen ab sofort eine dezente Fortschritts-Benachrichtigung mit Statusphasen und nativer Abbruch-Schaltfläche (`✕`), mit der sich der Prüflauf direkt ohne Öffnen des Dashboards abbrechen lässt (konfigurierbar über `sessionDashboard.audits.showProgressNotification`).
+- **Update-Download mit Live-Fortschritt & Abbruch:** Beim Herunterladen einer neuen Version von GitHub zeigt die Benachrichtigung den exakten Download-Fortschritt (MB und Prozent) und kann bei Bedarf jederzeit abgebrochen werden.
+- **Fortschrittsanzeige für Projekt-Tasks:** Langlaufende Builds und Tasks zeigen während der Ausführung eine begleitende Benachrichtigung mit Live-Laufzeit und 1-Klick-Abbruchfunktion (`sessionDashboard.tasks.showProgressNotification`).
+
 ## [0.83.0] – 09.11.2026
 
 - **Differenzierte Töne bei Fehlschlägen:** Fehlgeschlagene Projekt-Tasks, rot gelaufene Jenkins-Deploys sowie KI-Audits mit Befunden oder Fehlern spielen ab sofort standardmäßig einen prägnanten Warnton (Chord) statt der Erfolgsfanfare ab.

@@ -9,7 +9,9 @@ Module.prototype.require = function (id) {
   return origRequire.apply(this, arguments);
 };
 
-const { compareVersions, parseVersion, pickVsixAsset, releasePageUrl } = require('../lib/updateChecker');
+const { compareVersions, parseVersion, pickVsixAsset, releasePageUrl, downloadAsset } = require('../lib/updateChecker');
+const https = require('https');
+const { EventEmitter } = require('events');
 
 console.log('Testing lib/updateChecker.js (versions, assets)...');
 
@@ -41,4 +43,69 @@ console.log('✓ pickVsixAsset (only ai-sessions-x.y.z.vsix accepted)');
 assert.strictEqual(releasePageUrl('v0.75.0'), 'https://github.com/schueri89/ai-sessions/releases/tag/v0.75.0');
 console.log('✓ releasePageUrl');
 
-console.log('All update checker checks passed.');
+// Test streaming downloadAsset with progress & cancellation
+(async () => {
+  const origHttpsGet = https.get;
+  try {
+    const progressReports = [];
+    https.get = function (url, opts, cb) {
+      const res = new EventEmitter();
+      res.statusCode = 200;
+      res.headers = { 'content-length': '200' };
+      const req = new EventEmitter();
+      req.destroy = function (err) {
+        req.emit('error', err);
+      };
+      process.nextTick(() => {
+        cb(res);
+        res.emit('data', Buffer.alloc(100));
+        res.emit('data', Buffer.alloc(100));
+        res.emit('end');
+      });
+      return req;
+    };
+
+    const asset = {
+      name: 'ai-sessions-test.vsix',
+      browser_download_url: 'https://example.com/ai-sessions-test.vsix',
+      size: 200
+    };
+
+    const file = await downloadAsset(asset, (p) => {
+      progressReports.push(p);
+    });
+
+    assert(file.endsWith('ai-sessions-test.vsix'), 'Target file must match asset name');
+    assert.strictEqual(progressReports.length, 2, 'Should receive 2 progress reports');
+    assert.strictEqual(progressReports[0].increment, 50);
+    assert.strictEqual(progressReports[1].increment, 50);
+    console.log('✓ downloadAsset progress reporting');
+
+    // Test cancellation
+    const cancelToken = {
+      isCancellationRequested: false,
+      onCancellationRequested: (fn) => {
+        process.nextTick(fn);
+      }
+    };
+    https.get = function (url, opts, cb) {
+      const req = new EventEmitter();
+      req.destroy = function (err) {
+        process.nextTick(() => req.emit('error', err));
+      };
+      return req;
+    };
+
+    await assert.rejects(
+      async () => {
+        await downloadAsset(asset, null, cancelToken);
+      },
+      /Download abgebrochen/
+    );
+    console.log('✓ downloadAsset cancellation handling');
+  } finally {
+    https.get = origHttpsGet;
+  }
+
+  console.log('All update checker checks passed.');
+})();

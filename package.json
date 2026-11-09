@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.83.0",
+  "version": "0.84.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -507,6 +507,11 @@
             "type": "boolean",
             "default": true,
             "description": "Benachrichtigung anzeigen, wenn ein Projekt-Task-Lauf beendet wurde."
+          },
+          "sessionDashboard.tasks.showProgressNotification": {
+            "type": "boolean",
+            "default": true,
+            "description": "Fortschritts-Benachrichtigung mit Abbruch-Schaltfläche während laufender Projekt-Tasks und Builds anzeigen."
           }
         }
       },
@@ -585,6 +590,11 @@
             "type": "boolean",
             "default": true,
             "description": "Benachrichtigung anzeigen, wenn ein KI-Audit-Lauf beendet wurde."
+          },
+          "sessionDashboard.audits.showProgressNotification": {
+            "type": "boolean",
+            "default": true,
+            "description": "Fortschritts-Benachrichtigung mit Abbruch-Schaltfläche während laufender KI-Audits und Workspace-Guards anzeigen."
           }
         }
       },

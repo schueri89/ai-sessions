@@ -170,4 +170,64 @@ managerWithSound.notifyTaskCompletion(sampleTask.id, { isSuccess: true, duration
 assert.strictEqual(playedSound, null, 'Rapid subsequent completion call should be debounced within 2000ms');
 
 console.log('✓ ProjectTasksManager: notifyTaskCompletion sound triggering (success & fail) and debouncing verified');
+
+// 7. Progress Notification & Cancellation Hook
+let withProgressCalled = false;
+let progressOpts = null;
+let fakeToken = null;
+let fakeProgressMessages = [];
+
+const fakeVscode = {
+  ProgressLocation: { Notification: 15 },
+  workspace: {
+    getConfiguration: () => ({
+      get: (key, def) => def
+    })
+  },
+  window: {
+    withProgress: (opts, task) => {
+      withProgressCalled = true;
+      progressOpts = opts;
+      const fakeProgress = {
+        report: (msg) => fakeProgressMessages.push(msg)
+      };
+      fakeToken = {
+        onCancellationRequested: (cb) => {
+          fakeToken._onCancel = cb;
+        }
+      };
+      return task(fakeProgress, fakeToken);
+    }
+  }
+};
+
+const progressTasksManager = new ProjectTasksManager(
+  { globalState: mockGlobalState },
+  { vscode: fakeVscode }
+);
+
+let terminateCalled = false;
+const fakeExecution = {
+  terminate: () => { terminateCalled = true; }
+};
+
+progressTasksManager.startTaskProgressNotification('test-task-1', { project: 'ai-sessions', label: 'Build APK' }, fakeExecution, null);
+
+assert.strictEqual(withProgressCalled, true, 'withProgress must be called when task progress is enabled');
+assert.strictEqual(progressOpts.cancellable, true, 'Task progress notification must be cancellable');
+assert(progressOpts.title.includes('ai-sessions') && progressOpts.title.includes('Build APK'), 'Title must include project and task label');
+assert(progressTasksManager.runningTaskProgress.has('test-task-1'), 'Task must be registered in runningTaskProgress');
+
+// Test cancellation
+fakeToken._onCancel();
+assert.strictEqual(terminateCalled, true, 'Cancellation must call execution.terminate()');
+
+// Test finish
+progressTasksManager.startTaskProgressNotification('test-task-2', { project: 'ai-sessions', label: 'Compile' }, null, null);
+assert(progressTasksManager.runningTaskProgress.has('test-task-2'), 'test-task-2 must be running');
+progressTasksManager.finishTaskProgressNotification('test-task-2');
+assert(!progressTasksManager.runningTaskProgress.has('test-task-2'), 'test-task-2 must be cleared on finish');
+progressTasksManager.dispose();
+console.log('✓ ProjectTasksManager: task progress notification & cancellation verified');
+
 console.log('All check-project-tasks tests passed successfully!');

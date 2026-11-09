@@ -18,8 +18,8 @@ assert.strictEqual(cfg.length, 10, 'contributes.configuration must contain exact
 
 const expectedCategories = [
   { title: 'Tab: Sessions', order: 1, count: 10 },
-  { title: 'Tab: Tasks', order: 2, count: 6 },
-  { title: 'Tab: Audits', order: 3, count: 8 },
+  { title: 'Tab: Tasks', order: 2, count: 7 },
+  { title: 'Tab: Audits', order: 3, count: 9 },
   { title: 'Tab: Logs', order: 4, count: 3 },
   { title: 'Tab: Deploys', order: 5, count: 8 },
   { title: 'Tab: Releases', order: 6, count: 4 },
@@ -48,7 +48,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 73, `Total property count across all categories must be exactly 73, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 75, `Total property count across all categories must be exactly 75, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -57,11 +57,13 @@ assert(cfg[0].properties['sessionDashboard.providers.claude'], 'providers.claude
 assert(cfg[0].properties['sessionDashboard.board.columnCardLimit'], 'board.columnCardLimit must be in Tab: Sessions');
 assert(cfg[0].properties['sessionDashboard.history.pageSize'], 'history.pageSize must be in Tab: Sessions');
 assert(cfg[1].properties['sessionDashboard.tasks.enabled'], 'tasks.enabled must be in Tab: Tasks');
+assert(cfg[1].properties['sessionDashboard.tasks.showProgressNotification'], 'tasks.showProgressNotification must be in Tab: Tasks');
 assert(cfg[1].properties['sessionDashboard.sound.tasks.enabled'], 'sound.tasks.enabled must be in Tab: Tasks');
 assert(cfg[1].properties['sessionDashboard.sound.tasks.sound'], 'sound.tasks.sound must be in Tab: Tasks');
 assert(cfg[1].properties['sessionDashboard.sound.tasks.soundFailed'], 'sound.tasks.soundFailed must be in Tab: Tasks');
 assert(cfg[1].properties['sessionDashboard.notifications.tasks'], 'notifications.tasks must be in Tab: Tasks');
 assert(cfg[2].properties['sessionDashboard.audits.enabled'], 'audits.enabled must be in Tab: Audits');
+assert(cfg[2].properties['sessionDashboard.audits.showProgressNotification'], 'audits.showProgressNotification must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.audits.defaultModel'], 'audits.defaultModel must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.audits.nightlyModel'], 'audits.nightlyModel must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.audits.scheduledTaskName'], 'audits.scheduledTaskName must be in Tab: Audits');
@@ -87,7 +89,7 @@ assert(cfg[9].properties['sessionDashboard.defaultTab'], 'defaultTab must be in 
 assert(cfg[9].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
 assert(cfg[9].properties['sessionDashboard.updateCheck.enabled'], 'updateCheck.enabled must be in Allgemein');
 
-console.log('✓ All 10 categories and 73 properties in package.json verified successfully');
+console.log('✓ All 10 categories and 75 properties in package.json verified successfully');
 
 // 2. Target query resolution logic (extension.js)
 function resolveSettingsQuery(target) {
