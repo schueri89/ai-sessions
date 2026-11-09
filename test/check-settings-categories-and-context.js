@@ -14,7 +14,7 @@ assert(pkg.version, 'package.json version must exist');
 
 const cfg = pkg.contributes?.configuration;
 assert(Array.isArray(cfg), 'contributes.configuration must be an array of categories');
-assert.strictEqual(cfg.length, 9, 'contributes.configuration must contain exactly 9 categories');
+assert.strictEqual(cfg.length, 10, 'contributes.configuration must contain exactly 10 categories');
 
 const expectedCategories = [
   { title: 'Tab: Sessions', order: 1, count: 10 },
@@ -22,10 +22,11 @@ const expectedCategories = [
   { title: 'Tab: Audits', order: 3, count: 7 },
   { title: 'Tab: Logs', order: 4, count: 3 },
   { title: 'Tab: Deploys', order: 5, count: 6 },
-  { title: 'Statusleiste & Limits', order: 6, count: 4 },
-  { title: 'Sounds', order: 7, count: 15 },
-  { title: 'Benachrichtigungen', order: 8, count: 8 },
-  { title: 'Allgemein', order: 9, count: 4 }
+  { title: 'Tab: Releases', order: 6, count: 4 },
+  { title: 'Statusleiste & Limits', order: 7, count: 4 },
+  { title: 'Sounds', order: 8, count: 15 },
+  { title: 'Benachrichtigungen', order: 9, count: 8 },
+  { title: 'Allgemein', order: 10, count: 4 }
 ];
 
 let totalPropsCount = 0;
@@ -47,7 +48,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 62, `Total property count across all categories must be exactly 62, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 66, `Total property count across all categories must be exactly 66, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -72,10 +73,14 @@ assert(cfg[3].properties['sessionDashboard.logs.tasks'], 'logs.tasks must be in 
 assert(cfg[4].properties['sessionDashboard.jenkins.enabled'], 'jenkins.enabled must be in Tab: Deploys');
 assert(cfg[4].properties['sessionDashboard.sound.jenkins.enabled'], 'sound.jenkins.enabled must be in Tab: Deploys');
 assert(cfg[4].properties['sessionDashboard.notifications.jenkins'], 'notifications.jenkins must be in Tab: Deploys');
-assert(cfg[8].properties['sessionDashboard.defaultTab'], 'defaultTab must be in Allgemein');
-assert(cfg[8].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
+assert(cfg[5].properties['sessionDashboard.releases.enabled'], 'releases.enabled must be in Tab: Releases');
+assert(cfg[5].properties['sessionDashboard.releases.credentialsFile'], 'releases.credentialsFile must be in Tab: Releases');
+assert(cfg[5].properties['sessionDashboard.releases.projects'], 'releases.projects must be in Tab: Releases');
+assert(cfg[5].properties['sessionDashboard.releases.readyStatuses'], 'releases.readyStatuses must be in Tab: Releases');
+assert(cfg[9].properties['sessionDashboard.defaultTab'], 'defaultTab must be in Allgemein');
+assert(cfg[9].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
 
-console.log('✓ All 9 categories and 50 properties in package.json verified successfully');
+console.log('✓ All 10 categories and 66 properties in package.json verified successfully');
 
 // 2. Target query resolution logic (extension.js)
 function resolveSettingsQuery(target) {
@@ -85,6 +90,7 @@ function resolveSettingsQuery(target) {
     else if (target === 'audits') query = 'sessionDashboard.audits';
     else if (target === 'logs') query = 'sessionDashboard.logs';
     else if (target === 'jenkins' || target === 'deploys') query = 'sessionDashboard.jenkins';
+    else if (target === 'releases') query = 'sessionDashboard.releases';
     else if (target === 'sessions' || target === 'board' || target === 'history' || target === 'analyse') query = '@ext:schueri.ai-sessions';
     else if (target.startsWith('@') || target.startsWith('sessionDashboard')) query = target;
     else query = `sessionDashboard.${target}`;
@@ -98,6 +104,7 @@ assert.strictEqual(resolveSettingsQuery('audits'), 'sessionDashboard.audits');
 assert.strictEqual(resolveSettingsQuery('logs'), 'sessionDashboard.logs');
 assert.strictEqual(resolveSettingsQuery('jenkins'), 'sessionDashboard.jenkins');
 assert.strictEqual(resolveSettingsQuery('deploys'), 'sessionDashboard.jenkins');
+assert.strictEqual(resolveSettingsQuery('releases'), 'sessionDashboard.releases');
 assert.strictEqual(resolveSettingsQuery('board'), '@ext:schueri.ai-sessions');
 assert.strictEqual(resolveSettingsQuery('history'), '@ext:schueri.ai-sessions');
 assert.strictEqual(resolveSettingsQuery('analyse'), '@ext:schueri.ai-sessions');
@@ -119,6 +126,7 @@ Module.prototype.require = function (id) {
             if (section === 'sessionDashboard.tasks' && key === 'enabled') return true;
             if (section === 'sessionDashboard.audits' && key === 'enabled') return true;
             if (section === 'sessionDashboard.logs' && key === 'enabled') return true;
+            if (section === 'sessionDashboard.releases' && key === 'enabled') return true;
             return defVal !== undefined ? defVal : '';
           }
         })
@@ -137,6 +145,7 @@ assert(html.includes('id="tasks-settings"'), 'Tasks toolbar settings button (tas
 assert(html.includes('id="audits-settings"'), 'Audits toolbar settings button (audits-settings) must exist');
 assert(html.includes('id="logs-settings-btn"'), 'Logs viewer settings button (logs-settings-btn) must exist');
 assert(html.includes('id="jenkins-settings"'), 'Jenkins toolbar settings button (jenkins-settings) must exist');
+assert(html.includes('id="releases-settings"'), 'Releases toolbar settings button (releases-settings) must exist');
 
 console.log('✓ Tab-specific settings buttons verified in Webview HTML');
 console.log('All Settings Tab grouping & context navigation tests passed successfully.');

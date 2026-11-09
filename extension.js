@@ -785,6 +785,9 @@ function activate(context) {
         board.onJenkinsConfigChanged();
         jenkinsWatcher.restart();
       }
+      if (e.affectsConfiguration('sessionDashboard.releases')) {
+        board.onReleasesConfigChanged();
+      }
       if (e.affectsConfiguration('sessionDashboard.audits')) {
         if (auditManager) {
           auditManager.syncAuditConfig();
@@ -1603,6 +1606,7 @@ function activate(context) {
         else if (t === 'audits') query = 'sessionDashboard.audits';
         else if (t === 'logs') query = 'sessionDashboard.logs';
         else if (t === 'jenkins' || t === 'deploys') query = 'sessionDashboard.jenkins';
+        else if (t === 'releases') query = 'sessionDashboard.releases';
         else if (t === 'sessions' || t === 'board' || t === 'history' || t === 'analyse') query = '@ext:schueri.ai-sessions';
         else if (t.startsWith('@') || t.startsWith('sessionDashboard')) query = t;
         else query = `sessionDashboard.${t}`;

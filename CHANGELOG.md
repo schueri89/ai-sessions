@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.81.0] – 09.11.2026
+
+- **Neuer Tab „🏷️ Releases“:** Zeigt die JIRA-Lösungsversionen als übersichtliche Zeitachse – kommende Releases oben, bereits veröffentlichte Versionen darunter (beim Öffnen eingeklappt) – mit Status, Projekt, Start- und Release-Datum, Vorgangs-Fortschrittsbalken und 1-Klick-Button zum Öffnen in JIRA.
+- **Releases: Gruppierung nach Kalenderwoche:** Versionen mit Release in derselben Kalenderwoche werden unter einer gemeinsamen Zwischenzeile (z. B. „KW 45/2026 · 02.11.–08.11.2026“) gebündelt, wobei die aktuelle Woche optisch hervorgehoben wird.
+- **Releases: Fortschrittsbalken mit anpassbaren Status:** Im Fortschrittsbalken kommender Releases zählen neben erledigten Vorgängen auch Tickets in den Status „Ready for Live“ und „Live“ zum grünen Teil; die zählenden Status sowie Projekte und Zugangsdaten können in den Einstellungen unter „Tab: Releases“ (`sessionDashboard.releases.*`) konfiguriert werden.
+
 ## [0.80.0] – 09.11.2026
 
 - **Deploys: Pipeline-Favoriten & Einklappen:** Häufig genutzte Pipelines lassen sich im Tab „🚀 Deploys“ mit einem Klick auf das Sternchen als Favoriten markieren und werden oben angeheftet; der Block aller weiteren Pipelines kann platzsparend ein- und ausgeklappt werden.
