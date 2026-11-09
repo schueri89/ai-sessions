@@ -30,3 +30,9 @@ weil dort alle Repos nebeneinanderliegen, und wird nie deployt.
   (`code --install-extension vsix/ai-sessions-<version>.vsix`), bevor der Vorgang abgeschlossen gemeldet wird.
   VSIX-Pakete gehören ausnahmslos nach `vsix/`, nie ins Hauptverzeichnis der Extension. In
   `.gitignore` und `.vscodeignore` sind `vsix/` und `**/*.vsix` stets ausgeschlossen.
+- **Release & Update-Prüfung:** Veröffentlicht wird über einen Git-Tag `vX.Y.Z` (muss zur `version` in
+  `package.json` passen). Die Action `.github/workflows/release.yml` baut die VSIX (`npm run check` läuft
+  nur lokal, einige Tests brauchen die Projekte unter ROOT) und legt den GitHub Release mit dem passenden
+  `CHANGELOG.md`-Abschnitt an. `lib/updateChecker.js`
+  fragt `releases/latest` des öffentlichen Repos `schueri89/ai-sessions` ab und installiert das
+  VSIX-Asset. VSIX-Dateien werden nie committet.

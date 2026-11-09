@@ -21,6 +21,7 @@ const { JenkinsWatcher } = require('./lib/jenkinsWatcher');
 const { ProjectTasksManager } = require('./lib/projectTasks');
 const { AuditManager } = require('./lib/auditManager');
 const { TasksLogManager } = require('./lib/tasksLogManager');
+const { UpdateChecker } = require('./lib/updateChecker');
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 300;
@@ -661,6 +662,8 @@ function activate(context) {
   });
   board.jenkinsWatcher = jenkinsWatcher;
   jenkinsWatcher.restart();
+  const updateChecker = new UpdateChecker(context, logDebug);
+  updateChecker.start();
   const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
   context.subscriptions.push(
@@ -672,6 +675,7 @@ function activate(context) {
     auditManager,
     tasksLogManager,
     jenkinsWatcher,
+    updateChecker,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
         if (board.panel) {
@@ -1613,6 +1617,7 @@ function activate(context) {
       }
       vscode.commands.executeCommand('workbench.action.openSettings', query);
     }),
+    vscode.commands.registerCommand('sessionDashboard.checkForUpdates', () => updateChecker.check(true)),
     vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', async () => {
       const changed = await setJenkinsCredentials(context.secrets);
       if (changed) jenkinsWatcher.restart();

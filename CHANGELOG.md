@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.82.0] – 09.11.2026
+
+- **Update-Hinweis:** Die Extension prüft stündlich im Hintergrund, ob auf GitHub (`schueri89/ai-sessions`) eine neue Version veröffentlicht ist, und bietet sie mit 1-Klick zur direkten Installation, zum Ansehen der Release-Notes oder zum Überspringen an.
+- **Befehl „Nach Updates suchen“:** Neuer VS-Code-Befehl (`sessionDashboard.checkForUpdates`) für die sofortige Prüfung auf Knopfdruck; die automatische Prüfung lässt sich in den Einstellungen unter „Allgemein“ (`sessionDashboard.updateCheck.enabled`) anpassen.
+- **Automatisierter GitHub-Release-Workflow:** Neue GitHub Action (`.github/workflows/release.yml`) baut bei Versions-Tags (`vX.Y.Z`) automatisch das VSIX-Paket und veröffentlicht den GitHub Release samt Release-Notes aus dem Changelog.
+
 ## [0.81.0] – 09.11.2026
 
 - **Neuer Tab „🏷️ Releases“:** Zeigt die JIRA-Lösungsversionen als übersichtliche Zeitachse – kommende Releases oben, bereits veröffentlichte Versionen darunter (beim Öffnen eingeklappt) – mit Status, Projekt, Start- und Release-Datum, Vorgangs-Fortschrittsbalken und 1-Klick-Button zum Öffnen in JIRA.

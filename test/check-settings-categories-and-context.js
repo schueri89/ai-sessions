@@ -26,7 +26,7 @@ const expectedCategories = [
   { title: 'Statusleiste & Limits', order: 7, count: 4 },
   { title: 'Sounds', order: 8, count: 15 },
   { title: 'Benachrichtigungen', order: 9, count: 8 },
-  { title: 'Allgemein', order: 10, count: 4 }
+  { title: 'Allgemein', order: 10, count: 5 }
 ];
 
 let totalPropsCount = 0;
@@ -48,7 +48,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 66, `Total property count across all categories must be exactly 66, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 67, `Total property count across all categories must be exactly 67, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -79,8 +79,9 @@ assert(cfg[5].properties['sessionDashboard.releases.projects'], 'releases.projec
 assert(cfg[5].properties['sessionDashboard.releases.readyStatuses'], 'releases.readyStatuses must be in Tab: Releases');
 assert(cfg[9].properties['sessionDashboard.defaultTab'], 'defaultTab must be in Allgemein');
 assert(cfg[9].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
+assert(cfg[9].properties['sessionDashboard.updateCheck.enabled'], 'updateCheck.enabled must be in Allgemein');
 
-console.log('✓ All 10 categories and 66 properties in package.json verified successfully');
+console.log('✓ All 10 categories and 67 properties in package.json verified successfully');
 
 // 2. Target query resolution logic (extension.js)
 function resolveSettingsQuery(target) {

@@ -3,8 +3,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
+- [ ] Tasks: bei Fail anderen Ton abspielen
 
 ## Erledigt
+- [x] session-dashboard v0.82.0: Update-Prüfung gegen GitHub Releases (`schueri89/ai-sessions`), Befehl "Nach Updates suchen", Einstellungsoption unter Allgemein, automatisierter Release-Workflow (.github/workflows/release.yml) und Tag-Hinweis in AGENTS.md *(09.11.2026)*
 - [x] session-dashboard v0.81.0: Neuer Tab 🏷️ Releases (JIRA-Lösungsversionen als Zeitachse, Fortschrittsbalken mit anpassbaren Status z. B. Ready for Live / Live, Gruppierung nach Kalenderwochen, einklappbarer Block für Veröffentlichte, 1-Klick-Öffnen in JIRA und Einstellungskategorie Tab: Releases) *(09.11.2026, [Plan](.agents/plans/2026-11-04_session-dashboard-releases-tab.md))*
 - [x] session-dashboard v0.80.0: Deploys: Pipeline-Favoriten, Gesamtdauer, Live-Dauer & Hintergrund-Watcher für eigene Jenkins-Builds mit Benachrichtigungen *(09.11.2026)*
 - [x] session-dashboard v0.79.0: Dynamische Settings & Portabilität: Vollständige Entkopplung von hart codierten Pfaden (Entfernung des statischen ROOT-Fallbacks, dynamische Workspace- und Git-Root-Erkennung sowie konfigurierbares Root-Verzeichnis), flexible UI- & Quota-Konfiguration (Karten-Limit je Spalte, Historie-Seitengröße, Standard-Tab, synchronisierte Schwellenwerte für Statusleiste & Dashboard), konfigurierbare Sounds für Tasks & Audits sowie anpassbare Windows-Task-Namen und Task-Log-Limits *(08.11.2026, [Plan](.agents/plans/2026-11-08_dynamische-settings-und-entkopplung.md))*
