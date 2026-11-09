@@ -21,7 +21,7 @@ const expectedCategories = [
   { title: 'Tab: Tasks', order: 2, count: 5 },
   { title: 'Tab: Audits', order: 3, count: 7 },
   { title: 'Tab: Logs', order: 4, count: 3 },
-  { title: 'Tab: Deploys', order: 5, count: 4 },
+  { title: 'Tab: Deploys', order: 5, count: 6 },
   { title: 'Statusleiste & Limits', order: 6, count: 4 },
   { title: 'Sounds', order: 7, count: 15 },
   { title: 'Benachrichtigungen', order: 8, count: 8 },
@@ -47,7 +47,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 60, `Total property count across all categories must be exactly 60, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 62, `Total property count across all categories must be exactly 62, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -70,6 +70,8 @@ assert(cfg[3].properties['sessionDashboard.logs.enabled'], 'logs.enabled must be
 assert(cfg[3].properties['sessionDashboard.logs.maxCharacters'], 'logs.maxCharacters must be in Tab: Logs');
 assert(cfg[3].properties['sessionDashboard.logs.tasks'], 'logs.tasks must be in Tab: Logs');
 assert(cfg[4].properties['sessionDashboard.jenkins.enabled'], 'jenkins.enabled must be in Tab: Deploys');
+assert(cfg[4].properties['sessionDashboard.sound.jenkins.enabled'], 'sound.jenkins.enabled must be in Tab: Deploys');
+assert(cfg[4].properties['sessionDashboard.notifications.jenkins'], 'notifications.jenkins must be in Tab: Deploys');
 assert(cfg[8].properties['sessionDashboard.defaultTab'], 'defaultTab must be in Allgemein');
 assert(cfg[8].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
 

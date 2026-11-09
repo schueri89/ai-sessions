@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.80.0] – 09.11.2026
+
+- **Deploys: Pipeline-Favoriten & Einklappen:** Häufig genutzte Pipelines lassen sich im Tab „🚀 Deploys“ mit einem Klick auf das Sternchen als Favoriten markieren und werden oben angeheftet; der Block aller weiteren Pipelines kann platzsparend ein- und ausgeklappt werden.
+- **Deploys: Gesamtdauer & Live-Dauer:** Pipelines zeigen die summierte Dauer der letzten Builds aller enthaltenen Jobs in Minuten und Sekunden an; aktuell laufende Builds zählen ihre Dauer live hoch.
+- **Deploys: Hintergrund-Überwachung & Benachrichtigungen:** Selbst gestartete Jenkins-Builds (inklusive nachgelagerter Pipeline-Jobs) werden im Hintergrund überwacht und melden ihre Fertigstellung per VS-Code-Benachrichtigung (`[🚀 Jenkins]`) samt Erfolgs- oder Fehler-Status und Direktlink zum Job.
+
 ## [0.79.0] – 08.11.2026
 
 - **Dynamische Einstellungen & vollständige Pfad-Entkopplung:** Sämtliche hart codierten Pfade auf das lokale `webapps/ROOT`-Verzeichnis wurden eliminiert; die Projekt- und Root-Erkennung erfolgt ab sofort dynamisch über die geöffnete VS-Code-Arbeitsumgebung bzw. das aktuelle Arbeitsverzeichnis (mit Prüfung auf `.agents` bzw. `.git`) und kann bei Bedarf flexibel über die neue Einstellung `sessionDashboard.rootDirectory` konfiguriert werden.
