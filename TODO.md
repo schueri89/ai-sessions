@@ -3,9 +3,10 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 
 ## Offene Aufgaben
 - [ ] wie ist unser Stand im Vergleich zu https://jules.google/docs/ ? kann man noch Features übernehmen?
-- [ ] Tasks: bei Fail anderen Ton abspielen
+- [ ] Fortschritts-Benachrichtigungen mit Abbruch-Funktion für Audits, Updates und Tasks ([Plan](.agents/plans/2026-11-09_fortschritts-benachrichtigungen-audits-updates-tasks.md))
 
 ## Erledigt
+- [x] session-dashboard v0.83.0: Differenzierte Sound-Benachrichtigungen bei Fehlschlägen: Tasks, Deploys (Jenkins) und KI-Audits spielen bei Fehlern, Abbrüchen oder Befunden standardmäßig einen markanten Warnton (Chord) statt der Erfolgsfanfare ab, inklusive konfigurierbaren Einstellungen je Tab (`tasks.soundFailed`, `jenkins.soundFailed`, `audits.soundFailed`, `taskFailed.sound`), Einbindung von "Windows Error" und Erweiterung des Sound-Assistenten *(09.11.2026, [Plan](.agents/plans/2026-11-09_differenzierte-fail-sounds-fuer-tasks-deploys-audits.md))*
 - [x] session-dashboard v0.82.0: Update-Prüfung gegen GitHub Releases (`schueri89/ai-sessions`), Befehl "Nach Updates suchen", Einstellungsoption unter Allgemein, automatisierter Release-Workflow (.github/workflows/release.yml) und Tag-Hinweis in AGENTS.md *(09.11.2026)*
 - [x] session-dashboard v0.81.0: Neuer Tab 🏷️ Releases (JIRA-Lösungsversionen als Zeitachse, Fortschrittsbalken mit anpassbaren Status z. B. Ready for Live / Live, Gruppierung nach Kalenderwochen, einklappbarer Block für Veröffentlichte, 1-Klick-Öffnen in JIRA und Einstellungskategorie Tab: Releases) *(09.11.2026, [Plan](.agents/plans/2026-11-04_session-dashboard-releases-tab.md))*
 - [x] session-dashboard v0.80.0: Deploys: Pipeline-Favoriten, Gesamtdauer, Live-Dauer & Hintergrund-Watcher für eigene Jenkins-Builds mit Benachrichtigungen *(09.11.2026)*

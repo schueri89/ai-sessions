@@ -159,10 +159,15 @@ assert.strictEqual(typeof managerWithSound.showTerminal, 'function', 'showTermin
 managerWithSound.notifyTaskCompletion(sampleTask.id, { isSuccess: true, durationMs: 12500 });
 assert.strictEqual(playedSound, 'taskCompleted', 'taskCompleted sound should be triggered on task success');
 
+// Test failure completion (different taskId to avoid debounce)
+playedSound = null;
+managerWithSound.notifyTaskCompletion('fail-task-id', { isSuccess: false, exitCode: 1 });
+assert.strictEqual(playedSound, 'taskFailed', 'taskFailed sound should be triggered on task failure');
+
 // Test debounce
 playedSound = null;
 managerWithSound.notifyTaskCompletion(sampleTask.id, { isSuccess: true, durationMs: 13000 });
 assert.strictEqual(playedSound, null, 'Rapid subsequent completion call should be debounced within 2000ms');
 
-console.log('✓ ProjectTasksManager: notifyTaskCompletion sound triggering and debouncing verified');
+console.log('✓ ProjectTasksManager: notifyTaskCompletion sound triggering (success & fail) and debouncing verified');
 console.log('All check-project-tasks tests passed successfully!');

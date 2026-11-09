@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.83.0] – 09.11.2026
+
+- **Differenzierte Töne bei Fehlschlägen:** Fehlgeschlagene Projekt-Tasks, rot gelaufene Jenkins-Deploys sowie KI-Audits mit Befunden oder Fehlern spielen ab sofort standardmäßig einen prägnanten Warnton (Chord) statt der Erfolgsfanfare ab.
+- **Konfigurierbare Sounds je Dashboard-Tab:** Für Tasks (`sessionDashboard.sound.tasks.soundFailed`), Jenkins-Deploys (`sessionDashboard.sound.jenkins.sound` und `.soundFailed`) sowie Audits (`sessionDashboard.sound.audits.soundFailed`) lassen sich die Töne für Erfolg und Misserfolg getrennt einstellen.
+- **Neuer Sound „Windows Error“ & erweiterter Vorhör-Assistent:** Der moderne Windows-Fehlerton steht nun in allen Sound-Dropdowns zur Verfügung, und der interaktive Assistent (`sessionDashboard.previewSound`) erlaubt das direkte Probehören und Zuweisen des neuen Fehler-Ereignisses (`taskFailed`).
+
 ## [0.82.0] – 09.11.2026
 
 - **Update-Hinweis:** Die Extension prüft stündlich im Hintergrund, ob auf GitHub (`schueri89/ai-sessions`) eine neue Version veröffentlicht ist, und bietet sie mit 1-Klick zur direkten Installation, zum Ansehen der Release-Notes oder zum Überspringen an.

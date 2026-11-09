@@ -302,8 +302,14 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
   });
   notifierManager.notifyAuditCompletion('ai-sessions', { isSuccess: true, status: 'passed', durationMs: 12000 });
   assert(soundTriggered, 'soundNotifier.playSound should have been triggered');
-  assert.strictEqual(playedEvent, 'taskCompleted', 'playedEvent should be taskCompleted');
-  console.log('✓ notifyAuditCompletion plays taskCompleted sound');
+  assert.strictEqual(playedEvent, 'taskCompleted', 'playedEvent should be taskCompleted for clean audit');
+
+  soundTriggered = false;
+  playedEvent = '';
+  notifierManager.notifyAuditCompletion('auto-hub', { isSuccess: true, status: 'error', findingsCount: 3, durationMs: 15000 });
+  assert(soundTriggered, 'soundNotifier.playSound should have been triggered on findings');
+  assert.strictEqual(playedEvent, 'taskFailed', 'playedEvent should be taskFailed for audit with findings/errors');
+  console.log('✓ notifyAuditCompletion plays taskCompleted on success and taskFailed on errors/findings');
 
   // 9. deleteReport functionality
   const fs = require('fs');

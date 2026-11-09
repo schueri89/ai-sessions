@@ -24,7 +24,7 @@ Module.prototype.require = function (id) {
   return origRequire.apply(this, arguments);
 };
 
-const { acquireSharedSoundLock } = require('../lib/soundNotifier');
+const { acquireSharedSoundLock, resolveSoundPath, WIN_SOUNDS, SOUND_OPTIONS } = require('../lib/soundNotifier');
 
 console.log('Testing acquireSharedSoundLock cross-window sound deduplication...');
 
@@ -55,6 +55,24 @@ try {
   assert.strictEqual(ok4, true, 'Should recover gracefully from invalid JSON in lock file');
 
   console.log('✓ All acquireSharedSoundLock tests passed successfully.');
+
+  // 5. Sound path resolution for taskFailed and Windows Error
+  console.log('Testing sound path resolution for taskFailed & Windows Error...');
+  const isWin = process.platform === 'win32';
+  const isMac = process.platform === 'darwin';
+
+  if (isWin) {
+    assert.strictEqual(resolveSoundPath('unknown-sound', 'taskFailed'), WIN_SOUNDS['chord'], 'Fallback taskFailed sound on Windows must be chord');
+    assert.strictEqual(resolveSoundPath('chord', 'taskFailed'), WIN_SOUNDS['chord']);
+    assert.strictEqual(resolveSoundPath('Windows Error', 'taskFailed'), WIN_SOUNDS['Windows Error']);
+  } else if (isMac) {
+    assert.ok(resolveSoundPath('unknown-sound', 'taskFailed').includes('Basso'), 'Fallback taskFailed sound on macOS must be Basso');
+    assert.ok(resolveSoundPath('Windows Error', 'taskFailed').includes('Basso'), 'Windows Error on macOS should map to Basso');
+  }
+
+  assert.ok(SOUND_OPTIONS.some((o) => o.id === 'chord'), 'chord must be in SOUND_OPTIONS');
+  assert.ok(SOUND_OPTIONS.some((o) => o.id === 'Windows Error'), 'Windows Error must be in SOUND_OPTIONS');
+  console.log('✓ Sound path resolution and SOUND_OPTIONS verified successfully.');
 } finally {
   try {
     if (fs.existsSync(testLockFile)) {

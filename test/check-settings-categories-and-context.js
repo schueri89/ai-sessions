@@ -18,13 +18,13 @@ assert.strictEqual(cfg.length, 10, 'contributes.configuration must contain exact
 
 const expectedCategories = [
   { title: 'Tab: Sessions', order: 1, count: 10 },
-  { title: 'Tab: Tasks', order: 2, count: 5 },
-  { title: 'Tab: Audits', order: 3, count: 7 },
+  { title: 'Tab: Tasks', order: 2, count: 6 },
+  { title: 'Tab: Audits', order: 3, count: 8 },
   { title: 'Tab: Logs', order: 4, count: 3 },
-  { title: 'Tab: Deploys', order: 5, count: 6 },
+  { title: 'Tab: Deploys', order: 5, count: 8 },
   { title: 'Tab: Releases', order: 6, count: 4 },
   { title: 'Statusleiste & Limits', order: 7, count: 4 },
-  { title: 'Sounds', order: 8, count: 15 },
+  { title: 'Sounds', order: 8, count: 17 },
   { title: 'Benachrichtigungen', order: 9, count: 8 },
   { title: 'Allgemein', order: 10, count: 5 }
 ];
@@ -48,7 +48,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 67, `Total property count across all categories must be exactly 67, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 73, `Total property count across all categories must be exactly 73, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -59,6 +59,7 @@ assert(cfg[0].properties['sessionDashboard.history.pageSize'], 'history.pageSize
 assert(cfg[1].properties['sessionDashboard.tasks.enabled'], 'tasks.enabled must be in Tab: Tasks');
 assert(cfg[1].properties['sessionDashboard.sound.tasks.enabled'], 'sound.tasks.enabled must be in Tab: Tasks');
 assert(cfg[1].properties['sessionDashboard.sound.tasks.sound'], 'sound.tasks.sound must be in Tab: Tasks');
+assert(cfg[1].properties['sessionDashboard.sound.tasks.soundFailed'], 'sound.tasks.soundFailed must be in Tab: Tasks');
 assert(cfg[1].properties['sessionDashboard.notifications.tasks'], 'notifications.tasks must be in Tab: Tasks');
 assert(cfg[2].properties['sessionDashboard.audits.enabled'], 'audits.enabled must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.audits.defaultModel'], 'audits.defaultModel must be in Tab: Audits');
@@ -66,22 +67,27 @@ assert(cfg[2].properties['sessionDashboard.audits.nightlyModel'], 'audits.nightl
 assert(cfg[2].properties['sessionDashboard.audits.scheduledTaskName'], 'audits.scheduledTaskName must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.sound.audits.enabled'], 'sound.audits.enabled must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.sound.audits.sound'], 'sound.audits.sound must be in Tab: Audits');
+assert(cfg[2].properties['sessionDashboard.sound.audits.soundFailed'], 'sound.audits.soundFailed must be in Tab: Audits');
 assert(cfg[2].properties['sessionDashboard.notifications.audits'], 'notifications.audits must be in Tab: Audits');
 assert(cfg[3].properties['sessionDashboard.logs.enabled'], 'logs.enabled must be in Tab: Logs');
 assert(cfg[3].properties['sessionDashboard.logs.maxCharacters'], 'logs.maxCharacters must be in Tab: Logs');
 assert(cfg[3].properties['sessionDashboard.logs.tasks'], 'logs.tasks must be in Tab: Logs');
 assert(cfg[4].properties['sessionDashboard.jenkins.enabled'], 'jenkins.enabled must be in Tab: Deploys');
 assert(cfg[4].properties['sessionDashboard.sound.jenkins.enabled'], 'sound.jenkins.enabled must be in Tab: Deploys');
+assert(cfg[4].properties['sessionDashboard.sound.jenkins.sound'], 'sound.jenkins.sound must be in Tab: Deploys');
+assert(cfg[4].properties['sessionDashboard.sound.jenkins.soundFailed'], 'sound.jenkins.soundFailed must be in Tab: Deploys');
 assert(cfg[4].properties['sessionDashboard.notifications.jenkins'], 'notifications.jenkins must be in Tab: Deploys');
 assert(cfg[5].properties['sessionDashboard.releases.enabled'], 'releases.enabled must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.releases.credentialsFile'], 'releases.credentialsFile must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.releases.projects'], 'releases.projects must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.releases.readyStatuses'], 'releases.readyStatuses must be in Tab: Releases');
+assert(cfg[7].properties['sessionDashboard.sound.taskFailed.enabled'], 'sound.taskFailed.enabled must be in Sounds');
+assert(cfg[7].properties['sessionDashboard.sound.taskFailed.sound'], 'sound.taskFailed.sound must be in Sounds');
 assert(cfg[9].properties['sessionDashboard.defaultTab'], 'defaultTab must be in Allgemein');
 assert(cfg[9].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
 assert(cfg[9].properties['sessionDashboard.updateCheck.enabled'], 'updateCheck.enabled must be in Allgemein');
 
-console.log('✓ All 10 categories and 67 properties in package.json verified successfully');
+console.log('✓ All 10 categories and 73 properties in package.json verified successfully');
 
 // 2. Target query resolution logic (extension.js)
 function resolveSettingsQuery(target) {

@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.82.0",
+  "version": "0.83.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -465,10 +465,11 @@
             "type": "string",
             "enum": [
               "tada",
+              "chord",
+              "Windows Error",
               "ding",
               "chimes",
               "notify",
-              "chord",
               "ringin",
               "Windows Notify",
               "Windows Background",
@@ -479,7 +480,28 @@
               "none"
             ],
             "default": "tada",
-            "description": "Sound beim Beenden eines Projekt-Tasks."
+            "description": "Sound beim erfolgreichen Beenden eines Projekt-Tasks."
+          },
+          "sessionDashboard.sound.tasks.soundFailed": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "chord",
+              "Windows Error",
+              "ding",
+              "chimes",
+              "notify",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "default": "chord",
+            "description": "Sound beim Fehlschlagen eines Projekt-Tasks (Exit-Code != 0 oder Fehler)."
           },
           "sessionDashboard.notifications.tasks": {
             "type": "boolean",
@@ -521,10 +543,11 @@
             "type": "string",
             "enum": [
               "tada",
+              "chord",
+              "Windows Error",
               "ding",
               "chimes",
               "notify",
-              "chord",
               "ringin",
               "Windows Notify",
               "Windows Background",
@@ -535,7 +558,28 @@
               "none"
             ],
             "default": "tada",
-            "description": "Sound beim Beenden eines KI-Audits."
+            "description": "Sound beim erfolgreichen Beenden eines KI-Audit-Laufs (keine Befunde)."
+          },
+          "sessionDashboard.sound.audits.soundFailed": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "chord",
+              "Windows Error",
+              "ding",
+              "chimes",
+              "notify",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "default": "chord",
+            "description": "Sound beim Auftreten von Befunden oder Fehlern während eines KI-Audit-Laufs."
           },
           "sessionDashboard.notifications.audits": {
             "type": "boolean",
@@ -635,6 +679,48 @@
             "type": "boolean",
             "default": true,
             "description": "Sound abspielen, wenn ein selbst gestarteter Jenkins-Build (inkl. nachgelagerter Jobs) beendet wurde."
+          },
+          "sessionDashboard.sound.jenkins.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "chord",
+              "Windows Error",
+              "ding",
+              "chimes",
+              "notify",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "default": "tada",
+            "description": "Sound beim erfolgreichen Beenden eines selbst gestarteten Jenkins-Builds."
+          },
+          "sessionDashboard.sound.jenkins.soundFailed": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "chord",
+              "Windows Error",
+              "ding",
+              "chimes",
+              "notify",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "default": "chord",
+            "description": "Sound beim Fehlschlagen, Instabilwerden oder Abbrechen eines selbst gestarteten Jenkins-Builds."
           },
           "sessionDashboard.notifications.jenkins": {
             "type": "boolean",
@@ -808,6 +894,49 @@
             "default": "tada",
             "description": "Sound beim Beenden einer Aufgabe (Task).",
             "markdownDescription": "Sound beim Beenden einer Aufgabe (Task).\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22taskCompleted%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
+          },
+          "sessionDashboard.sound.taskFailed.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sound abspielen, wenn ein Task, Deploy oder Audit fehlgeschlagen ist."
+          },
+          "sessionDashboard.sound.taskFailed.sound": {
+            "type": "string",
+            "enum": [
+              "tada",
+              "chord",
+              "Windows Error",
+              "ding",
+              "chimes",
+              "notify",
+              "ringin",
+              "Windows Notify",
+              "Windows Background",
+              "Hero",
+              "Glass",
+              "Ping",
+              "Pop",
+              "none"
+            ],
+            "enumDescriptions": [
+              "Tada / Hero (Fanfare / Erfolg – Standard für Aufgabe beendet)",
+              "Chord / Basso (Klassischer System-Akkord – Standard bei Fehlern / taskFailed)",
+              "Windows Error (Moderner Windows-Fehlerton)",
+              "Ding / Ping (Dezenter Ton – Standard für Leerlauf-Reminder)",
+              "Chimes / Glass (Harmonische Glocken – Standard für Rückfragen & Limit)",
+              "Notify / Pop (Moderne Benachrichtigung)",
+              "Ringin / Blow (Signalton / Klingeln)",
+              "Windows Notify (Voller Benachrichtigungston)",
+              "Windows Background (Sehr sanfter Hintergrundton)",
+              "Hero (macOS Fanfare)",
+              "Glass (macOS Glockenton)",
+              "Ping (macOS Sonar-Ping)",
+              "Pop (macOS Blase / Klick)",
+              "Kein Sound (Stumm für dieses Ereignis)"
+            ],
+            "default": "chord",
+            "description": "Sound beim Fehlschlagen einer Aufgabe, eines Deploys oder Audits.",
+            "markdownDescription": "Sound beim Fehlschlagen einer Aufgabe, eines Deploys oder Audits.\n\n[▶ Sound jetzt vorhören](command:sessionDashboard.previewSound?%22taskFailed%22) · [🎵 Alle Sounds probehören & auswählen...](command:sessionDashboard.previewSound)"
           },
           "sessionDashboard.sound.idleReminder.enabled": {
             "type": "boolean",

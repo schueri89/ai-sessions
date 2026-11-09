@@ -8,14 +8,18 @@ Module.prototype.require = function (id) {
   if (id === 'vscode') {
     return {
       workspace: { getConfiguration: () => ({ get: (key, def) => def }) },
-      window: {}
+      window: {
+        showInformationMessage: () => {},
+        showErrorMessage: () => {},
+        showWarningMessage: () => {}
+      }
     };
   }
   return origRequire.apply(this, arguments);
 };
 
 const { flattenJobs } = require('../lib/jenkins');
-const { findFinishedBuilds, isOwnBuild } = require('../lib/jenkinsWatcher');
+const { JenkinsWatcher, findFinishedBuilds, isOwnBuild } = require('../lib/jenkinsWatcher');
 
 console.log('Testing lib/jenkinsWatcher.js (build causes & finish detection)...');
 
@@ -62,6 +66,32 @@ assert.deepStrictEqual(findFinishedBuilds(prev, running, 'raphael.schuerholz'), 
 const brandNew = new Map();
 assert.deepStrictEqual(findFinishedBuilds(brandNew, jobs, 'raphael.schuerholz'), [], 'unknown jobs are only seeded');
 console.log('✓ finish detection (running -> done, skipped poll, foreign, unchanged, new job)');
+
+let playedSound = null;
+const mockSoundNotifier = {
+  playSound: (evt) => { playedSound = evt; }
+};
+const watcher = new JenkinsWatcher({}, { soundNotifier: mockSoundNotifier });
+
+// 1. Success build -> taskCompleted
+const testJobSuccess = {
+  fullName: 'build',
+  url: 'https://j/job/build-test/',
+  lastBuild: { number: 9991 + Math.floor(Math.random() * 100000), result: 'SUCCESS', duration: 15000 }
+};
+watcher.notify(testJobSuccess);
+assert.strictEqual(playedSound, 'taskCompleted', 'SUCCESS build should trigger taskCompleted sound');
+
+// 2. Failure build -> taskFailed
+playedSound = null;
+const testJobFailure = {
+  fullName: 'deploy',
+  url: 'https://j/job/deploy-test/',
+  lastBuild: { number: 9991 + Math.floor(Math.random() * 100000), result: 'FAILURE', duration: 25000 }
+};
+watcher.notify(testJobFailure);
+assert.strictEqual(playedSound, 'taskFailed', 'FAILURE build should trigger taskFailed sound');
+console.log('✓ JenkinsWatcher.notify triggers taskCompleted on SUCCESS and taskFailed on FAILURE');
 
 Module.prototype.require = origRequire;
 console.log('All jenkinsWatcher checks passed.');

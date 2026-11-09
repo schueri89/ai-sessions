@@ -1461,6 +1461,7 @@ function activate(context) {
     vscode.commands.registerCommand('sessionDashboard.previewSound', async (arg) => {
       const eventLabels = {
         taskCompleted: 'Aufgabe beendet (taskCompleted)',
+        taskFailed: 'Aufgabe / Deploy fehlgeschlagen (taskFailed)',
         idleReminder: 'Leerlauf-Reminder (idleReminder)',
         needsInput: 'Rückfrage / Bestätigung (needsInput)',
         limitAvailable: 'Limit wieder verfügbar (limitAvailable)'
@@ -1468,7 +1469,7 @@ function activate(context) {
 
       const openSoundPickerForEvent = async (eventKey) => {
         const cfg = vscode.workspace.getConfiguration('sessionDashboard.sound');
-        const fallback = eventKey === 'idleReminder' ? 'ding' : (eventKey === 'taskCompleted' ? 'tada' : 'chimes');
+        const fallback = eventKey === 'idleReminder' ? 'ding' : (eventKey === 'taskFailed' ? 'chord' : (eventKey === 'taskCompleted' ? 'tada' : 'chimes'));
         const current = cfg.get(`${eventKey}.sound`, fallback);
         const items = SOUND_OPTIONS.map((s) => ({
           label: s.id === current ? `✓ ${s.label}` : s.label,
@@ -1511,6 +1512,7 @@ function activate(context) {
       // 2. Interaktives Menü
       const cfg = vscode.workspace.getConfiguration('sessionDashboard.sound');
       const taskSound = cfg.get('taskCompleted.sound', 'tada');
+      const failSound = cfg.get('taskFailed.sound', 'chord');
       const idleSound = cfg.get('idleReminder.sound', 'ding');
       const inputSound = cfg.get('needsInput.sound', 'chimes');
       const limitSound = cfg.get('limitAvailable.sound', 'chimes');
@@ -1526,6 +1528,12 @@ function activate(context) {
           label: '$(check) Ton für „Aufgabe beendet“ wählen...',
           description: `Aktuell: ${taskSound}`,
           eventKey: 'taskCompleted',
+          action: 'configure'
+        },
+        {
+          label: '$(error) Ton für „Aufgabe / Deploy fehlgeschlagen“ wählen...',
+          description: `Aktuell: ${failSound}`,
+          eventKey: 'taskFailed',
           action: 'configure'
         },
         {
@@ -1583,6 +1591,7 @@ function activate(context) {
             if (nextAction === 'Diesem Ereignis zuweisen...') {
               const evPick = await vscode.window.showQuickPick([
                 { label: 'Aufgabe beendet (taskCompleted)', eventKey: 'taskCompleted' },
+                { label: 'Aufgabe / Deploy fehlgeschlagen (taskFailed)', eventKey: 'taskFailed' },
                 { label: 'Leerlauf-Reminder (idleReminder)', eventKey: 'idleReminder' },
                 { label: 'Rückfrage / Bestätigung (needsInput)', eventKey: 'needsInput' },
                 { label: 'Limit wieder verfügbar (limitAvailable)', eventKey: 'limitAvailable' }
