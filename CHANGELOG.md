@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.86.1] – 10.11.2026
+
+- **Deploys: besser lesbare Kacheln:** Die Buttons „Build in Jenkins öffnen“ und „Konsolenausgabe öffnen“ sind jetzt klare Symbole in Textfarbe, und die Pfeile zwischen den Pipeline-Schritten sind kräftiger.
+
 ## [0.86.0] – 10.11.2026
 
 - **Deploys als Pipeline-Ansicht:** Eine aufgeklappte Pipeline zeigt jetzt wie die Jenkins-Build-Pipeline-Ansicht ihren Aufbau mit Pfeilen und Verzweigungen sowie die letzten 5 Läufe als farbige Kacheln je Job (Build-Nummer, Startzeit, Dauer mit Fortschritt, gestartet von, Parameter des Laufs); laufende Pipelines aktualisieren sich alle 5 Sekunden.
