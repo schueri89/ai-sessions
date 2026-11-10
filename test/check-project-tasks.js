@@ -230,4 +230,170 @@ assert(!progressTasksManager.runningTaskProgress.has('test-task-2'), 'test-task-
 progressTasksManager.dispose();
 console.log('✓ ProjectTasksManager: task progress notification & cancellation verified');
 
+// 8. Migration of previously saved 'idle' states with lastRun to 'success'
+const migrationStorage = {
+  'sessionDashboard.projectTaskStates': {
+    'ai-hub:APK bauen (PROD)': {
+      status: 'idle',
+      lastRun: Date.now() - 60000,
+      lastDurationMs: 24000,
+      lastExitCode: 0
+    },
+    'ai-hub:Failed Task': {
+      status: 'idle',
+      lastRun: Date.now() - 120000,
+      lastDurationMs: 5000,
+      lastExitCode: 1,
+      error: 'Fehler'
+    },
+    'ai-hub:Never Run Task': {
+      status: 'idle'
+    }
+  }
+};
+const migrationGlobalState = {
+  get: (key, def) => (key in migrationStorage ? migrationStorage[key] : def),
+  update: (key, val) => {
+    migrationStorage[key] = val;
+    return Promise.resolve();
+  }
+};
+
+const migrationManager = new ProjectTasksManager({ globalState: migrationGlobalState });
+assert.strictEqual(
+  migrationManager.taskStates.get('ai-hub:APK bauen (PROD)').status,
+  'success',
+  'Successful task previously stored with status idle must be migrated to success'
+);
+assert.strictEqual(
+  migrationManager.taskStates.get('ai-hub:Failed Task').status,
+  'idle',
+  'Failed task must not be migrated to success'
+);
+assert.strictEqual(
+  migrationManager.taskStates.get('ai-hub:Never Run Task').status,
+  'idle',
+  'Never run task must remain idle'
+);
+assert.strictEqual(
+  migrationStorage['sessionDashboard.projectTaskStates']['ai-hub:APK bauen (PROD)'].status,
+  'success',
+  'Migrated status must be persisted to globalState'
+);
+console.log('✓ ProjectTasksManager: state migration from idle (with successful lastRun) to success verified');
+
+// 9. Composite task lifecycle & subtask error propagation
+let startListener = null;
+let endProcListener = null;
+let endTaskListener = null;
+
+const fakeVsWithEvents = {
+  ProgressLocation: { Notification: 15 },
+  workspace: {
+    getConfiguration: () => ({
+      get: (key, def) => def
+    })
+  },
+  window: {
+    withProgress: () => Promise.resolve(),
+    showInformationMessage: () => Promise.resolve(),
+    showErrorMessage: () => Promise.resolve()
+  },
+  tasks: {
+    onDidStartTask: (cb) => { startListener = cb; return { dispose: () => {} }; },
+    onDidEndTaskProcess: (cb) => { endProcListener = cb; return { dispose: () => {} }; },
+    onDidEndTask: (cb) => { endTaskListener = cb; return { dispose: () => {} }; }
+  }
+};
+
+const compositeStorage = {};
+const compositeGlobalState = {
+  get: (key, def) => (key in compositeStorage ? compositeStorage[key] : def),
+  update: (key, val) => { compositeStorage[key] = val; return Promise.resolve(); }
+};
+
+const eventManager = new ProjectTasksManager(
+  { globalState: compositeGlobalState, subscriptions: [] },
+  { vscode: fakeVsWithEvents }
+);
+eventManager.init();
+
+// Set up mock tasks: 1 composite parent task, 1 subtask
+eventManager.tasks = [
+  {
+    id: 'test-hub:Composite Build',
+    project: 'test-hub',
+    label: 'Composite Build',
+    dependsOn: ['Step 1'],
+    isTopLevel: true
+  },
+  {
+    id: 'test-hub:Step 1',
+    project: 'test-hub',
+    label: 'Step 1',
+    isTopLevel: false
+  }
+];
+
+// Test 9a: Successful composite task execution
+const parentExec1 = { task: { name: 'Composite Build', scope: { name: 'test-hub' } } };
+const subExec1 = { task: { name: 'Step 1', scope: { name: 'test-hub' } } };
+
+// Start parent
+startListener({ execution: parentExec1 });
+assert.strictEqual(eventManager.taskStates.get('test-hub:Composite Build').status, 'running');
+
+// Start subtask
+startListener({ execution: subExec1 });
+assert.strictEqual(eventManager.taskStates.get('test-hub:Step 1').status, 'running');
+
+// Subtask finishes with exitCode 0
+endProcListener({ execution: subExec1, exitCode: 0 });
+assert.strictEqual(eventManager.taskStates.get('test-hub:Step 1').status, 'success');
+
+// Parent finishes via onDidEndTask (no process event for composite task)
+endTaskListener({ execution: parentExec1 });
+assert.strictEqual(
+  eventManager.taskStates.get('test-hub:Composite Build').status,
+  'success',
+  'Composite parent task must end with status success when subtasks succeed'
+);
+assert.strictEqual(
+  eventManager.taskStates.get('test-hub:Composite Build').lastExitCode,
+  0,
+  'lastExitCode must be 0'
+);
+console.log('✓ ProjectTasksManager: composite task successfully completes with status success via onDidEndTask');
+
+// Test 9b: Composite task with failing subtask
+const parentExec2 = { task: { name: 'Composite Build', scope: { name: 'test-hub' } } };
+const subExec2 = { task: { name: 'Step 1', scope: { name: 'test-hub' } } };
+
+startListener({ execution: parentExec2 });
+startListener({ execution: subExec2 });
+
+// Subtask fails with exitCode 1
+endProcListener({ execution: subExec2, exitCode: 1 });
+assert.strictEqual(eventManager.taskStates.get('test-hub:Step 1').status, 'error');
+
+// Parent finishes
+endTaskListener({ execution: parentExec2 });
+assert.strictEqual(
+  eventManager.taskStates.get('test-hub:Composite Build').status,
+  'error',
+  'Composite parent task must end with status error when a subtask fails'
+);
+assert.strictEqual(
+  eventManager.taskStates.get('test-hub:Composite Build').lastExitCode,
+  1,
+  'Composite task must have exitCode 1 on subtask failure'
+);
+assert(
+  eventManager.taskStates.get('test-hub:Composite Build').error.includes('Step 1'),
+  'Error message must reference failing subtask'
+);
+console.log('✓ ProjectTasksManager: composite task subtask failure propagation verified');
+
+eventManager.dispose();
+
 console.log('All check-project-tasks tests passed successfully!');

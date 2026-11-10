@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.86.2] – 10.11.2026
+
+- **Tasks: Einheitlicher Erfolgsstatus für mehrstufige Tasks:** Zusammengesetzte Build- und Deploy-Abläufe (wie APK- und AAB-Builds mit Teilschritten) behalten nach erfolgreichem Abschluss nun einheitlich den grünen Status `✓ Erfolg`, und bestehende Task-Zustände mit erfasster Laufzeit werden automatisch angeglichen.
+
 ## [0.86.1] – 10.11.2026
 
 - **Deploys: besser lesbare Kacheln:** Die Buttons „Build in Jenkins öffnen“ und „Konsolenausgabe öffnen“ sind jetzt klare Symbole in Textfarbe, und die Pfeile zwischen den Pipeline-Schritten sind kräftiger.
@@ -19,6 +23,7 @@ Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 ## [0.84.1] – 10.11.2026
 
 - **Lade-Kringel in allen Tabs:** Historie, Deploys und Releases sowie Windows-Aufgaben und Log-Ansicht im Tab Logs zeigen beim Laden jetzt wie die übrigen Tabs eine Lade-Animation.
+- **Audits: Robustes Parsing für Critic- und Konfidenz-Angaben:** Der Status-Parser für Audit-Berichte filtert Vorlagenzeilen und Konfidenzwerte (`Konfidenz: 85% (Hoch)`) präzise aus, sodass Warnungen und Hinweise mit hoher Konfidenz nicht fälschlich als Hochrisiko-Befunde eingestuft werden.
 
 ## [0.84.0] – 09.11.2026
 

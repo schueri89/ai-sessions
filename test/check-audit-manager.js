@@ -46,10 +46,26 @@ const sampleReportWarning = `
 Modus: \`all\` | Modell: \`gemma4:26b\`
 
 ## 🔍 2. Code Review
-WARNUNG: Fehlender Scope
+#### WARNUNG: Fehlender Scope
+- **Konfidenz**: 85% (Hoch)
+- **Critic-Begründung**: Variable x leckt in variables-Scope.
 `;
 const statusWarn = manager.parseReportStatus(sampleReportWarning);
 assert.strictEqual(statusWarn.status, 'warning', 'Status should be warning');
+
+// Test report with template lines containing KRITISCH & HOCH
+const sampleReportWithTemplates = `
+# Audit-Report: test-templates
+Modus: \`security\` | Modell: \`gemma4:26b\`
+
+## 🛡️ 3. Security Audit
+Schweregrade: Kritisch / Hoch / Mittel
+- Schweregrad: KRITISCH (CRITICAL) / HOCH (HIGH) / MITTEL (MEDIUM) / NIEDRIG (LOW) / HINWEIS (INFO)
+- Konfidenz: [90-100% (Sehr hoch) / 75-89% (Hoch) / 50-74% (Mittel)]
+Keine Sicherheitsrisiken im geprüften Diff festgestellt.
+`;
+const statusWithTemplates = manager.parseReportStatus(sampleReportWithTemplates);
+assert.strictEqual(statusWithTemplates.status, 'passed', 'Template lines must not cause warning or error status');
 
 const sampleReportGermanChangesRequested = `
 # Audit-Report: test-de
