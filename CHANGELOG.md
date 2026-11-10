@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.87.0] – 10.11.2026
+
+- **Audits: Dismissal Memory (Ignorieren-Funktion für Befunde):** Abgelehnte Befunde und False Positives können ab sofort direkt an den Befundkarten (Button „🚫 Ignorieren“) oder in der neuen Sektion „🛡️ Dismissal Memory“ im Projekt-Akkordeon mit Begründung hinterlegt werden. Ignorierte Befunde werden bei der Statusbewertung neutralisiert (Status wird grün mit Hinweis „Bestanden (ignoriert)“) und zukünftigen Ollama-Prüfläufen automatisch im Prompt als zu ignorierende Ausnahmen übergeben.
+- **Audits: Konfigurierbares Wochenend-Voll-Audit:** Der nächtliche Windows-Scheduled-Task unterscheidet nun konfigurierbar zwischen schnellen täglichen Diff-Audits an Werktagen und tiefen Komplett-Scans am Wochenende (`sessionDashboard.audits.weekendFullAudit`, `weekendDay`, `dailyDiffMode`, `scheduledTaskTime`). Der aktuelle Zeitplan wird in der Toolbar des Audit-Tabs transparent dargestellt (z. B. „Täglich 04:30 Uhr (Mo–Fr: Diff, Sa: Komplett)“).
+
 ## [0.86.2] – 10.11.2026
 
 - **Tasks: Einheitlicher Erfolgsstatus für mehrstufige Tasks:** Zusammengesetzte Build- und Deploy-Abläufe (wie APK- und AAB-Builds mit Teilschritten) behalten nach erfolgreichem Abschluss nun einheitlich den grünen Status `✓ Erfolg`, und bestehende Task-Zustände mit erfasster Laufzeit werden automatisch angeglichen.

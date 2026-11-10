@@ -466,6 +466,60 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
     assert.strictEqual(cancelCalled, true, 'token.onCancellationRequested must invoke cancelAudit()');
     console.log('✓ startAuditProgressNotification & cancellation hook verified');
 
+    // Dismissal Memory & Suppression Tests
+    const sampleFindingReport = `
+# Audit-Report: test-dismissals
+Modus: \`security\` | Modell: \`gemma4:e4b\`
+
+## 🛡️ 3. Security Audit
+#### KRITISCH: XSS in user-profile.ts
+- **Fundstelle**: src/user-profile.ts:88
+- **Risiko**: innerHTML verwendet.
+`;
+    const statusBefore = manager.parseReportStatus(sampleFindingReport, Date.now());
+    assert.strictEqual(statusBefore.status, 'error', 'Status before dismissal must be error');
+
+    const testDismissals = [
+      { id: 'dsm_1', title: 'XSS in user-profile.ts', file: 'src/user-profile.ts', type: 'sec', reason: 'Sanitized via DOMPurify' }
+    ];
+    const statusAfter = manager.parseReportStatus(sampleFindingReport, Date.now(), testDismissals);
+    assert.strictEqual(statusAfter.status, 'passed', 'Status after dismissal must be passed');
+    assert.strictEqual(statusAfter.summary, 'Bestanden (Befunde ignoriert)', 'Summary must reflect ignored findings');
+    console.log('✓ parseReportStatus with dismissals verified');
+
+    // Test addDismissal, getDismissals, removeDismissal
+    const dummyProj = 'test-dismissal-proj';
+    const addedDsm = manager.addDismissal(dummyProj, {
+      title: 'False Positive SQL-Injection',
+      file: 'models/query.cfc',
+      line: 55,
+      reason: 'Parameter wird durch cfqueryparam geschützt',
+      type: 'sec'
+    });
+    assert(addedDsm && addedDsm.id, 'addDismissal must return created entry with id');
+    const projectDismissals = manager.getDismissals(dummyProj);
+    assert.strictEqual(projectDismissals.length, 1, 'getDismissals must return 1 entry');
+    assert.strictEqual(projectDismissals[0].title, 'False Positive SQL-Injection');
+
+    // Test buildPrompt contains dismissal note
+    const promptWithDsm = manager.buildPrompt(dummyProj, ['dummy_review.md']);
+    assert(promptWithDsm.includes('Dismissal Memory'), 'buildPrompt must include Dismissal Memory note');
+    assert(promptWithDsm.includes('False Positive SQL-Injection'), 'buildPrompt must list dismissed title');
+    assert(promptWithDsm.includes('models/query.cfc:55'), 'buildPrompt must list file and line');
+
+    // Remove dismissal
+    const removedOk = manager.removeDismissal(dummyProj, addedDsm.id);
+    assert.strictEqual(removedOk, true, 'removeDismissal must return true');
+    assert.strictEqual(manager.getDismissals(dummyProj).length, 0, 'Dismissals must be empty after remove');
+    console.log('✓ Dismissal Memory CRUD & buildPrompt injection verified');
+
+    // Test Scheduled Task weekend full audit schedule string
+    const schedTask = manager.getScheduledTask();
+    assert(schedTask.schedule.includes('Täglich'), 'schedule string must include Täglich');
+    assert(schedTask.schedule.includes('Mo–Fr: Diff'), 'schedule string must include Mo–Fr: Diff when weekendFullAudit=true');
+    assert(schedTask.weekendFullAudit === true, 'weekendFullAudit must default to true');
+    console.log(`✓ getScheduledTask schedule string verified: "${schedTask.schedule}"`);
+
     manager.dispose();
     progressManager.dispose();
     console.log('All AuditManager tests passed successfully!');

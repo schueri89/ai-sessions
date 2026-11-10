@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.86.2",
+  "version": "0.87.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -538,6 +538,46 @@
             "type": "string",
             "default": "DevBox-Nightly-Audit",
             "description": "Name des Windows Scheduled Tasks für die nächtlichen automatischen Audits."
+          },
+          "sessionDashboard.audits.scheduledTaskTime": {
+            "type": "string",
+            "default": "04:30",
+            "description": "Uhrzeit für den täglichen nächtlichen Windows Scheduled Task (Format: HH:mm, z. B. 04:30)."
+          },
+          "sessionDashboard.audits.weekendFullAudit": {
+            "type": "boolean",
+            "default": true,
+            "description": "Am Wochenende (z. B. Samstag/Sonntag) automatisch einen vollständigen Projekt-Scan (Komplett-Audit) statt des täglichen Diff-Audits durchführen."
+          },
+          "sessionDashboard.audits.weekendDay": {
+            "type": "string",
+            "enum": [
+              "Saturday",
+              "Sunday",
+              "Both"
+            ],
+            "enumDescriptions": [
+              "Samstag (Voll-Scan in der Samstagnacht)",
+              "Sonntag (Voll-Scan in der Sonntagnacht)",
+              "Samstag & Sonntag (Voll-Scan an beiden Wochenendtagen)"
+            ],
+            "default": "Saturday",
+            "description": "Wochentag für das automatische Wochenend-Voll-Audit via Scheduled Task."
+          },
+          "sessionDashboard.audits.dailyDiffMode": {
+            "type": "string",
+            "enum": [
+              "since-yesterday",
+              "HEAD~1",
+              "unstaged"
+            ],
+            "enumDescriptions": [
+              "Seit gestern (Änderungen der letzten 24 Stunden bzw. seit dem Vortag)",
+              "Letzter Commit (HEAD~1)",
+              "Uncommitted Changes (Arbeitsverzeichnis)"
+            ],
+            "default": "since-yesterday",
+            "description": "Standard-Prüfumfang für das tägliche nächtliche Audit an Wochentagen."
           },
           "sessionDashboard.sound.audits.enabled": {
             "type": "boolean",
