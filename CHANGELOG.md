@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.85.0] – 10.11.2026
+
+- **Benachrichtigung bei grünem Release:** Sobald alle Vorgänge eines kommenden Releases fertig sind, erscheint eine Benachrichtigung mit Sound und Button „In JIRA öffnen“; der Tab Releases bleibt dabei automatisch aktuell (Abfrage alle 5 Minuten, abschaltbar unter Tab: Releases).
+
 ## [0.84.1] – 10.11.2026
 
 - **Lade-Kringel in allen Tabs:** Historie, Deploys und Releases sowie Windows-Aufgaben und Log-Ansicht im Tab Logs zeigen beim Laden jetzt wie die übrigen Tabs eine Lade-Animation.

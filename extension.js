@@ -18,6 +18,7 @@ const { resolveAntigravityReset, setCopilotTokenProvider } = require('./lib/quot
 const { STATES, describe, formatTokens, friendlyModel } = require('./lib/format');
 const { setJenkinsCredentials } = require('./lib/jenkins');
 const { JenkinsWatcher } = require('./lib/jenkinsWatcher');
+const { ReleasesWatcher } = require('./lib/releasesWatcher');
 const { ProjectTasksManager } = require('./lib/projectTasks');
 const { AuditManager } = require('./lib/auditManager');
 const { TasksLogManager } = require('./lib/tasksLogManager');
@@ -662,6 +663,12 @@ function activate(context) {
   });
   board.jenkinsWatcher = jenkinsWatcher;
   jenkinsWatcher.restart();
+  const releasesWatcher = new ReleasesWatcher({
+    soundNotifier,
+    onData: (data) => board.postReleasesData(data)
+  });
+  board.releasesWatcher = releasesWatcher;
+  releasesWatcher.restart();
   const updateChecker = new UpdateChecker(context, logDebug);
   updateChecker.start();
   const statusBar = new StatusBarWidget(model);
@@ -675,6 +682,7 @@ function activate(context) {
     auditManager,
     tasksLogManager,
     jenkinsWatcher,
+    releasesWatcher,
     updateChecker,
     vscode.window.registerWebviewPanelSerializer('sessionDashboard.board', {
       async deserializeWebviewPanel(webviewPanel) {
@@ -791,6 +799,7 @@ function activate(context) {
       }
       if (e.affectsConfiguration('sessionDashboard.releases')) {
         board.onReleasesConfigChanged();
+        releasesWatcher.restart();
       }
       if (e.affectsConfiguration('sessionDashboard.audits')) {
         if (auditManager) {
