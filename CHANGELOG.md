@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.86.0] – 10.11.2026
+
+- **Deploys als Pipeline-Ansicht:** Eine aufgeklappte Pipeline zeigt jetzt wie die Jenkins-Build-Pipeline-Ansicht ihren Aufbau mit Pfeilen und Verzweigungen sowie die letzten 5 Läufe als farbige Kacheln je Job (Build-Nummer, Startzeit, Dauer mit Fortschritt, gestartet von, Parameter des Laufs); laufende Pipelines aktualisieren sich alle 5 Sekunden.
+- **Deploys starten:** „▶ Starten“ startet eine Pipeline direkt aus dem Dashboard – mit Bestätigung und der Möglichkeit, die Build-Parameter vorher anzupassen.
+- **Manuelle Schritte auslösen:** Wartet ein Schritt auf manuellen Start (z. B. Deploy LIVE nach erfolgreichem STAGE), lässt er sich über „▷ Auslösen“ in der Kachel wie in Jenkins starten.
+
 ## [0.85.0] – 10.11.2026
 
 - **Benachrichtigung bei grünem Release:** Sobald alle Vorgänge eines kommenden Releases fertig sind, erscheint eine Benachrichtigung mit Sound und Button „In JIRA öffnen“; der Tab Releases bleibt dabei automatisch aktuell (Abfrage alle 5 Minuten, abschaltbar unter Tab: Releases).
