@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.84.1] – 10.11.2026
+
+- **Lade-Kringel in allen Tabs:** Historie, Deploys und Releases sowie Windows-Aufgaben und Log-Ansicht im Tab Logs zeigen beim Laden jetzt wie die übrigen Tabs eine Lade-Animation.
+
 ## [0.84.0] – 09.11.2026
 
 - **Fortschritts-Benachrichtigungen für KI-Audits:** Laufende Code-Reviews, Security-Scans und Workspace-Guards zeigen ab sofort eine dezente Fortschritts-Benachrichtigung mit Statusphasen und nativer Abbruch-Schaltfläche (`✕`), mit der sich der Prüflauf direkt ohne Öffnen des Dashboards abbrechen lässt (konfigurierbar über `sessionDashboard.audits.showProgressNotification`).
