@@ -25,8 +25,9 @@ Alle fachlichen Regeln, Datenstrukturen und Architekturvorgaben stehen in
   (`versionierung.md`) und Changelog-Eintrag (`changelog.md`) vorschlagen. Gepusht wird nur auf
   ausdrückliche Ansage, im Chat wird nie danach gefragt. Änderungen ausschließlich in diesem
   Projektverzeichnis ausführen und pro Projekt separat committen.
-  Mit jedem Push einer neuen Version wird zusätzlich das Tag `vX.Y.Z` (= `version` aus `package.json`)
-  gesetzt und gepusht; das löst den GitHub Release samt VSIX aus, über den die Nutzer das Update
+  Direkt nach jedem Commit einer neuen Version wird lokal das Tag `vX.Y.Z` (= `version` aus
+  `package.json`) gesetzt, annotiert (der Hook `tag-reminder.py` erinnert daran), und beim Push
+  mitgepusht; erst das Tag löst den GitHub Release samt VSIX aus, über den die Nutzer das Update
   angeboten bekommen.
 - **Fail Fast statt vorsichtiger Programmierung**: Keine defensiven `try/catch`-Kapselungen
   um Schnittstellen, Datenbankabfragen oder Services („damit nichts abstürzt“) und keine stillen
