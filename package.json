@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.87.0",
+  "version": "0.88.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -1229,7 +1229,7 @@
           "sessionDashboard.rootDirectory": {
             "type": "string",
             "default": "",
-            "description": "Haupt-Projektverzeichnis für Projekt-Scans, Audits und Tasks. Bleibt das Feld leer, wird automatisch das aktive Workspace-Verzeichnis verwendet."
+            "description": "Haupt-Projektverzeichnis für Projekt-Scans, Audits und Tasks; seine Unterordner gelten als Projekte. Bleibt das Feld leer, gelten bei mehreren Workspace-Ordnern diese selbst als Projekte, bei einem einzelnen Workspace-Ordner dessen Unterordner."
           },
           "sessionDashboard.updateCheck.enabled": {
             "type": "boolean",

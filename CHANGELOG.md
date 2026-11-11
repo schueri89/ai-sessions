@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.88.0] – 11.11.2026
+
+- **Projekte in Multi-Root-Workspaces:** Bei mehreren Workspace-Ordnern gelten diese selbst als Projekte (Projekt-Auswahl, Erkennung, Tasks) statt der Unterordner des ersten Ordners; ein gesetztes Haupt-Projektverzeichnis hat weiterhin Vorrang.
+
 ## [0.87.0] – 10.11.2026
 
 - **Audits: Dismissal Memory (Ignorieren-Funktion für Befunde):** Abgelehnte Befunde und False Positives können ab sofort direkt an den Befundkarten (Button „🚫 Ignorieren“) oder in der neuen Sektion „🛡️ Dismissal Memory“ im Projekt-Akkordeon mit Begründung hinterlegt werden. Ignorierte Befunde werden bei der Statusbewertung neutralisiert (Status wird grün mit Hinweis „Bestanden (ignoriert)“) und zukünftigen Ollama-Prüfläufen automatisch im Prompt als zu ignorierende Ausnahmen übergeben.

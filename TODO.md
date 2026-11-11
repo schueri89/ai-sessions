@@ -5,6 +5,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 - [ ] Tasks: die Anzahl beim Filter irritiert etwas, wenn man nur die Haupt-Tasks anzeigen lässt. kann man das anpassen?
 
 ## Erledigt
+- [x] session-dashboard v0.88.0: Projekt-Erkennung: bei mehreren Workspace-Ordnern sind diese die Projekte (lib/project.js `getKnownProjects`, pfadgenaues `matchProjectInText` statt ROOT-Basename-Regex), `.agents`-Suche und `process.cwd()`-Fallback in `getDefaultRoot` entfernt *(11.11.2026)*
 - [x] session-dashboard v0.87.0: Audits: Dismissal Memory (Ignorieren-Funktion & False-Positive-Gedächtnis je Projekt im Dashboard & CLI) und konfigurierbares Wochenend-Voll-Audit (Scheduled Task mit Unterscheidung tägliches Diff-Audit vs. wöchentlicher Komplett-Scan via sessionDashboard.audits.weekendFullAudit/weekendDay/dailyDiffMode/scheduledTaskTime) *(10.11.2026, [Plan](.agents/plans/2026-11-10_audits-dismissal-memory-und-scheduled-weekend-scan.md))*
 - [x] session-dashboard v0.86.2: Tasks: Status-Angleichung für mehrstufige Tasks (APK- und AAB-Builds mit dependsOn behalten nach erfolgreichem Lauf dauerhaft den Status ✓ Erfolg, automatische Migration zuvor als idle erfasster Läufe beim Start und differenzierte Fehler-Erkennung bei Abbruch oder fehlerhaften Unterschritten) *(10.11.2026, [Plan](.agents/plans/2026-11-10_tasks-status-angleichung-fuer-mehrstufige-tasks.md))*
 - [x] session-dashboard v0.86.1: Deploys-Kacheln: Öffnen-/Konsole-Buttons als SVG-Symbole mit Theme-Kontrast, kräftigere Pfeile zwischen den Schritten *(10.11.2026)*
