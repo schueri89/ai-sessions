@@ -35,4 +35,6 @@ weil dort alle Repos nebeneinanderliegen, und wird nie deployt.
   nur lokal, einige Tests brauchen die Projekte unter ROOT) und legt den GitHub Release mit dem passenden
   `CHANGELOG.md`-Abschnitt an. `lib/updateChecker.js`
   fragt `releases/latest` des öffentlichen Repos `schueri89/ai-sessions` ab und installiert das
-  VSIX-Asset. VSIX-Dateien werden nie committet.
+  VSIX-Asset. VSIX-Dateien werden nie committet. „Latest" bekommt nur der Release mit der höchsten
+  Version (Abgleich gegen die Tags auf GitHub): Am 11.11.2026 wurden `v0.90.0` und `v0.90.1`
+  zusammen gepusht, der zuletzt fertige Lauf (0.90.0) wurde „Latest", 0.90.1 kam nie als Update an.

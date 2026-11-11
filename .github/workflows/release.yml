@@ -47,7 +47,23 @@ jobs:
             fs.writeFileSync("release-notes.md", body + "\n");
           ' "${GITHUB_REF_NAME#v}"
 
+      # Only the highest version becomes "Latest": the update checker reads releases/latest, and
+      # with several tags pushed at once the run finishing last would win otherwise (11.11.2026).
+      - name: Höchste Version bestimmen
+        id: latest
+        run: |
+          tags="$(git ls-remote --tags --refs origin 'v*' | sed 's#.*refs/tags/##')"
+          latest="$(node -e '
+            const parse = (t) => t.replace(/^v/, "").split(".").map(Number);
+            const cmp = (a, b) => { for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i]; return 0; };
+            const own = parse(process.argv[1]);
+            const tags = process.argv[2].split(/\s+/).filter((t) => /^v\d+\.\d+\.\d+$/.test(t));
+            console.log(tags.every((t) => cmp(parse(t), own) <= 0) ? "true" : "false");
+          ' "$GITHUB_REF_NAME" "$tags")"
+          echo "Latest: $latest"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
       - name: GitHub Release anlegen
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "vsix/ai-sessions-${GITHUB_REF_NAME#v}.vsix" --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+        run: gh release create "$GITHUB_REF_NAME" "vsix/ai-sessions-${GITHUB_REF_NAME#v}.vsix" --title "$GITHUB_REF_NAME" --notes-file release-notes.md --latest=${{ steps.latest.outputs.latest }}

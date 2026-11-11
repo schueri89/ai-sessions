@@ -2,6 +2,7 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
+_Zurzeit nichts offen._
 
 ## Erledigt
 - [x] session-dashboard v0.92.1: Tasks: Projekt-Filter-Chips und Zähler „x von y“ folgen dem Schalter „Nur Haupt-Tasks“ (Projekte ohne Haupt-Tasks werden dann ausgeblendet, Tooltip nennt die Gesamtzahl inkl. Teilschritte) *(11.11.2026)*
