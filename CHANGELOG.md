@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.89.0] – 11.11.2026
+
+- **Deploys: Laufende Pipelines oben:** Gerade laufende Pipelines stehen in einer eigenen Rubrik „🔄 Laufend“ über den Favoriten und gehen in der Liste nicht mehr unter. Gemeinsam genutzte Jobs (z. B. killapps), die gerade für eine andere Pipeline laufen, zählen dabei nicht mit.
+- **Deploys: Status des letzten Laufs:** Die Statusanzeige einer Pipeline richtet sich nach dem letzten Lauf; ältere Fehler von Schritten, die seitdem nicht mehr gelaufen sind, färben sie nicht mehr rot.
+- **Deploys: Farbigere Ansicht:** „Starten“ ist grün, „Öffnen“ blau hervorgehoben, die Rubriken haben farbige Markierungen; die Zusatzzeile unter dem Pipeline-Namen entfällt.
+
 ## [0.88.0] – 11.11.2026
 
 - **Projekte in Multi-Root-Workspaces:** Bei mehreren Workspace-Ordnern gelten diese selbst als Projekte (Projekt-Auswahl, Erkennung, Tasks) statt der Unterordner des ersten Ordners; ein gesetztes Haupt-Projektverzeichnis hat weiterhin Vorrang.
