@@ -99,7 +99,7 @@ const mockGlobalState = {
   }
 };
 
-const manager = new ProjectTasksManager({ globalState: mockGlobalState });
+const manager = new ProjectTasksManager({ globalState: mockGlobalState }, { rootDir });
 manager.refresh();
 
 const tasksList = manager.getAllTasks();

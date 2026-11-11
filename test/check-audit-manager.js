@@ -520,6 +520,51 @@ Modus: \`security\` | Modell: \`gemma4:e4b\`
     assert(schedTask.weekendFullAudit === true, 'weekendFullAudit must default to true');
     console.log(`✓ getScheduledTask schedule string verified: "${schedTask.schedule}"`);
 
+    // Performance Review Tests
+    const samplePerfCritReport = `
+# Audit-Report: test-perf
+Modus: \`perf\` | Modell: \`gemma4:e4b\`
+
+## ⚡ 1. Performance Review
+#### KRITISCHE BREMSE: N+1 Query in OrderService.cfc
+- **Fundstelle**: \`OrderService.cfc:120\`
+- **Konfidenz**: 95%
+- **Problem**: Query innerhalb einer cfloop.
+`;
+    const perfCritStatus = manager.parseReportStatus(samplePerfCritReport, Date.now());
+    assert.strictEqual(perfCritStatus.status, 'error', 'KRITISCHE BREMSE must map to error status');
+    assert.strictEqual(perfCritStatus.mode, 'perf', 'Mode must be parsed as perf');
+
+    const samplePerfWarnReport = `
+# Audit-Report: test-perf-warn
+Modus: \`perf\` | Modell: \`gemma4:e4b\`
+
+## ⚡ 1. Performance Review
+#### OPTIMIERUNGSBEDARF: Fehlende OnPush Strategy
+- **Fundstelle**: \`order-list.component.ts:15\`
+- **Konfidenz**: 82%
+`;
+    const perfWarnStatus = manager.parseReportStatus(samplePerfWarnReport, Date.now());
+    assert.strictEqual(perfWarnStatus.status, 'warning', 'OPTIMIERUNGSBEDARF must map to warning status');
+
+    const samplePerfCleanReport = `
+# Audit-Report: test-perf-clean
+Modus: \`perf\` | Modell: \`gemma4:e4b\`
+
+## ⚡ 1. Performance Review
+#### [KRITISCHE BREMSE | OPTIMIERUNGSBEDARF]: [Kurztitel]
+- **Fundstelle**: \`[Dateiname:Zeilennummer]\`
+
+Keine signifikanten Performance-Bremsen gefunden.
+`;
+    const perfCleanStatus = manager.parseReportStatus(samplePerfCleanReport, Date.now());
+    assert.strictEqual(perfCleanStatus.status, 'passed', 'Template bracket header and clean message must map to passed status');
+
+    const perfPrompt = manager.buildPrompt('test-perf-proj', ['C:\\reports\\2026-11-10_test-perf-proj_perf.md']);
+    assert(perfPrompt.includes('Performance-Bericht'), 'buildPrompt for _perf.md must mention Performance-Bericht');
+    assert(perfPrompt.includes('Wissensbasis-Evolution'), 'buildPrompt for _perf.md must include Wissensbasis-Evolution instruction');
+    console.log('✓ Performance-Review status parsing & buildPrompt verified');
+
     manager.dispose();
     progressManager.dispose();
     console.log('All AuditManager tests passed successfully!');

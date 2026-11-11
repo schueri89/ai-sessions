@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.92.0] – 11.11.2026
+
+- **Audits: Dedizierter Performance-Review (3. Audit-Säule):** Das lokale KI-Audit-System und der Tab „🔍 Audits & Reviews“ wurden um einen eigenständigen Performance-Review (`--mode perf` sowie integriert in den kombinierten Single-Pass-Lauf `--mode all`) für Server (CFML/Lucee/MariaDB) und Client (Angular/TypeScript/CSS/Web) erweitert.
+- **Wissensbasis-gestütztes 3-Stufen-Review:** Der Performance-Review lädt dynamisch die zentrale Performance-Dokumentation (`cfml-performance.md`, `frontend-performance.md` samt automatisch aufgelösten Unterdateien und projektspezifischem Kontext), prüft darüber hinaus frei auf algorithmische und architektonische Engpässe und schlägt neue Muster als `💡 Wissensbasis-Kandidat` zur Erweiterung der Dokumentation vor.
+- **Dashboard-Integration:** Neue sortierbare Spalte „Performance“, Schnellstart-Button `⚡ Perf`, kombinierter Start-Button `⚡ Alle` (Code+Sec+Perf), dritte Detail-Karte im aufgeklappten Projekt-Bereich, Unterstützung im Dismissal Memory (`perf`) und direkte KI-Übergabe inklusive Wissensbasis-Evolutionsauftrag.
+
 ## [0.91.0] – 12.11.2026
 
 - **Deploys: Warteschlange sichtbar:** Pipelines mit einem Lauf in der Jenkins-Warteschlange stehen ebenfalls unter „🔄 Laufend“ und zeigen den eigenen Status ⏳ (bei gleichzeitig laufendem Build 🔄⏳); die Ansicht aktualisiert sich dann alle 15 Sekunden.
