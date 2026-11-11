@@ -2,9 +2,9 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-- [ ] Tasks: die Anzahl beim Filter irritiert etwas, wenn man nur die Haupt-Tasks anzeigen lässt. kann man das anpassen?
 
 ## Erledigt
+- [x] session-dashboard v0.92.1: Tasks: Projekt-Filter-Chips und Zähler „x von y“ folgen dem Schalter „Nur Haupt-Tasks“ (Projekte ohne Haupt-Tasks werden dann ausgeblendet, Tooltip nennt die Gesamtzahl inkl. Teilschritte) *(11.11.2026)*
 - [x] session-dashboard v0.92.0: Audits: Dedizierter Performance-Review als 3. Audit-Säule (`--mode perf` & integriert in `--mode all`) für Server (CFML/Lucee/MariaDB) und Client (Angular/TypeScript/CSS/Web) auf Basis der wachsenden Wissensbasis (`cfml-performance.md`, `frontend-performance.md`), 3-Stufen-Review mit `💡 Wissensbasis-Kandidat`-Rückfluss, eigener Tabellenspalte, Detail-Karte, Dismissal Memory (`perf`) und KI-Dispatch *(11.11.2026, [Plan](../.agents/plans/2026-11-10_performance-review-erweiterung.md))*
 - [x] session-dashboard v0.91.0: Deploys: Jobs in der Jenkins-Warteschlange (`inQueue`) bringen ihre Pipeline unter „Laufend“ mit Status ⏳ (gemeinsam genutzte Jobs nur als Einstieg), Watcher pollt bei Warteschlange im 15-s-Takt; `nudge()` nach Start/Auslösen pollt nach 2 s statt erst nach 15 s und hält den 15-s-Takt 3 Min. (Boost) *(12.11.2026)*
 - [x] session-dashboard v0.89.0: Deploys: Rubrik „🔄 Laufend“ über Favoriten, Pipeline-Status aus dem letzten Lauf (Jobs älter als der neueste Start eines Einstiegs-Jobs ignoriert), gemeinsam genutzte Downstream-Jobs zählen nur bei Auslösung aus der eigenen Pipeline (UpstreamCause im letzten Build), Starten-/Öffnen-Buttons grün/blau, farbige Rubrik-Markierungen, Zusatzzeile (View-Typ/Beschreibung) unter dem Pipeline-Namen entfernt *(11.11.2026)*

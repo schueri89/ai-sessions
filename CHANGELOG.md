@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.92.1] – 11.11.2026
+
+- **Tasks: Filter-Zähler folgen „Nur Haupt-Tasks“:** Die Projekt-Filter-Chips und der Zähler „x von y“ zählen bei aktiver Haupt-Task-Filterung nur noch Haupt-Tasks; Projekte ohne solche Tasks werden ausgeblendet (außer wenn gewählt), der Tooltip nennt die Gesamtzahl inklusive Teilschritte.
+
 ## [0.92.0] – 11.11.2026
 
 - **Audits: Dedizierter Performance-Review (3. Audit-Säule):** Das lokale KI-Audit-System und der Tab „🔍 Audits & Reviews“ wurden um einen eigenständigen Performance-Review (`--mode perf` sowie integriert in den kombinierten Single-Pass-Lauf `--mode all`) für Server (CFML/Lucee/MariaDB) und Client (Angular/TypeScript/CSS/Web) erweitert.
