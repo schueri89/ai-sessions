@@ -2,6 +2,13 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.93.0] – 12.11.2026
+
+- **Sessions: Direkte Projekt-Auswahl per Klick:** Ein Klick auf das Projekt-Badge auf den Session-Karten öffnet direkt die Projekt-Zuweisung per Auswahlliste (statt das Board zu filtern); das überflüssige Stift-Icon entfällt.
+- **Sessions: Verschlankte JIRA-Bedienung:** Auf den Kacheln entfällt das separate Stift-Icon; zum Ändern wird das Ticket mit dem Mülleimer-Icon gelöscht, woraufhin direkt der Button `+ JIRA` für den neuen Vorgang erscheint.
+- **Sessions: Bereinigung „Status: closed“:** Das technische Relikt `Status: closed` bei historischen Claude-Sessions wird nicht mehr angezeigt; Kacheln zeigen stattdessen sauber die relative Zeitangabe.
+- **Details-Seite: Projekt & JIRA integriert:** Auf der Read-Only-Details-Seite (`👁️ Details`) kann das Projekt nun direkt per Klick auf das Badge geändert werden; bei konfiguriertem JIRA werden Ticket-Pill, Browser-Aufruf, Löschen-Button und `+ JIRA`-Zuweisung inklusive Live-Aktualisierung bereitgestellt.
+
 ## [0.92.2] – 12.11.2026
 
 - **Logs: Intelligenter Auto-Scroll und stabiles Nachlesen:** Beim Hochscrollen in Log-Dateien wird die Scroll-Position bei Hintergrund-Aktualisierungen nicht mehr nach unten zurückgesetzt. Unveränderte Log-Dateien werden nicht mehr neu gerendert, Auto-Scroll pausiert beim Hochscrollen automatisch (Checkbox wird abgewählt) und reaktiviert sich beim Scrollen an das Ende oder per Klick auf die Checkbox. Hintergrund-Polling von KI-Sessions stößt keine Log-Aktualisierungen mehr an.

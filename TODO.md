@@ -2,9 +2,10 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-_Zurzeit nichts offen._
+_Zurzeit keine offenen Aufgaben._
 
 ## Erledigt
+- [x] session-dashboard v0.93.0: Sessions-Karten Interaktion, Bereinigung „Status: closed“ & Details-Seite JIRA/Projekt (Projekt-Badge öffnet per Klick direkt QuickPick statt Board-Filter, Stift-Icon entfällt; JIRA-Stift-Icon entfällt zugunsten von Löschen gefolgt von + JIRA; „Status: closed“-Relikt aus format.js entfernt; Details-Seite TranscriptViewerPanel mit interaktivem Projekt-Badge, JIRA-Buttons und Live-Aktualisierung erweitert) *(12.11.2026, [Plan](.agents/plans/2026-11-12_sessions-karten-interaktion-status-closed-details-seite.md))*
 - [x] session-dashboard v0.92.2: Logs: Intelligenter Auto-Scroll und stabiles Nachlesen beim Durchscrollen von Log-Dateien (kein automatisches Herunterspringen bei Hintergrund-Aktualisierungen, Pause von Auto-Scroll beim Hochscrollen, DOM-Schutz bei unveränderten Logs und Entkopplung vom KI-Session-Polling) *(12.11.2026)*
 - [x] session-dashboard v0.92.1: Tasks: Projekt-Filter-Chips und Zähler „x von y“ folgen dem Schalter „Nur Haupt-Tasks“ (Projekte ohne Haupt-Tasks werden dann ausgeblendet, Tooltip nennt die Gesamtzahl inkl. Teilschritte) *(11.11.2026)*
 - [x] session-dashboard v0.92.0: Audits: Dedizierter Performance-Review als 3. Audit-Säule (`--mode perf` & integriert in `--mode all`) für Server (CFML/Lucee/MariaDB) und Client (Angular/TypeScript/CSS/Web) auf Basis der wachsenden Wissensbasis (`cfml-performance.md`, `frontend-performance.md`), 3-Stufen-Review mit `💡 Wissensbasis-Kandidat`-Rückfluss, eigener Tabellenspalte, Detail-Karte, Dismissal Memory (`perf`) und KI-Dispatch *(11.11.2026, [Plan](../.agents/plans/2026-11-10_performance-review-erweiterung.md))*

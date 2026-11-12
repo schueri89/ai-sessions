@@ -79,7 +79,6 @@ function renderCardMeta(s, cachedJiraEnabled) {
   if (cachedJiraEnabled) {
     if (s.ticket) {
       elements.push({ type: 'card-jira-pill', text: s.ticket });
-      elements.push({ type: 'project-edit-btn', action: 'edit' });
       elements.push({ type: 'project-edit-btn', action: 'remove' });
     } else {
       elements.push({ type: 'card-jira-add-btn', text: '+ JIRA' });
@@ -100,9 +99,37 @@ assert.strictEqual(itemsEnabledNoTicket.length, 1, 'Should have 1 add-btn when J
 assert.strictEqual(itemsEnabledNoTicket[0].type, 'card-jira-add-btn');
 
 const itemsEnabledWithTicket = renderCardMeta({ sessionId: 's2', ticket: 'PROJ-123' }, true);
-assert.strictEqual(itemsEnabledWithTicket.length, 3, 'Should have pill + edit + remove buttons when JIRA enabled with ticket');
+assert.strictEqual(itemsEnabledWithTicket.length, 2, 'Should have pill + remove button (no edit button) when JIRA enabled with ticket');
 assert.strictEqual(itemsEnabledWithTicket[0].type, 'card-jira-pill');
 assert.strictEqual(itemsEnabledWithTicket[0].text, 'PROJ-123');
+assert.strictEqual(itemsEnabledWithTicket[1].action, 'remove');
 
-console.log('✓ JIRA card rendering logic verified (hidden when inactive, visible when active)');
+// BoardPanel Webview script assertions: no edit buttons, direct assignProject on badge
+assert(!htmlWithJira.includes("jEditBtn.title = 'JIRA-Ticket ändern"), 'jEditBtn must be removed from BoardPanel');
+assert(!htmlWithJira.includes("pEditBtn.title = isUnassigned"), 'pEditBtn must be removed from BoardPanel');
+assert(htmlWithJira.includes("vscode.postMessage({ action: 'assignProject', sessionId: s.sessionId });"), 'project-badge click must send assignProject');
+console.log('✓ JIRA card rendering logic verified (hidden when inactive, visible when active, edit icons removed)');
+
+// 4. Test format.js describe() without "Status: closed"
+const { describe } = require('../lib/format');
+const descClosed = describe({ rawStatus: 'closed', state: 'idle', statusUpdatedAt: Date.now() - 3600000 });
+assert(!descClosed.includes('Status: closed'), 'describe() must NOT output "Status: closed"');
+assert(descClosed.includes('Std.') || descClosed.includes('Min.') || descClosed.includes('zuletzt aktiv'), 'describe() must output relative time');
+console.log('✓ format.js describe() suppresses "Status: closed" successfully');
+
+// 5. Test TranscriptViewerPanel interactive project and JIRA header
+const { TranscriptViewerPanel } = require('../lib/transcriptViewerPanel');
+const testViewer = Object.create(TranscriptViewerPanel.prototype);
+testViewer.effectiveProject = 'auto-hub';
+testViewer.jiraEnabled = true;
+testViewer.ticket = 'AI-42';
+testViewer.transcript = { sessionId: 'test-s1', provider: 'claude', title: 'Test Transcript', turns: [] };
+const viewerHtml = testViewer.getHtml();
+assert(viewerHtml.includes('id="viewer-project-badge"'), 'TranscriptViewerPanel must have viewer-project-badge');
+assert(viewerHtml.includes('id="viewer-jira-container"'), 'TranscriptViewerPanel must have viewer-jira-container');
+assert(viewerHtml.includes('AI-42'), 'TranscriptViewerPanel must render ticket');
+assert(viewerHtml.includes('id="viewer-jira-remove"'), 'TranscriptViewerPanel must render trash button');
+assert(!viewerHtml.includes('id="viewer-jira-edit"'), 'TranscriptViewerPanel must not have edit button');
+console.log('✓ TranscriptViewerPanel interactive project badge and JIRA controls verified');
+
 console.log('All check-sessions-tab-and-jira tests passed successfully!');

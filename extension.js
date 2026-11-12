@@ -220,18 +220,27 @@ class SessionModel {
 // Resolves sessionId and provider from various caller formats (string, tree item, card payload).
 function sessionInfoOf(arg, model) {
   if (!arg) return null;
+  let sId = null;
+  let prov = null;
+  let rawSession = null;
   if (typeof arg === 'string') {
-    const found = model ? model.sessions.find((s) => s.sessionId === arg) : null;
-    return { sessionId: arg, provider: found ? found.provider : 'claude', session: found };
+    sId = arg;
+  } else if (arg.session) {
+    sId = arg.session.sessionId;
+    prov = arg.session.provider;
+    rawSession = arg.session;
+  } else if (arg.sessionId) {
+    sId = arg.sessionId;
+    prov = arg.provider;
+    rawSession = arg;
   }
-  if (arg.session) {
-    return { sessionId: arg.session.sessionId, provider: arg.session.provider, session: arg.session };
-  }
-  if (arg.sessionId) {
-    const found = model ? model.sessions.find((s) => s.sessionId === arg.sessionId) : null;
-    return { sessionId: arg.sessionId, provider: arg.provider || (found ? found.provider : 'claude'), session: found || arg };
-  }
-  return null;
+  if (!sId) return null;
+  const found = model ? model.sessions.find((s) => s.sessionId === sId) : null;
+  const session = found || rawSession;
+  const provider = prov || (found ? found.provider : (session ? session.provider : 'claude'));
+  const project = (model && model.projects ? model.projects.getOverride(sId) : null) || (found && found.project) || (rawSession && rawSession.project);
+  const ticket = (model && model.tickets ? model.tickets.getTicket(sId) : null) || (found && found.ticket) || (rawSession && rawSession.ticket);
+  return { sessionId: sId, provider, session, project, ticket };
 }
 
 function sessionIdOf(arg) {
@@ -1058,10 +1067,12 @@ function activate(context) {
       const trimmed = input.trim();
       if (!trimmed) {
         await model.tickets.removeTicket(sId);
+        TranscriptViewerPanel.updateSessionMeta(sId, { ticket: null });
         vscode.window.showInformationMessage(`JIRA-Ticket für Session „${titleLabel}“ wurde entfernt.`);
       } else {
         const cleanKey = trimmed.toUpperCase();
         await model.tickets.setTicket(sId, cleanKey);
+        TranscriptViewerPanel.updateSessionMeta(sId, { ticket: cleanKey });
         const cfgUrl = vscode.workspace.getConfiguration('sessionDashboard').get('jiraBaseUrl', '');
         if (cfgUrl) {
           vscode.window.showInformationMessage(
@@ -1113,6 +1124,7 @@ function activate(context) {
       const id = sessionIdOf(arg);
       if (!id) return;
       await model.tickets.removeTicket(id);
+      TranscriptViewerPanel.updateSessionMeta(id, { ticket: null });
       await update(true);
       if (board.viewMode === 'history') {
         board.sendHistory();
@@ -1206,6 +1218,8 @@ function activate(context) {
       }
 
       await update(true);
+      const updatedS = model.sessions.find((s) => s.sessionId === sId);
+      TranscriptViewerPanel.updateSessionMeta(sId, { project: updatedS ? updatedS.project : (model.projects.getOverride(sId) || autoProject) });
       if (board.viewMode === 'history') {
         board.sendHistory();
       }
@@ -1215,6 +1229,8 @@ function activate(context) {
       if (!id) return;
       await model.projects.removeOverride(id);
       await update(true);
+      const updatedS = model.sessions.find((s) => s.sessionId === id);
+      TranscriptViewerPanel.updateSessionMeta(id, { project: updatedS ? updatedS.project : 'ROOT' });
       if (board.viewMode === 'history') {
         board.sendHistory();
       }
