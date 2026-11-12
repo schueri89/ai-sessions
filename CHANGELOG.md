@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.92.2] – 12.11.2026
+
+- **Logs: Intelligenter Auto-Scroll und stabiles Nachlesen:** Beim Hochscrollen in Log-Dateien wird die Scroll-Position bei Hintergrund-Aktualisierungen nicht mehr nach unten zurückgesetzt. Unveränderte Log-Dateien werden nicht mehr neu gerendert, Auto-Scroll pausiert beim Hochscrollen automatisch (Checkbox wird abgewählt) und reaktiviert sich beim Scrollen an das Ende oder per Klick auf die Checkbox. Hintergrund-Polling von KI-Sessions stößt keine Log-Aktualisierungen mehr an.
+
 ## [0.92.1] – 11.11.2026
 
 - **Tasks: Filter-Zähler folgen „Nur Haupt-Tasks“:** Die Projekt-Filter-Chips und der Zähler „x von y“ zählen bei aktiver Haupt-Task-Filterung nur noch Haupt-Tasks; Projekte ohne solche Tasks werden ausgeblendet (außer wenn gewählt), der Tooltip nennt die Gesamtzahl inklusive Teilschritte.

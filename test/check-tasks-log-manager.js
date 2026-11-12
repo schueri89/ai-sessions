@@ -68,4 +68,8 @@ assert.strictEqual(logContent.name, 'backup-sync.log', 'Log name should match');
 assert(typeof logContent.content === 'string', 'Content should be a string');
 console.log(`✓ getLogContent returns valid content object for backup-sync.log (exists: ${logContent.exists})`);
 
+assert.strictEqual(typeof manager.getFailedCount(), 'number', 'getFailedCount should return a number');
+assert.strictEqual(manager.getFailedCount(), overview.failedTasksCount, 'getFailedCount should match overview.failedTasksCount');
+console.log(`✓ getFailedCount returns ${manager.getFailedCount()} matching overview`);
+
 console.log('All TasksLogManager tests passed successfully!');

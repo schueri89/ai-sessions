@@ -5,6 +5,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 _Zurzeit nichts offen._
 
 ## Erledigt
+- [x] session-dashboard v0.92.2: Logs: Intelligenter Auto-Scroll und stabiles Nachlesen beim Durchscrollen von Log-Dateien (kein automatisches Herunterspringen bei Hintergrund-Aktualisierungen, Pause von Auto-Scroll beim Hochscrollen, DOM-Schutz bei unveränderten Logs und Entkopplung vom KI-Session-Polling) *(12.11.2026)*
 - [x] session-dashboard v0.92.1: Tasks: Projekt-Filter-Chips und Zähler „x von y“ folgen dem Schalter „Nur Haupt-Tasks“ (Projekte ohne Haupt-Tasks werden dann ausgeblendet, Tooltip nennt die Gesamtzahl inkl. Teilschritte) *(11.11.2026)*
 - [x] session-dashboard v0.92.0: Audits: Dedizierter Performance-Review als 3. Audit-Säule (`--mode perf` & integriert in `--mode all`) für Server (CFML/Lucee/MariaDB) und Client (Angular/TypeScript/CSS/Web) auf Basis der wachsenden Wissensbasis (`cfml-performance.md`, `frontend-performance.md`), 3-Stufen-Review mit `💡 Wissensbasis-Kandidat`-Rückfluss, eigener Tabellenspalte, Detail-Karte, Dismissal Memory (`perf`) und KI-Dispatch *(11.11.2026, [Plan](../.agents/plans/2026-11-10_performance-review-erweiterung.md))*
 - [x] session-dashboard v0.91.0: Deploys: Jobs in der Jenkins-Warteschlange (`inQueue`) bringen ihre Pipeline unter „Laufend“ mit Status ⏳ (gemeinsam genutzte Jobs nur als Einstieg), Watcher pollt bei Warteschlange im 15-s-Takt; `nudge()` nach Start/Auslösen pollt nach 2 s statt erst nach 15 s und hält den 15-s-Takt 3 Min. (Boost) *(12.11.2026)*
