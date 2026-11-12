@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.90.0] – 12.11.2026
+
+- **Deploys: Warteschlange sichtbar:** Pipelines mit einem Lauf in der Jenkins-Warteschlange stehen ebenfalls unter „🔄 Laufend“ und zeigen den eigenen Status ⏳ (bei gleichzeitig laufendem Build 🔄⏳); die Ansicht aktualisiert sich dann alle 15 Sekunden.
+- **Deploys: Schnellere Aktualisierung nach dem Start:** Nach „Starten“ oder „Auslösen“ wird die Liste nach wenigen Sekunden aktualisiert und danach mindestens drei Minuten lang alle 15 Sekunden.
+
 ## [0.89.0] – 11.11.2026
 
 - **Deploys: Laufende Pipelines oben:** Gerade laufende Pipelines stehen in einer eigenen Rubrik „🔄 Laufend“ über den Favoriten und gehen in der Liste nicht mehr unter. Gemeinsam genutzte Jobs (z. B. killapps), die gerade für eine andere Pipeline laufen, zählen dabei nicht mit.
