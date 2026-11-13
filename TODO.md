@@ -5,6 +5,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 _Zurzeit keine offenen Aufgaben._
 
 ## Erledigt
+- [x] session-dashboard v0.94.1: Deploys: Schritt-Badge laufender Pipelines zeigt aktiven Schritt und Gesamtzahl (z. B. „2/5“) *(13.11.2026)*
 - [x] session-dashboard v0.94.0: Update-Hinweis im Dashboard (roter Button „❗ Update x.y.z“ / „Neu laden“ in der Toolbar, Zustand fensterübergreifend über globalState `sessionDashboard.update.available`); Deploys: aktive Schritt-Nummer laufender Pipelines in der Status-Spalte, Abstand Starten/Öffnen und Pfeil/Titel bei „Alle weiteren Pipelines“ *(13.11.2026)*
 - [x] session-dashboard v0.93.1: Antigravity-Quota-Prozentanzeige wiederhergestellt (`detectAgyHub()` in `lib/quota.js` liest Port, PID und CSRF-Token aus `~/.gemini/antigravity/daemon/hub_*.json` mit Lebendprüfung per `process.kill(pid, 0)` statt `--csrf_token` aus der `agy.exe`-Kommandozeile) *(13.11.2026)*
 - [x] session-dashboard v0.93.0: Sessions-Karten Interaktion, Bereinigung „Status: closed“ & Details-Seite JIRA/Projekt (Projekt-Badge öffnet per Klick direkt QuickPick statt Board-Filter, Stift-Icon entfällt; JIRA-Stift-Icon entfällt zugunsten von Löschen gefolgt von + JIRA; „Status: closed“-Relikt aus format.js entfernt; Details-Seite TranscriptViewerPanel mit interaktivem Projekt-Badge, JIRA-Buttons und Live-Aktualisierung erweitert) *(12.11.2026, [Plan](.agents/plans/2026-11-12_sessions-karten-interaktion-status-closed-details-seite.md))*

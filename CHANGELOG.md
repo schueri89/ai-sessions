@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.94.1] – 13.11.2026
+
+- **Deploys: Schritt-Anzeige mit Gesamtzahl:** Das Badge laufender Pipelines zeigt jetzt zusätzlich die Anzahl aller Schritte (z. B. „2/5“).
+
 ## [0.94.0] – 13.11.2026
 
 - **Update-Hinweis im Dashboard:** Steht eine neue Version bereit, erscheint oben rechts neben Einstellungen, Debug-Log und Sound ein roter Button „❗ Update x.y.z“, der die Installation anbietet; nach der Installation wird er zu „❗ Neu laden“.
