@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.94.0] – 13.11.2026
+
+- **Update-Hinweis im Dashboard:** Steht eine neue Version bereit, erscheint oben rechts neben Einstellungen, Debug-Log und Sound ein roter Button „❗ Update x.y.z“, der die Installation anbietet; nach der Installation wird er zu „❗ Neu laden“.
+- **Deploys: Aktiver Schritt bei laufenden Pipelines:** Neben dem Status-Symbol zeigt eine Zahl, bei welchem Schritt die Pipeline gerade läuft oder wartet.
+- **Deploys: Mehr Luft:** Abstand zwischen „Starten“ und „Öffnen“ sowie zwischen Pfeil und Titel bei „Alle weiteren Pipelines“.
+
 ## [0.93.1] – 13.11.2026
 
 - **Antigravity-Quota: Prozentanzeige wiederhergestellt:** Die Erkennung des laufenden Antigravity-Hubs liest Port und CSRF-Token nun aus der Daemon-Datei (`daemon/hub_<port>.json`) statt aus den Startparametern, sodass 5h- und 7d-Prozentwerte wieder zuverlässig in Dashboard und Statusleiste erscheinen.

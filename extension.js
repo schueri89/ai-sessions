@@ -679,6 +679,8 @@ function activate(context) {
   board.releasesWatcher = releasesWatcher;
   releasesWatcher.restart();
   const updateChecker = new UpdateChecker(context, logDebug);
+  board.updateChecker = updateChecker;
+  updateChecker.onDidChange(() => board.sendAppUpdate());
   updateChecker.start();
   const statusBar = new StatusBarWidget(model);
   const view = vscode.window.createTreeView('sessionDashboard.sessions', { treeDataProvider: tree });
