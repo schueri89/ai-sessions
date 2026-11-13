@@ -22,7 +22,7 @@ const expectedCategories = [
   { title: 'Tab: Audits', order: 3, count: 13 },
   { title: 'Tab: Logs', order: 4, count: 3 },
   { title: 'Tab: Deploys', order: 5, count: 8 },
-  { title: 'Tab: Releases', order: 6, count: 7 },
+  { title: 'Tab: Releases', order: 6, count: 9 },
   { title: 'Statusleiste & Limits', order: 7, count: 4 },
   { title: 'Sounds', order: 8, count: 17 },
   { title: 'Benachrichtigungen', order: 9, count: 8 },
@@ -48,7 +48,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 82, `Total property count across all categories must be exactly 82, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 84, `Total property count across all categories must be exactly 84, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -87,6 +87,8 @@ assert(cfg[5].properties['sessionDashboard.releases.enabled'], 'releases.enabled
 assert(cfg[5].properties['sessionDashboard.releases.credentialsFile'], 'releases.credentialsFile must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.releases.projects'], 'releases.projects must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.releases.readyStatuses'], 'releases.readyStatuses must be in Tab: Releases');
+assert(cfg[5].properties['sessionDashboard.releases.developerField'], 'releases.developerField must be in Tab: Releases');
+assert(cfg[5].properties['sessionDashboard.releases.reviewPrompt'], 'releases.reviewPrompt must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.sound.releases.enabled'], 'sound.releases.enabled must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.sound.releases.sound'], 'sound.releases.sound must be in Tab: Releases');
 assert(cfg[5].properties['sessionDashboard.notifications.releases'], 'notifications.releases must be in Tab: Releases');
@@ -96,7 +98,7 @@ assert(cfg[9].properties['sessionDashboard.defaultTab'], 'defaultTab must be in 
 assert(cfg[9].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
 assert(cfg[9].properties['sessionDashboard.updateCheck.enabled'], 'updateCheck.enabled must be in Allgemein');
 
-console.log('✓ All 10 categories and 82 properties in package.json verified successfully');
+console.log('✓ All 10 categories and 84 properties in package.json verified successfully');
 
 // 2. Target query resolution logic (extension.js)
 function resolveSettingsQuery(target) {

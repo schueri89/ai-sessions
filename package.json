@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.94.1",
+  "version": "0.95.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -811,6 +811,17 @@
               "Live"
             ],
             "description": "JIRA-Status, die im Fortschrittsbalken kommender Releases zusätzlich zu erledigten Vorgängen als fertig (grün) zählen. Groß-/Kleinschreibung egal."
+          },
+          "sessionDashboard.releases.developerField": {
+            "type": "string",
+            "default": "customfield_10055",
+            "markdownDescription": "ID des JIRA-Feldes (Benutzerauswahl), das in der Vorgangsliste einer Lösungsversion als **Entwickler** angezeigt wird, z. B. `customfield_10055`."
+          },
+          "sessionDashboard.releases.reviewPrompt": {
+            "type": "string",
+            "editPresentation": "multilineText",
+            "default": "Führe einen Code-Review für den JIRA-Vorgang {key} „{title}“ durch ({url}).\n\n1. Ermittle in allen Git-Repositories dieses Workspaces die zugehörigen Commits (z. B. `git log --all --grep=\"{key}\"`) und Branches mit „{key}“ im Namen.\n2. Prüfe die Änderungen dieser Commits (`git show` bzw. `git diff`) auf Fehler, Sicherheitsrisiken (OWASP Top 10), Performance und Wartbarkeit.\n3. Gib das Ergebnis gegliedert aus: 🚨 Kritische Punkte, ⚠️ Verbesserungspotenzial, ✅ Positives – jeweils mit Repository, Datei und Zeile.",
+            "markdownDescription": "Prompt, den der Button **🔍 Code** in einem neuen Copilot-Chat (Agent-Modus) absendet. Platzhalter: `{key}` (Vorgangsnummer), `{title}` (Titel), `{url}` (Link zum Vorgang)."
           },
           "sessionDashboard.sound.releases.enabled": {
             "type": "boolean",

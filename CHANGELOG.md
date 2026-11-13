@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.95.0] – 13.11.2026
+
+- **Releases: Verknüpfte Vorgänge aufklappbar:** Ein Klick auf eine Lösungsversion zeigt die zugeordneten Vorgänge mit Vorgangsnummer und Titel, Entwickler (Vorname) und Status; jeder Vorgang lässt sich direkt im Browser öffnen.
+- **Releases: Code-Review per Copilot:** Der Button „🔍 Code“ öffnet einen neuen Copilot-Chat und lässt die Commits des Vorgangs prüfen; der Prompt ist in den Einstellungen anpassbar (`sessionDashboard.releases.reviewPrompt`), das Entwickler-Feld ebenso (`sessionDashboard.releases.developerField`).
+
 ## [0.94.1] – 13.11.2026
 
 - **Deploys: Schritt-Anzeige mit Gesamtzahl:** Das Badge laufender Pipelines zeigt jetzt zusätzlich die Anzahl aller Schritte (z. B. „2/5“).
