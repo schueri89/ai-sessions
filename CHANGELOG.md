@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.93.1] – 13.11.2026
+
+- **Antigravity-Quota: Prozentanzeige wiederhergestellt:** Die Erkennung des laufenden Antigravity-Hubs liest Port und CSRF-Token nun aus der Daemon-Datei (`daemon/hub_<port>.json`) statt aus den Startparametern, sodass 5h- und 7d-Prozentwerte wieder zuverlässig in Dashboard und Statusleiste erscheinen.
+
 ## [0.93.0] – 12.11.2026
 
 - **Sessions: Direkte Projekt-Auswahl per Klick:** Ein Klick auf das Projekt-Badge auf den Session-Karten öffnet direkt die Projekt-Zuweisung per Auswahlliste (statt das Board zu filtern); das überflüssige Stift-Icon entfällt.

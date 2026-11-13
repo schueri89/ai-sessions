@@ -1,7 +1,10 @@
 'use strict';
 
 const assert = require('assert');
-const { parseLiveQuotaGroups, resolveAntigravityReset } = require('../lib/quota');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { detectAgyHub, parseLiveQuotaGroups, resolveAntigravityReset } = require('../lib/quota');
 const { friendlyModel } = require('../lib/format');
 
 console.log('Testing Antigravity Argon quota parsing...');
@@ -118,5 +121,48 @@ assert.strictEqual(nearZeroResetTime, nearZeroArgonQuota.argon.weekly.resetsAt, 
 // Test friendlyModel for Argon
 assert.strictEqual(friendlyModel('gemini-4-argon'), 'Gemini 4 Argon');
 assert.strictEqual(friendlyModel('argon'), 'Gemini 4 Argon');
+
+// Test detectAgyHub via daemon/hub_*.json (skips stale PIDs, picks newest alive PID)
+const tmpAgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ag-hub-test-'));
+const daemonDir = path.join(tmpAgDir, 'daemon');
+fs.mkdirSync(daemonDir, { recursive: true });
+const prevAgDir = process.env.ANTIGRAVITY_APP_DATA_DIR;
+process.env.ANTIGRAVITY_APP_DATA_DIR = tmpAgDir;
+try {
+  // Missing/dead PID should be ignored even if newer
+  const deadFile = path.join(daemonDir, 'hub_55555.json');
+  fs.writeFileSync(deadFile, JSON.stringify({
+    pid: 999999999,
+    httpPort: 55555,
+    csrfToken: 'dead-token'
+  }), 'utf8');
+
+  const liveFile = path.join(daemonDir, 'hub_64976.json');
+  fs.writeFileSync(liveFile, JSON.stringify({
+    pid: process.pid,
+    httpPort: 64976,
+    httpsPort: 64984,
+    lsVersion: '2.31.1',
+    csrfToken: 'live-csrf-token'
+  }), 'utf8');
+  const nowSec = Math.floor(Date.now() / 1000);
+  fs.utimesSync(liveFile, nowSec - 10, nowSec - 10);
+  fs.utimesSync(deadFile, nowSec, nowSec);
+
+  const detected = detectAgyHub(true);
+  assert.deepStrictEqual(detected, {
+    port: 64976,
+    csrfToken: 'live-csrf-token',
+    pid: process.pid
+  }, 'detectAgyHub must pick live daemon hub_*.json and skip dead PIDs');
+
+  // When only dead PIDs remain, detectAgyHub(true) must return null
+  fs.unlinkSync(liveFile);
+  assert.strictEqual(detectAgyHub(true), null, 'detectAgyHub must return null when no live hub exists');
+} finally {
+  if (prevAgDir === undefined) delete process.env.ANTIGRAVITY_APP_DATA_DIR;
+  else process.env.ANTIGRAVITY_APP_DATA_DIR = prevAgDir;
+  fs.rmSync(tmpAgDir, { recursive: true, force: true });
+}
 
 console.log('✓ All Antigravity Argon quota tests passed successfully.');
