@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.96.0] – 15.11.2026
+
+- **Sessions: Virtuelle Büro-Ansicht („🏢 Büro“) & Zweitmonitor-Popout:** Aktive Sessions erscheinen jetzt zusätzlich als Avatare an Schreibtischen in einem animierten Entwicklerbüro (mit Live-Status, Hover-Details, Direktklick zum Chat und `↗ Popout`-Button bzw. Befehl für ein eigenes VS-Code-Fenster).
+
 ## [0.95.0] – 13.11.2026
 
 - **Releases: Verknüpfte Vorgänge aufklappbar:** Ein Klick auf eine Lösungsversion zeigt die zugeordneten Vorgänge mit Vorgangsnummer und Titel, Entwickler (Vorname) und Status; jeder Vorgang lässt sich direkt im Browser öffnen.

@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.95.0",
+  "version": "0.96.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -15,7 +15,8 @@
   "main": "./extension.js",
   "activationEvents": [
     "onStartupFinished",
-    "onWebviewPanel:sessionDashboard.board"
+    "onWebviewPanel:sessionDashboard.board",
+    "onWebviewPanel:sessionDashboard.office"
   ],
   "contributes": {
     "icons": {
@@ -269,6 +270,12 @@
         "title": "Nach Updates suchen",
         "category": "Session Dashboard",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "sessionDashboard.openOffice",
+        "title": "Büro-Ansicht im eigenen Tab öffnen",
+        "category": "Session Dashboard",
+        "icon": "$(window)"
       }
     ],
     "menus": {
@@ -1221,6 +1228,7 @@
             "type": "string",
             "enum": [
               "sessions",
+              "office",
               "tasks",
               "audits",
               "logs",
@@ -1252,7 +1260,7 @@
     ]
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/providers/cline.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/jenkins.js && node --check lib/jenkinsWatcher.js && node --check lib/jiraReleases.js && node --check lib/releasesWatcher.js && node --check lib/projectTasks.js && node --check lib/auditManager.js && node --check lib/tasksLogManager.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node --check lib/updateChecker.js && node test/check-webviews.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js && node test/check-claude-cost.js && node test/check-cache-efficiency.js && node test/check-history-pagination-and-diff.js && node test/check-show-last-prompt.js && node test/check-cline-integration.js && node test/check-project-tasks.js && node test/check-audit-manager.js && node test/check-tasks-log-manager.js && node test/check-format-limit-reset.js && node test/check-sessions-tab-and-jira.js && node test/check-settings-categories-and-context.js && node test/check-jenkins-watcher.js && node test/check-jenkins-pipeline.js && node test/check-jira-releases.js && node test/check-releases-watcher.js && node test/check-update-checker.js",
+    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/providers/cline.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/officeView.js && node --check lib/officePanel.js && node --check lib/jenkins.js && node --check lib/jenkinsWatcher.js && node --check lib/jiraReleases.js && node --check lib/releasesWatcher.js && node --check lib/projectTasks.js && node --check lib/auditManager.js && node --check lib/tasksLogManager.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node --check lib/updateChecker.js && node test/check-webviews.js && node test/check-office-view.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js && node test/check-claude-cost.js && node test/check-cache-efficiency.js && node test/check-history-pagination-and-diff.js && node test/check-show-last-prompt.js && node test/check-cline-integration.js && node test/check-project-tasks.js && node test/check-audit-manager.js && node test/check-tasks-log-manager.js && node test/check-format-limit-reset.js && node test/check-sessions-tab-and-jira.js && node test/check-settings-categories-and-context.js && node test/check-jenkins-watcher.js && node test/check-jenkins-pipeline.js && node test/check-jira-releases.js && node test/check-releases-watcher.js && node test/check-update-checker.js",
     "package": "node -e \"const fs=require('fs');fs.mkdirSync('vsix',{recursive:true})\" && vsce package --skip-license --allow-missing-repository --out vsix/"
   },
   "devDependencies": {

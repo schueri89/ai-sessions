@@ -46,4 +46,9 @@ dummyViewer.transcript = {
 };
 testScriptSyntax('TranscriptViewerPanel', dummyViewer.getHtml());
 
+// 3. OfficePanel
+const { OfficePanel } = require('../lib/officePanel');
+const officePanel = new OfficePanel({});
+testScriptSyntax('OfficePanel', officePanel.html());
+
 console.log('Alle Webview-Scripts erfolgreich validiert.');

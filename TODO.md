@@ -5,6 +5,7 @@ Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergrü
 _Zurzeit keine offenen Aufgaben._
 
 ## Erledigt
+- [x] session-dashboard v0.96.0: Sessions: Virtuelle Büro-Ansicht („🏢 Büro“) als vierter Sub-Tab unter Sessions sowie als eigenständiges Popout-Panel für einen Zweitmonitor (`lib/officeView.js`, `lib/officePanel.js`, `sessionDashboard.openOffice`, `sessionDashboard.defaultTab` erweitert um `"office"`) *(15.11.2026, [Plan](.agents/plans/2026-11-15_session-dashboard-buero-ansicht.md))*
 - [x] session-dashboard v0.95.0: Releases: Lösungsversionen aufklappbar mit verknüpften Vorgängen (Vorgang + Titel in einer Spalte, Entwickler-Vorname aus JIRA-Feld `sessionDashboard.releases.developerField` = customfield_10055, Status; `fetchReleaseIssues` in `lib/jiraReleases.js`, lazy je Version), Button „↗ Öffnen“ je Vorgang und „🔍 Code“ (neuer Copilot-Chat im Agent-Modus, Prompt aus `sessionDashboard.releases.reviewPrompt` mit Platzhaltern {key}/{title}/{url}) *(13.11.2026)*
 - [x] session-dashboard v0.94.1: Deploys: Schritt-Badge laufender Pipelines zeigt aktiven Schritt und Gesamtzahl (z. B. „2/5“) *(13.11.2026)*
 - [x] session-dashboard v0.94.0: Update-Hinweis im Dashboard (roter Button „❗ Update x.y.z“ / „Neu laden“ in der Toolbar, Zustand fensterübergreifend über globalState `sessionDashboard.update.available`); Deploys: aktive Schritt-Nummer laufender Pipelines in der Status-Spalte, Abstand Starten/Öffnen und Pfeil/Titel bei „Alle weiteren Pipelines“ *(13.11.2026)*

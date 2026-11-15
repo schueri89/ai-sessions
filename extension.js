@@ -10,6 +10,7 @@ const { ProjectStore } = require('./lib/projectStore');
 const { getKnownSubfolders } = require('./lib/project');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
+const { OfficePanel } = require('./lib/officePanel');
 const { StatusBarWidget } = require('./lib/statusBar');
 const { TranscriptViewerPanel } = require('./lib/transcriptViewerPanel');
 const { SoundNotifier, SOUND_OPTIONS } = require('./lib/soundNotifier');
@@ -650,6 +651,7 @@ function activate(context) {
   model.toastNotifier = toastNotifier;
   const tree = new SessionTreeProvider(model);
   const board = new BoardPanel(model);
+  const officePanel = new OfficePanel(model);
   const tasksManager = new ProjectTasksManager(context, { soundNotifier });
   tasksManager.init();
   board.tasksManager = tasksManager;
@@ -705,6 +707,15 @@ function activate(context) {
         board.ensurePinned();
         board.closeDuplicateTabs();
       }
+    }),
+    vscode.window.registerWebviewPanelSerializer('sessionDashboard.office', {
+      async deserializeWebviewPanel(webviewPanel) {
+        if (officePanel.panel) {
+          try { webviewPanel.dispose(); } catch {}
+          return;
+        }
+        officePanel.attach(webviewPanel);
+      }
     })
   );
   statusBar.show();
@@ -716,6 +727,7 @@ function activate(context) {
   function syncViews(completedSessionIds = []) {
     tree.refresh();
     board.update(completedSessionIds);
+    officePanel.update(completedSessionIds);
     statusBar.update();
     const visible = model.visibleSessions();
     const waiting = visible.filter((s) => s.displayState === 'waiting').length;
@@ -1647,13 +1659,14 @@ function activate(context) {
         else if (t === 'logs') query = 'sessionDashboard.logs';
         else if (t === 'jenkins' || t === 'deploys') query = 'sessionDashboard.jenkins';
         else if (t === 'releases') query = 'sessionDashboard.releases';
-        else if (t === 'sessions' || t === 'board' || t === 'history' || t === 'analyse') query = '@ext:schueri.ai-sessions';
+        else if (t === 'sessions' || t === 'board' || t === 'office' || t === 'history' || t === 'analyse') query = '@ext:schueri.ai-sessions';
         else if (t.startsWith('@') || t.startsWith('sessionDashboard')) query = t;
         else query = `sessionDashboard.${t}`;
       }
       vscode.commands.executeCommand('workbench.action.openSettings', query);
     }),
     vscode.commands.registerCommand('sessionDashboard.checkForUpdates', () => updateChecker.check(true)),
+    vscode.commands.registerCommand('sessionDashboard.openOffice', () => officePanel.show()),
     vscode.commands.registerCommand('sessionDashboard.jenkinsSetCredentials', async () => {
       const changed = await setJenkinsCredentials(context.secrets);
       if (changed) jenkinsWatcher.restart();
