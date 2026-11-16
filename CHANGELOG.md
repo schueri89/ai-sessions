@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.96.1] – 15.11.2026
+
+- **Büro-Ansicht: Sortierung, Position der Chat-Infos & vollständige Zählung:** Schreibtische werden jetzt nach letzter Aktivität sortiert (neueste zuerst), die Detail- und Aktionsleiste des ausgewählten Chats steht übersichtlich oberhalb statt unterhalb des Büros, und alle aktiven Sessions erscheinen ohne 24-Platz-Deckel passend zur Zählung im Board.
+
 ## [0.96.0] – 15.11.2026
 
 - **Sessions: Virtuelle Büro-Ansicht („🏢 Büro“) & Zweitmonitor-Popout:** Aktive Sessions erscheinen jetzt zusätzlich als Avatare an Schreibtischen in einem animierten Entwicklerbüro (mit Live-Status, Hover-Details, Direktklick zum Chat und `↗ Popout`-Button bzw. Befehl für ein eigenes VS-Code-Fenster).
