@@ -296,7 +296,7 @@ function isChatSessionTab(tab) {
     return true;
   }
   const uri = tab.input.uri;
-  if (uri && typeof uri.scheme === 'string' && uri.scheme.includes('chat-session')) {
+  if (uri && typeof uri.scheme === 'string' && (uri.scheme.includes('chat-session') || uri.scheme.startsWith('agent-host-'))) {
     return true;
   }
   if (typeof tab.label === 'string' && (tab.label.includes('GitHub Copilot') || tab.label.includes('Copilot Chat'))) {
@@ -493,11 +493,15 @@ async function openCopilotSession(info) {
   });
 
   const encoded = Buffer.from(sessionId, 'utf8').toString('base64url');
-  const sessionResourceUri = vscode.Uri.from({
-    scheme: 'vscode-chat-session',
-    authority: 'local',
-    path: '/' + encoded
-  });
+  const sessionType = info.sessionType || info.session?.sessionType;
+  // Agent-host sessions ("Copilot" in the chat picker) use the session type as scheme: agent-host-copilotcli:/<id>
+  const sessionResourceUri = sessionType
+    ? vscode.Uri.from({ scheme: sessionType, path: '/' + sessionId })
+    : vscode.Uri.from({
+      scheme: 'vscode-chat-session',
+      authority: 'local',
+      path: '/' + encoded
+    });
 
   // 1. Schließe eventuell vorhandene Chat-Session-Tabs im mittleren Editorbereich
   try {

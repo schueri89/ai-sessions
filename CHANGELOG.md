@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.99.0] – 16.11.2026
+
+- **Copilot: Sessions vom Typ „Copilot“ sichtbar:** Chats, die im Copilot-Chat über die Auswahl „Copilot“ statt „Local“ laufen, erscheinen jetzt mit Zustand (arbeitet, wartet auf Freigabe, fertig) im Dashboard und lassen sich per Klick öffnen.
+
 ## [0.98.0] – 16.11.2026
 
 - **Deploys: Fortschritt laufender Pipelines direkt sichtbar:** Unter dem Pipeline-Namen stehen der gerade laufende Job, seine Laufzeit und ein Fortschrittsbalken – ohne die Pipeline aufklappen zu müssen.

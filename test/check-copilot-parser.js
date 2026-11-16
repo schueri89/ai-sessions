@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const { parseJsonlChatSession } = require('../lib/providers/copilot');
+const { parseJsonlChatSession, applyCliEvent, newCliParseState } = require('../lib/providers/copilot');
 
 console.log('Testing Copilot JSONL chat session parser (splice & retry handling)...');
 
@@ -55,4 +55,32 @@ assert.strictEqual(res3.sessionObj.requests[1].modelState.value, 1);
 assert.strictEqual(res3.sessionObj.requests[1].modelState.completedAt, 30);
 
 console.log('✓ All Copilot JSONL splice parser tests passed successfully.');
+
+// Test 4: Copilot CLI (agent host) events.jsonl state machine
+console.log('Testing Copilot CLI events parser...');
+const cli = newCliParseState();
+const feed = (type, data = {}) => applyCliEvent(cli, { type, data, timestamp: '2026-11-16T10:00:00.000Z' });
+feed('session.start', { startTime: '2026-11-16T09:00:00.000Z', selectedModel: 'claude-opus-5.5', context: { cwd: '\\\\?\\UNC\\SRV\\share\\app' } });
+assert.strictEqual(cli.contextCwd, '\\\\SRV\\share\\app', 'UNC long path prefix must be stripped');
+feed('user.message', { content: 'Fix\r\nthe bug' });
+assert.strictEqual(cli.lastPrompt, 'Fix the bug');
+assert.strictEqual(cli.running, true);
+feed('assistant.turn_start');
+feed('assistant.message', { toolRequests: [{ name: 'powershell' }] });
+feed('permission.requested', { requestId: 'p1', permissionRequest: { kind: 'shell' } });
+assert.strictEqual(cli.pending.size, 1, 'open permission request must be pending');
+feed('permission.completed', { requestId: 'p1' });
+assert.strictEqual(cli.pending.size, 0);
+feed('assistant.turn_end');
+assert.strictEqual(cli.running, true, 'turn with tool calls must keep the session running');
+feed('assistant.turn_start');
+feed('assistant.message', { content: 'Done', toolRequests: [] });
+feed('assistant.turn_end');
+assert.strictEqual(cli.running, false, 'final answer without tool calls must end the request');
+feed('user.message', { content: 'next' });
+feed('session.usage_record', { usage: { model: 'claude-opus-5.5', inputTokens: 900, outputTokens: 100, maxPromptTokens: 10000 } });
+assert.deepStrictEqual(cli.tokens, { context: 1000, maxContext: 10000, percent: 10, model: 'claude-opus-5.5' });
+feed('abort', { reason: 'user_initiated' });
+assert.strictEqual(cli.running, false, 'abort must end the request');
+console.log('✓ Copilot CLI events parser tests passed successfully.');
 
