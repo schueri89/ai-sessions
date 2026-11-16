@@ -147,7 +147,7 @@ assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].wait
 // 5. Coffee queue limit (max. 3), celebration confetti, and diverse state rendering in VM
 {
   const noop = () => {};
-  let fakeNow = 1000000;
+  let fakeNow = new Date(2026, 10, 16, 14, 0, 0).getTime();
   class FakeDate extends Date {
     constructor(...args) {
       super(args.length === 0 ? fakeNow : args[0]);
@@ -155,6 +155,7 @@ assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].wait
     static now() { return fakeNow; }
   }
   let nextRaf = null;
+  let drawOps = [];
   const makeEl = () => ({
     style: {},
     classList: { contains: () => false, add: noop, remove: noop, toggle: noop },
@@ -163,7 +164,9 @@ assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].wait
     getBoundingClientRect: () => ({ left: 0, top: 0, width: 768, height: 276 }),
     getContext: () => ({
       fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left',
-      fillRect: noop, strokeRect: noop, fillText: noop,
+      fillRect: (x, y, w, h) => drawOps.push({ op: 'rect', x, y, w, h }),
+      strokeRect: noop,
+      fillText: (text, x, y) => drawOps.push({ op: 'text', text, x, y }),
       beginPath: noop, moveTo: noop, lineTo: noop, stroke: noop
     }),
     parentElement: { getBoundingClientRect: () => ({ left: 0, top: 0, width: 768, height: 276 }) },
@@ -221,16 +224,47 @@ assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].wait
   assert(office.getStats().confettiCount > 0, 'Abschluss-Jubel muss Konfetti-Partikel erzeugen');
 
   // Advance simulation past 2.2s celebration phase so coffee walkers depart
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 55; i++) {
     fakeNow += 50;
     if (nextRaf) nextRaf();
   }
+  drawOps = [];
+  fakeNow += 50;
+  if (nextRaf) nextRaf();
   const stats = office.getStats();
   assert.strictEqual(stats.coffeeQueueCount, 3, 'Maximal 3 Entwickler dürfen gleichzeitig zur Kaffeemaschine laufen/warten');
-  const coffeeCount = Object.values(stats.phases).filter((p) => p.phase === 'toCoffee' || p.phase === 'atCoffee').length;
-  assert.strictEqual(coffeeCount, 3, 'Genau 3 Akteure befinden sich in der Kaffee-Warteschlange');
+  const coffeeCount = Object.values(stats.phases).filter((p) => (p.phase === 'toDrink' || p.phase === 'atDrink') && p.drinkStation === 'coffee').length;
+  assert.strictEqual(coffeeCount, 3, 'Genau 3 Akteure befinden sich vor 16 Uhr in der Kaffee-Warteschlange');
   assert.strictEqual(stats.phases.c4.phase, 'seated', 'Der 4. Entwickler bleibt am Platz');
   assert.strictEqual(stats.phases.c5.phase, 'seated', 'Der 5. Entwickler bleibt am Platz');
+  // Verify row-0 walker (y ~ 42) is drawn before row-0 seated desk ('proj-3') so seated avatars occlude passing walkers
+  const row0DeskIdx = drawOps.findIndex((o) => o.op === 'text' && o.text === 'proj-3');
+  const walkerLegsIdx = drawOps.findIndex((o) => o.op === 'rect' && o.y >= 64 && o.y <= 68 && o.h >= 5 && o.w === 5);
+  assert(row0DeskIdx > 0 && walkerLegsIdx > 0 && walkerLegsIdx < row0DeskIdx, 'Laufender Avatar im Gang muss vor den sitzenden Avataren derselben Reihe gezeichnet werden');
+
+  // After 16:00, newly completed developers head to the Bar for a beer from the fridge
+  fakeNow = new Date(2026, 10, 16, 16, 15, 0).getTime();
+  office.update({
+    columns: [
+      { state: 'busy', label: 'Arbeitet', sessions: [{ sessionId: 'b1', provider: 'claude', project: 'bar-test', statusUpdatedAt: fakeNow }] },
+      { state: 'idle', label: 'Fertig', sessions: busySessions.map((s) => ({ ...s, statusUpdatedAt: fakeNow })) }
+    ]
+  });
+  fakeNow += 500;
+  office.update({
+    columns: [
+      { state: 'idle', label: 'Fertig', sessions: [{ sessionId: 'b1', provider: 'claude', project: 'bar-test', statusUpdatedAt: fakeNow }, ...busySessions.map((s) => ({ ...s, statusUpdatedAt: fakeNow - 1000 }))] }
+    ],
+    justCompletedSessionIds: ['b1']
+  });
+  for (let i = 0; i < 55; i++) {
+    fakeNow += 50;
+    if (nextRaf) nextRaf();
+  }
+  const barStats = office.getStats();
+  assert.strictEqual(barStats.barQueueCount, 1, 'Ab 16 Uhr muss der fertige Entwickler zur Bar gehen');
+  assert.strictEqual(barStats.phases.b1.drinkStation, 'bar', 'Station muss ab 16 Uhr die Bar sein');
+  assert.strictEqual(barStats.phases.b1.drinkType, 'beer', 'Getränk muss ab 16 Uhr ein Bier sein');
   office.setActive(false);
 }
 console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarianten OK');

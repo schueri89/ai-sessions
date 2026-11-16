@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.102.0] – 16.11.2026
+
+- **Büro-Ansicht: Bar mit Kühlschrank ab 16 Uhr:** Unter der Kaffee-Ecke steht jetzt eine kleine Bar samt Kühlschrank; ab 16 Uhr holen sich fertige Entwickler dort ein Bier (mit sich öffnender Kühlschranktür und Bierglas am Platz).
+- **Büro-Ansicht: Tiefenreihenfolge beim Gehen korrigiert:** Entwickler auf dem Weg zur Kaffee-Ecke oder Bar laufen jetzt sauber hinter den sitzenden Kollegen und Schreibtischen ihrer Reihe entlang, statt über sie hinwegzulaufen.
+
 ## [0.101.0] – 16.11.2026
 
 - **Büro-Ansicht: Lebendige Animationen & Kaffeepause:** Fertige Entwickler jubeln kurz mit Konfetti und holen sich (zu maximal dritt gleichzeitig) einen Kaffee aus der Kaffee-Ecke, laufende Sessions unterscheiden Denken, Lesen, Schreiben und Terminal-Befehle an Monitor und Lampe, und Rate-Limits werden als Pause mit Sanduhr dargestellt. Außerdem unterscheidet die Sprechblase zwischen Rückfrage und Freigabe, die Context-Auslastung wächst als Papierstapel am Tisch, Avatare blinzeln und schauen sich um, und im Büro laufen eine echte Wanduhr, ein tageszeitabhängiges Fenster (Tag/Abend/Nacht), eine wiegende Pflanze sowie ein Staubsauger-Roboter.
