@@ -26,7 +26,10 @@ console.log('Testing lib/jenkinsWatcher.js (build causes & finish detection)...'
 const jobs = flattenJobs([
   {
     name: 'build', url: 'https://j/job/build/', color: 'blue',
-    lastBuild: { number: 7, result: 'SUCCESS', building: false, actions: [{}, { causes: [{ userId: 'Raphael.Schuerholz' }] }] }
+    lastBuild: {
+      number: 7, result: 'SUCCESS', building: false, estimatedDuration: 90000,
+      actions: [{ parameters: [{ name: 'BRANCH', value: 'feature/x' }] }, { causes: [{ userId: 'Raphael.Schuerholz' }] }]
+    }
   },
   {
     name: 'deploy', url: 'https://j/job/deploy/', color: 'red',
@@ -47,6 +50,11 @@ assert.deepStrictEqual(jobs[2].lastBuild.userIds, []);
 assert.strictEqual(isOwnBuild(jobs[0].lastBuild, 'raphael.schuerholz'), true, 'case-insensitive user match');
 assert.strictEqual(isOwnBuild(jobs[2].lastBuild, 'raphael.schuerholz'), false);
 console.log('✓ userIds collected from direct and upstream causes');
+
+assert.deepStrictEqual(jobs[0].lastBuild.params, [{ name: 'BRANCH', value: 'feature/x' }], 'build parameters of lastBuild');
+assert.strictEqual(jobs[0].lastBuild.estimatedDuration, 90000);
+assert.strictEqual(jobs[1].lastBuild.estimatedDuration, 0);
+console.log('✓ lastBuild carries parameters (branch) and estimated duration');
 
 const prev = new Map([
   ['https://j/job/build/', { number: 7, building: true }],

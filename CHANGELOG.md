@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.98.0] – 16.11.2026
+
+- **Deploys: Fortschritt laufender Pipelines direkt sichtbar:** Unter dem Pipeline-Namen stehen der gerade laufende Job, seine Laufzeit und ein Fortschrittsbalken – ohne die Pipeline aufklappen zu müssen.
+- **Deploys: Letzter Lauf mit Nummer und Branch:** „Letzter Build“ zeigt die Nummer der zuletzt gestarteten Pipeline und den dabei deployten Branch.
+- **Deploys: Spalte „Umfang“ entfernt:** Die Pipeline-Ansicht zeigt die Anzahl der Jobs nicht mehr in einer eigenen Spalte.
+
 ## [0.97.0] – 16.11.2026
 
 - **Neuer Tab „📋 Meine Vorgänge“:** Zeigt die eigenen JIRA-Vorgänge als Liste, gruppiert nach Status in einklappbaren Blöcken – mit Suche, Rolle (Bearbeiter/Entwickler), Lösungsversion und letzter Änderung; ein Klick öffnet den Vorgang im Browser, „🔍 Code“ startet wie bei Releases ein Copilot-Code-Review. Einzuschalten unter `sessionDashboard.myIssues.enabled`, dazu den eigenen JIRA-Benutzer (E-Mail oder Account-ID) eintragen; Abfrage und Reihenfolge der Status sind anpassbar.
