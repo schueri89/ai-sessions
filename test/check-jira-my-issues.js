@@ -40,17 +40,25 @@ const raw = (key, status, category, extra = {}) => ({
 const issue = normalizeMyIssue(raw('EHFE-1', 'Ready for Live', 'indeterminate', {
   assignee: { accountId: 'other', displayName: 'Tina Test' },
   customfield_10055: { accountId: me, displayName: 'Raphael' },
+  customfield_10050: '2026-11-20',
+  issuetype: { name: 'Bug', iconUrl: 'https://ehoi.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10303?size=medium' },
+  priority: { name: 'Hoch', iconUrl: 'https://ehoi.atlassian.net/images/icons/priorities/high.svg' },
   fixVersions: [{ name: 'EHFE-2026-KW46-1' }]
-}), 'https://ehoi.atlassian.net', ready, 'customfield_10055', me);
+}), 'https://ehoi.atlassian.net', ready, 'customfield_10055', me, 'customfield_10050');
 assert.strictEqual(issue.bucket, 'done', 'ready status counts green');
 assert.deepStrictEqual(issue.roles, ['Entwickler']);
 assert.strictEqual(issue.assignee, 'Tina Test');
 assert.deepStrictEqual(issue.fixVersions, ['EHFE-2026-KW46-1']);
 assert.strictEqual(issue.url, 'https://ehoi.atlassian.net/browse/EHFE-1');
+assert.strictEqual(issue.due, '2026-11-20');
+assert.strictEqual(issue.priority, 'Hoch');
+assert.ok(issue.priorityIcon.endsWith('/high.svg'));
+assert.ok(issue.typeIcon.includes('/issuetype/avatar/10303'));
 assert.ok(issue.updated > 0);
-console.log('✓ normalizeMyIssue (bucket, roles, fix versions, url)');
+console.log('✓ normalizeMyIssue (bucket, roles, fix versions, url, due date, icons)');
 
-const norm = (key, status, category) => normalizeMyIssue(raw(key, status, category), 'https://j', ready, 'customfield_10055', me);
+const norm = (key, status, category) => normalizeMyIssue(raw(key, status, category), 'https://j', ready, 'customfield_10055', me, 'customfield_10050');
+assert.strictEqual(norm('A-9', 'Offen', 'new').due, '', 'missing due date stays empty');
 const issues = [
   norm('A-1', 'Live', 'done'),
   norm('A-2', 'Codereview', 'indeterminate'),

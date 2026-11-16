@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.100.0] – 16.11.2026
+
+- **Meine Vorgänge: Prio, Fälligkeit und Icons:** Die Liste zeigt jetzt die Priorität mit JIRA-Icon und die Fälligkeit der Entwicklung (überfällige rot); vor jedem Vorgang steht das Icon seines Vorgangstyps. Die Spalten Projekt, Rolle und Geändert entfallen, die Buttons „Öffnen“ und „Code“ stehen nebeneinander.
+
 ## [0.99.0] – 16.11.2026
 
 - **Copilot: Sessions vom Typ „Copilot“ sichtbar:** Chats, die im Copilot-Chat über die Auswahl „Copilot“ statt „Local“ laufen, erscheinen jetzt mit Zustand (arbeitet, wartet auf Freigabe, fertig) im Dashboard und lassen sich per Klick öffnen.
