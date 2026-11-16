@@ -42,7 +42,11 @@ for (const isPopout of [false, true]) {
       textAlign: 'left',
       fillRect: noop,
       strokeRect: noop,
-      fillText: noop
+      fillText: noop,
+      beginPath: noop,
+      moveTo: noop,
+      lineTo: noop,
+      stroke: noop
     }),
     parentElement: { getBoundingClientRect: () => ({ left: 0, top: 0, width: 752, height: 276 }) },
     innerHTML: '',
@@ -131,13 +135,105 @@ const updatedColumns = [
 const layout2 = buildOfficeLayout(updatedColumns, layout1.slots);
 assert.strictEqual(layout2.items[0].sessionId, 's-idle-0', 'Aktualisierte Session mit neuestem Datum muss nach vorne auf Desk 0 rücken');
 
-// 4. Shared column builder produces expected structure incl. statusUpdatedAt
+// 4. Shared column builder produces expected structure incl. statusUpdatedAt and waitingFor
 const builtCols = buildSessionColumns({
-  visibleSessions: () => [{ sessionId: 'x1', displayState: 'busy', provider: 'claude', project: 'tvw-hub', title: 'Test', statusUpdatedAt: 123456 }],
+  visibleSessions: () => [{ sessionId: 'x1', displayState: 'waiting', waitingFor: 'permission', provider: 'claude', project: 'tvw-hub', title: 'Test', statusUpdatedAt: 123456 }],
   getProjectDetectionMode: () => 'auto'
 });
-assert.strictEqual(builtCols.find((c) => c.state === 'busy').sessions.length, 1, 'buildSessionColumns ordnet busy korrekt zu');
-assert.strictEqual(builtCols.find((c) => c.state === 'busy').sessions[0].statusUpdatedAt, 123456, 'buildSessionColumns übernimmt statusUpdatedAt');
+assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions.length, 1, 'buildSessionColumns ordnet waiting korrekt zu');
+assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].statusUpdatedAt, 123456, 'buildSessionColumns übernimmt statusUpdatedAt');
+assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].waitingFor, 'permission', 'buildSessionColumns übernimmt waitingFor');
+
+// 5. Coffee queue limit (max. 3), celebration confetti, and diverse state rendering in VM
+{
+  const noop = () => {};
+  let fakeNow = 1000000;
+  class FakeDate extends Date {
+    constructor(...args) {
+      super(args.length === 0 ? fakeNow : args[0]);
+    }
+    static now() { return fakeNow; }
+  }
+  let nextRaf = null;
+  const makeEl = () => ({
+    style: {},
+    classList: { contains: () => false, add: noop, remove: noop, toggle: noop },
+    addEventListener: noop,
+    querySelectorAll: () => [],
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 768, height: 276 }),
+    getContext: () => ({
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left',
+      fillRect: noop, strokeRect: noop, fillText: noop,
+      beginPath: noop, moveTo: noop, lineTo: noop, stroke: noop
+    }),
+    parentElement: { getBoundingClientRect: () => ({ left: 0, top: 0, width: 768, height: 276 }) },
+    innerHTML: '', value: 'all', width: 768, height: 276
+  });
+  const els = new Map();
+  const sandbox = {
+    vscode: { postMessage: noop },
+    window: {},
+    document: {
+      hidden: false,
+      body: { classList: { contains: () => false } },
+      getElementById: (id) => {
+        if (!els.has(id)) els.set(id, makeEl());
+        return els.get(id);
+      },
+      addEventListener: noop
+    },
+    getComputedStyle: () => ({ backgroundColor: 'rgb(30, 30, 30)', getPropertyValue: () => '' }),
+    requestAnimationFrame: (cb) => { nextRaf = cb; return 1; },
+    cancelAnimationFrame: () => { nextRaf = null; },
+    Date: FakeDate,
+    Math, Map, Set, Array, Number, String, Boolean
+  };
+  vm.runInNewContext(getOfficeClientScript({ isPopout: false }), sandbox);
+  const office = sandbox.window.__aiOffice;
+  office.setActive(true);
+
+  // Initial busy + waiting + rate-limited sessions
+  const busySessions = ['c1', 'c2', 'c3', 'c4', 'c5'].map((id, idx) => ({
+    sessionId: id,
+    provider: 'claude',
+    project: 'proj-' + idx,
+    title: 'Task ' + idx,
+    activity: idx === 0 ? '🛠️ npm test' : (idx === 1 ? '📖 Liest file.js' : (idx === 2 ? '🧠 Denkt nach…' : 'Arbeitet…')),
+    tokens: { percent: idx * 25 },
+    statusUpdatedAt: fakeNow - idx * 1000
+  }));
+  office.update({
+    columns: [
+      { state: 'busy', label: 'Arbeitet', sessions: busySessions },
+      { state: 'waiting', label: 'Wartet auf dich', sessions: [{ sessionId: 'w1', provider: 'copilot', project: 'p', waitingFor: 'permission', detail: 'Freigabe nötig', statusUpdatedAt: fakeNow }] }
+    ]
+  });
+
+  // Transition all 5 busy sessions to idle simultaneously
+  fakeNow += 500;
+  office.update({
+    columns: [
+      { state: 'idle', label: 'Fertig', sessions: busySessions.map((s) => ({ ...s, statusUpdatedAt: fakeNow })) },
+      { state: 'busy', label: 'Arbeitet', sessions: [{ sessionId: 'rl1', provider: 'antigravity', project: 'rl', rateLimit: { resetsAt: fakeNow + 60000 }, statusUpdatedAt: fakeNow }] }
+    ],
+    justCompletedSessionIds: ['c1', 'c2', 'c3', 'c4', 'c5']
+  });
+  assert(office.getStats().confettiCount > 0, 'Abschluss-Jubel muss Konfetti-Partikel erzeugen');
+
+  // Advance simulation past 2.2s celebration phase so coffee walkers depart
+  for (let i = 0; i < 60; i++) {
+    fakeNow += 50;
+    if (nextRaf) nextRaf();
+  }
+  const stats = office.getStats();
+  assert.strictEqual(stats.coffeeQueueCount, 3, 'Maximal 3 Entwickler dürfen gleichzeitig zur Kaffeemaschine laufen/warten');
+  const coffeeCount = Object.values(stats.phases).filter((p) => p.phase === 'toCoffee' || p.phase === 'atCoffee').length;
+  assert.strictEqual(coffeeCount, 3, 'Genau 3 Akteure befinden sich in der Kaffee-Warteschlange');
+  assert.strictEqual(stats.phases.c4.phase, 'seated', 'Der 4. Entwickler bleibt am Platz');
+  assert.strictEqual(stats.phases.c5.phase, 'seated', 'Der 5. Entwickler bleibt am Platz');
+  office.setActive(false);
+}
+console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarianten OK');
 
 // 5. BoardPanel & OfficePanel HTML expose office view markers and place inspector above canvas
 const bpHtml = new BoardPanel({}).html();
