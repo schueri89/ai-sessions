@@ -824,6 +824,9 @@ function activate(context) {
         board.onReleasesConfigChanged();
         releasesWatcher.restart();
       }
+      if (e.affectsConfiguration('sessionDashboard.myIssues') || e.affectsConfiguration('sessionDashboard.releases')) {
+        board.onMyIssuesConfigChanged();
+      }
       if (e.affectsConfiguration('sessionDashboard.audits')) {
         if (auditManager) {
           auditManager.syncAuditConfig();

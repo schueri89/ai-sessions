@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.97.0] – 16.11.2026
+
+- **Neuer Tab „📋 Meine Vorgänge“:** Zeigt die eigenen JIRA-Vorgänge als Liste, gruppiert nach Status in einklappbaren Blöcken – mit Suche, Rolle (Bearbeiter/Entwickler), Lösungsversion und letzter Änderung; ein Klick öffnet den Vorgang im Browser, „🔍 Code“ startet wie bei Releases ein Copilot-Code-Review. Einzuschalten unter `sessionDashboard.myIssues.enabled`, dazu den eigenen JIRA-Benutzer (E-Mail oder Account-ID) eintragen; Abfrage und Reihenfolge der Status sind anpassbar.
+
 ## [0.96.1] – 15.11.2026
 
 - **Büro-Ansicht: Sortierung, Position der Chat-Infos & vollständige Zählung:** Schreibtische werden jetzt nach letzter Aktivität sortiert (neueste zuerst), die Detail- und Aktionsleiste des ausgewählten Chats steht übersichtlich oberhalb statt unterhalb des Büros, und alle aktiven Sessions erscheinen ohne 24-Platz-Deckel passend zur Zählung im Board.

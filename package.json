@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.96.1",
+  "version": "0.97.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -864,8 +864,46 @@
         }
       },
       {
-        "title": "Statusleiste & Limits",
+        "title": "Tab: Meine Vorgänge",
         "order": 7,
+        "properties": {
+          "sessionDashboard.myIssues.enabled": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Tab **📋 Meine Vorgänge** im Session-Dashboard anzeigen: eigene JIRA-Vorgänge als Liste, gruppiert nach Status. Nutzt Zugangsdatei, Entwickler-Feld und Review-Prompt aus **Tab: Releases**."
+          },
+          "sessionDashboard.myIssues.user": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Dein JIRA-Benutzer als E-Mail-Adresse oder Atlassian-Account-ID. Wird für `{user}` in der JQL-Abfrage eingesetzt."
+          },
+          "sessionDashboard.myIssues.jql": {
+            "type": "string",
+            "default": "(assignee = {user} OR {developerField} = {user}) AND (statusCategory != Done OR updated >= -14d) ORDER BY updated DESC",
+            "markdownDescription": "JQL-Abfrage für den Tab **Meine Vorgänge**. Platzhalter: `{user}` (dein Account), `{developerField}` (Entwickler-Feld aus `sessionDashboard.releases.developerField`, z. B. `cf[10055]`)."
+          },
+          "sessionDashboard.myIssues.statusOrder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "Offen",
+              "Ready for Development",
+              "In Development",
+              "Needs Bugfix",
+              "In Review",
+              "Codereview",
+              "Deployed to Staging",
+              "Ready for Live"
+            ],
+            "description": "Reihenfolge der Status-Blöcke im Tab 'Meine Vorgänge' (Groß-/Kleinschreibung egal). Nicht aufgeführte Status folgen danach, sortiert nach Kategorie (Offen, In Arbeit, Erledigt) und Name."
+          }
+        }
+      },
+      {
+        "title": "Statusleiste & Limits",
+        "order": 8,
         "properties": {
           "sessionDashboard.statusBarClickAction": {
             "type": "string",
@@ -921,7 +959,7 @@
       },
       {
         "title": "Sounds",
-        "order": 8,
+        "order": 9,
         "properties": {
           "sessionDashboard.sound.enabled": {
             "type": "boolean",
@@ -1171,7 +1209,7 @@
       },
       {
         "title": "Benachrichtigungen",
-        "order": 9,
+        "order": 10,
         "properties": {
           "sessionDashboard.notifications.enabled": {
             "type": "boolean",
@@ -1217,7 +1255,7 @@
       },
       {
         "title": "Allgemein",
-        "order": 10,
+        "order": 11,
         "properties": {
           "sessionDashboard.openOnStartup": {
             "type": "boolean",
@@ -1234,6 +1272,7 @@
               "logs",
               "jenkins",
               "releases",
+              "myIssues",
               "history",
               "analyse"
             ],
@@ -1260,7 +1299,7 @@
     ]
   },
   "scripts": {
-    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/providers/cline.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/officeView.js && node --check lib/officePanel.js && node --check lib/jenkins.js && node --check lib/jenkinsWatcher.js && node --check lib/jiraReleases.js && node --check lib/releasesWatcher.js && node --check lib/projectTasks.js && node --check lib/auditManager.js && node --check lib/tasksLogManager.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node --check lib/updateChecker.js && node test/check-webviews.js && node test/check-office-view.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js && node test/check-claude-cost.js && node test/check-cache-efficiency.js && node test/check-history-pagination-and-diff.js && node test/check-show-last-prompt.js && node test/check-cline-integration.js && node test/check-project-tasks.js && node test/check-audit-manager.js && node test/check-tasks-log-manager.js && node test/check-format-limit-reset.js && node test/check-sessions-tab-and-jira.js && node test/check-settings-categories-and-context.js && node test/check-jenkins-watcher.js && node test/check-jenkins-pipeline.js && node test/check-jira-releases.js && node test/check-releases-watcher.js && node test/check-update-checker.js",
+    "check": "node --check extension.js && node --check lib/soundNotifier.js && node --check lib/toastNotifier.js && node --check lib/registry.js && node --check lib/quota.js && node --check lib/project.js && node --check lib/projectStore.js && node --check lib/statusBar.js && node --check lib/providers/claude.js && node --check lib/providers/antigravity.js && node --check lib/providers/copilot.js && node --check lib/providers/codex.js && node --check lib/providers/cline.js && node --check lib/transcripts.js && node --check lib/history.js && node --check lib/doneStore.js && node --check lib/bookmarkStore.js && node --check lib/ticketStore.js && node --check lib/treeView.js && node --check lib/boardPanel.js && node --check lib/officeView.js && node --check lib/officePanel.js && node --check lib/jenkins.js && node --check lib/jenkinsWatcher.js && node --check lib/jiraReleases.js && node --check lib/jiraMyIssues.js && node --check lib/releasesWatcher.js && node --check lib/projectTasks.js && node --check lib/auditManager.js && node --check lib/tasksLogManager.js && node --check lib/format.js && node --check lib/analytics.js && node --check lib/transcriptParser.js && node --check lib/transcriptViewerPanel.js && node --check lib/approvalExport.js && node --check lib/updateChecker.js && node test/check-webviews.js && node test/check-office-view.js && node test/check-approvals.js && node test/check-copilot-parser.js && node test/check-antigravity-quota.js && node test/check-sound-notifier.js && node test/check-toast-notifier.js && node test/check-claude-cost.js && node test/check-cache-efficiency.js && node test/check-history-pagination-and-diff.js && node test/check-show-last-prompt.js && node test/check-cline-integration.js && node test/check-project-tasks.js && node test/check-audit-manager.js && node test/check-tasks-log-manager.js && node test/check-format-limit-reset.js && node test/check-sessions-tab-and-jira.js && node test/check-settings-categories-and-context.js && node test/check-jenkins-watcher.js && node test/check-jenkins-pipeline.js && node test/check-jira-releases.js && node test/check-jira-my-issues.js && node test/check-releases-watcher.js && node test/check-update-checker.js",
     "package": "node -e \"const fs=require('fs');fs.mkdirSync('vsix',{recursive:true})\" && vsce package --skip-license --allow-missing-repository --out vsix/"
   },
   "devDependencies": {
