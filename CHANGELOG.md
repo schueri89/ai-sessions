@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.102.2] – 17.11.2026
+
+- **Copilot: Öffnen von „Copilot“-Sessions repariert:** Der Klick führt nicht mehr zur Meldung „Session identity was not advertised by its agent host“, sondern öffnet den Chat.
+- **Copilot: Richtiger Titel bei „Copilot“-Sessions:** Statt der letzten eigenen Nachricht wird wieder der Chat-Titel aus VS Code angezeigt (automatisch erzeugt oder umbenannt).
+
 ## [0.102.1] – 17.11.2026
 
 - **Copilot: Sessions vom Typ „Copilot“ lassen sich öffnen:** Ein Klick auf eine solche Session öffnet sie jetzt direkt im Copilot-Chat.

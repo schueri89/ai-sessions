@@ -8,6 +8,7 @@ const { BookmarkStore } = require('./lib/bookmarkStore');
 const { TicketStore, detectTicket, buildJiraUrl } = require('./lib/ticketStore');
 const { ProjectStore } = require('./lib/projectStore');
 const { getKnownSubfolders } = require('./lib/project');
+const { resolveAgentHostSessionUri } = require('./lib/providers/copilot');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { OfficePanel } = require('./lib/officePanel');
@@ -494,8 +495,11 @@ async function openCopilotSession(info) {
 
   const sessionType = info.sessionType || info.session?.sessionType;
   if (sessionType && sessionType.startsWith('agent-host-')) {
+    const sessionUri = resolveAgentHostSessionUri(sessionId);
+    if (!sessionUri) throw new Error(`Copilot-Session ${sessionId} ist im Agent Host von VS Code nicht registriert.`);
     // VS Code's agent-host opener resolves agent-host-session://<provider>/<id> and opens it directly in the chat view.
-    const link = vscode.Uri.from({ scheme: 'agent-host-session', authority: sessionType.slice('agent-host-'.length), path: '/' + sessionId });
+    const [provider, id] = sessionUri.split(':/');
+    const link = vscode.Uri.from({ scheme: 'agent-host-session', authority: provider, path: '/' + id });
     logDebug(`[Copilot] Öffne Agent-Host-Session via vscode.open: ${link.toString()}`);
     await vscode.commands.executeCommand('vscode.open', link);
     return;
