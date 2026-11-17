@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.102.1] – 17.11.2026
+
+- **Copilot: Sessions vom Typ „Copilot“ lassen sich öffnen:** Ein Klick auf eine solche Session öffnet sie jetzt direkt im Copilot-Chat.
+
 ## [0.102.0] – 16.11.2026
 
 - **Büro-Ansicht: Bar mit Kühlschrank ab 16 Uhr:** Unter der Kaffee-Ecke steht jetzt eine kleine Bar samt Kühlschrank; ab 16 Uhr holen sich fertige Entwickler dort ein Bier (mit sich öffnender Kühlschranktür und Bierglas am Platz).

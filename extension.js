@@ -492,16 +492,21 @@ async function openCopilotSession(info) {
     project: info.project || info.session?.project
   });
 
-  const encoded = Buffer.from(sessionId, 'utf8').toString('base64url');
   const sessionType = info.sessionType || info.session?.sessionType;
-  // Agent-host sessions ("Copilot" in the chat picker) use the session type as scheme: agent-host-copilotcli:/<id>
-  const sessionResourceUri = sessionType
-    ? vscode.Uri.from({ scheme: sessionType, path: '/' + sessionId })
-    : vscode.Uri.from({
-      scheme: 'vscode-chat-session',
-      authority: 'local',
-      path: '/' + encoded
-    });
+  if (sessionType && sessionType.startsWith('agent-host-')) {
+    // VS Code's agent-host opener resolves agent-host-session://<provider>/<id> and opens it directly in the chat view.
+    const link = vscode.Uri.from({ scheme: 'agent-host-session', authority: sessionType.slice('agent-host-'.length), path: '/' + sessionId });
+    logDebug(`[Copilot] Öffne Agent-Host-Session via vscode.open: ${link.toString()}`);
+    await vscode.commands.executeCommand('vscode.open', link);
+    return;
+  }
+
+  const encoded = Buffer.from(sessionId, 'utf8').toString('base64url');
+  const sessionResourceUri = vscode.Uri.from({
+    scheme: 'vscode-chat-session',
+    authority: 'local',
+    path: '/' + encoded
+  });
 
   // 1. Schließe eventuell vorhandene Chat-Session-Tabs im mittleren Editorbereich
   try {
