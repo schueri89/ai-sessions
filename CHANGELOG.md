@@ -2,6 +2,13 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.103.0] – 17.11.2026
+
+- **Büro-Ansicht: Dynamische Tageszeit nach Zeitzone:** Sonnenaufgang, Tag, Sonnenuntergang und Nacht werden jetzt automatisch anhand der eigenen Zeitzone und des Datums berechnet statt mit festen Uhrzeiten.
+- **Büro-Ansicht: Mehr Fenster & Nacht-Atmosphäre mit Geist:** An der oberen Wand sitzen jetzt drei Fenster (links außen, links vom Schild und rechts vom Schild) mit gemeinsamer Himmelsansicht (Sonne bzw. Mond wandern über die drei Fenster, statt mehrfach zu erscheinen); ab Sonnenuntergang wird das Büro abgedunkelt, Arbeitsplätze sowie Mondlicht setzen Lichtinseln, und ein kleiner Büro-Geist treibt sein Unwesen. Ein Klick auf eines der Fenster schaltet die Tageszeiten zur Simulation durch (Sonnenaufgang, Tag, Sonnenuntergang, Nacht, zurück auf Echtzeit).
+- **Büro-Ansicht: PlayStation & Diskussionen bei Langeweile:** Fertige Entwickler ohne neue Aufgabe gehen nach ihrer Pause zufällig und mit ruhigen Abständen (längere Verweildauer von ca. 1–2,5 Minuten) in die neue PlayStation-Ecke zum Zocken oder treffen sich zum Diskutieren am Stehtisch – und sprinten bei neuer Arbeit sofort an den Platz zurück.
+- **Büro-Ansicht: JIRA-Nummer am Schreibtisch & ruhigere Bar:** Zugewiesene JIRA-Tickets stehen direkt unter dem Schreibtisch-Namensschild sowie im Inspector (inklusive Öffnen/Zuweisen-Button); die blinkende Leuchte an der Bar wurde entfernt.
+
 ## [0.102.2] – 17.11.2026
 
 - **Copilot: Öffnen von „Copilot“-Sessions repariert:** Der Klick führt nicht mehr zur Meldung „Session identity was not advertised by its agent host“, sondern öffnet den Chat.

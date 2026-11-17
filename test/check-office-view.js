@@ -150,7 +150,8 @@ assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].wait
   let fakeNow = new Date(2026, 10, 16, 14, 0, 0).getTime();
   class FakeDate extends Date {
     constructor(...args) {
-      super(args.length === 0 ? fakeNow : args[0]);
+      if (args.length === 0) super(fakeNow);
+      else super(...args);
     }
     static now() { return fakeNow; }
   }
@@ -269,7 +270,174 @@ assert.strictEqual(builtCols.find((c) => c.state === 'waiting').sessions[0].wait
 }
 console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarianten OK');
 
-// 5. BoardPanel & OfficePanel HTML expose office view markers and place inspector above canvas
+// 6. Dynamic timezone solar times, 3 windows, night mode + ghost, boredom (PlayStation/discussion), JIRA badge, no blinking bar light
+{
+  const noop = () => {};
+  let fakeNow = new Date(2026, 10, 17, 13, 0, 0).getTime();
+  class FakeDate extends Date {
+    constructor(...args) {
+      if (args.length === 0) super(fakeNow);
+      else super(...args);
+    }
+    static now() { return fakeNow; }
+  }
+  let nextRaf = null;
+  let drawOps = [];
+  const makeEl = () => {
+    const ctxObj = {
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left',
+      fillRect: (x, y, w, h) => drawOps.push({ op: 'rect', x, y, w, h, color: ctxObj.fillStyle }),
+      strokeRect: noop,
+      fillText: (text, x, y) => drawOps.push({ op: 'text', text, x, y, color: ctxObj.fillStyle }),
+      beginPath: noop, moveTo: noop, lineTo: noop, stroke: noop
+    };
+    return {
+      style: {},
+      classList: { contains: () => false, add: noop, remove: noop, toggle: noop },
+      addEventListener: noop,
+      querySelectorAll: () => [],
+      getBoundingClientRect: () => ({ left: 0, top: 0, width: 796, height: 408 }),
+      getContext: () => ctxObj,
+      parentElement: { getBoundingClientRect: () => ({ left: 0, top: 0, width: 796, height: 408 }) },
+      innerHTML: '', value: 'all', width: 796, height: 408
+    };
+  };
+  let mockRand = 0.9;
+  const mockMath = Object.create(Math);
+  mockMath.random = () => mockRand;
+  const els = new Map();
+  const sandbox = {
+    vscode: { postMessage: noop },
+    window: {},
+    document: {
+      hidden: false,
+      body: { classList: { contains: () => false } },
+      getElementById: (id) => {
+        if (!els.has(id)) els.set(id, makeEl());
+        return els.get(id);
+      },
+      addEventListener: noop
+    },
+    getComputedStyle: () => ({ backgroundColor: 'rgb(30, 30, 30)', getPropertyValue: () => '' }),
+    requestAnimationFrame: (cb) => { nextRaf = cb; return 1; },
+    cancelAnimationFrame: () => { nextRaf = null; },
+    Date: FakeDate,
+    Intl,
+    Math: mockMath, Map, Set, Array, Number, String, Boolean
+  };
+  vm.runInNewContext(getOfficeClientScript({ isPopout: false }), sandbox);
+  const office = sandbox.window.__aiOffice;
+  office.setActive(true);
+
+  const initStats = office.getStats();
+  assert.strictEqual(initStats.windowPositions.length, 3, 'Büro muss genau 3 Fenster besitzen (Variante A)');
+  const [win1, win2, win3] = initStats.windowPositions;
+  assert(win1 < win2 && win2 + 58 < 316 && win3 > 480, 'Fenster müssen links außen, links vom Schild und rechts vom Schild liegen');
+
+  // Solar times for Europe/Berlin differ significantly between November and June
+  const novBerlin = initStats.getSunTimesFor(new Date(2026, 10, 17, 12, 0, 0).getTime(), 'Europe/Berlin');
+  const junBerlin = initStats.getSunTimesFor(new Date(2026, 5, 21, 12, 0, 0).getTime(), 'Europe/Berlin');
+  assert(novBerlin.sunsetMin < 1050, 'November-Sonnenuntergang in Berlin muss vor 17:30 Uhr liegen');
+  assert(junBerlin.sunsetMin > 1240, 'Juni-Sonnenuntergang in Berlin muss nach 20:40 Uhr liegen');
+  assert.strictEqual(initStats.getTimeOfDayFor(new Date(2026, 10, 17, 13, 0, 0).getTime(), 'Europe/Berlin'), 'day', '13:00 muss Tag sein');
+  assert.strictEqual(initStats.getTimeOfDayFor(new Date(2026, 10, 17, 22, 0, 0).getTime(), 'Europe/Berlin'), 'night', '22:00 muss Nacht sein');
+  assert.strictEqual(initStats.ghostActive, false, 'Tagsüber darf kein Geist aktiv sein');
+
+  // JIRA ticket at desk + Inspector, plus no blinking bar LED
+  drawOps = [];
+  office.update({
+    jiraEnabled: true,
+    columns: [
+      {
+        state: 'idle',
+        label: 'Fertig',
+        sessions: [
+          { sessionId: 'j1', provider: 'claude', project: 'tvw-hub', ticket: 'TVW-4242', title: 'JIRA Desk Test', statusUpdatedAt: fakeNow - 60000 },
+          { sessionId: 'j2', provider: 'copilot', project: 'ai-sessions', title: 'Idle Friend', statusUpdatedAt: fakeNow - 60000 }
+        ]
+      }
+    ]
+  });
+  // Daytime check: exactly 1 sun across all 3 windows (not 3)
+  const daySuns = drawOps.filter((o) => o.op === 'rect' && o.w === 8 && o.h === 8 && o.color === '#FDE047' && o.y < 25);
+  assert.strictEqual(daySuns.length, 1, 'Tagsüber darf insgesamt nur eine Sonne über alle 3 Fenster erscheinen');
+
+  assert(drawOps.some((o) => o.op === 'text' && o.text === 'TVW-4242'), 'JIRA-Nummer muss direkt am Schreibtisch gezeichnet werden');
+  assert(els.get('office-inspector-info').innerHTML.includes('TVW-4242'), 'Inspector-Info muss die JIRA-Nummer enthalten');
+  assert(els.get('office-inspector-actions').innerHTML.includes('data-office-act="openJira"'), 'Inspector muss JIRA-Öffnen-Button anbieten');
+  const barLabelOp = drawOps.find((o) => o.op === 'text' && (o.text === 'BAR' || o.text === 'BAR 16h'));
+  assert(barLabelOp, 'BAR-Schriftzug muss gezeichnet werden');
+  const blinkingLed = drawOps.find((o) => o.op === 'rect' && o.w === 4 && o.h === 4 && Math.abs(o.y - (barLabelOp.y - 6)) <= 2);
+  assert(!blinkingLed, 'Blinkende 4x4-Leuchte bei der Bar darf nicht mehr gezeichnet werden');
+
+  // With high random roll (> depart chance), lounge stays empty/calm even after 90s
+  mockRand = 0.9;
+  for (let i = 0; i < 180; i++) {
+    fakeNow += 500;
+    if (nextRaf) nextRaf();
+  }
+  const calmStats = office.getStats();
+  assert.strictEqual(calmStats.playCount + calmStats.chatCount, 0, 'Ohne Zufallstreffer müssen PS5 und Tisch ruhig/leer bleiben');
+
+  // With low random roll (< depart chance), developer heads to PlayStation or discussion after delay/retry and stays longer
+  mockRand = 0.1;
+  for (let i = 0; i < 320; i++) {
+    fakeNow += 500;
+    if (nextRaf) nextRaf();
+  }
+  const boredStats = office.getStats();
+  assert(boredStats.playCount + boredStats.chatCount >= 1, 'Gelangweilte Fertig-Entwickler müssen per Zufall zur PlayStation oder zum Diskutieren gehen');
+
+  // Verify staying at leisure longer than 25s
+  for (let i = 0; i < 50; i++) {
+    fakeNow += 500;
+    if (nextRaf) nextRaf();
+  }
+  const stillBoredStats = office.getStats();
+  assert(stillBoredStats.playCount + stillBoredStats.chatCount >= 1, 'Freizeit-Aufenthalt muss länger als 25s dauern');
+
+  // Returning to busy must immediately pull them back from PlayStation/discussion
+  office.update({
+    jiraEnabled: true,
+    columns: [
+      { state: 'busy', label: 'Arbeitet', sessions: [{ sessionId: 'j1', provider: 'claude', project: 'tvw-hub', ticket: 'TVW-4242', title: 'Back to work', statusUpdatedAt: fakeNow }] },
+      { state: 'idle', label: 'Fertig', sessions: [{ sessionId: 'j2', provider: 'copilot', project: 'ai-sessions', title: 'Idle Friend', statusUpdatedAt: fakeNow - 60000 }] }
+    ]
+  });
+  const returnPhase = office.getStats().phases.j1.phase;
+  assert(returnPhase === 'seated' || returnPhase === 'fromPlay' || returnPhase === 'fromChat', 'Bei neuer Arbeit muss j1 sofort zum Schreibtisch zurückkehren');
+
+  // Switch to night (22:00) -> office darkens and ghost becomes active
+  fakeNow = new Date(2026, 10, 17, 22, 0, 0).getTime();
+  for (let i = 0; i < 9; i++) {
+    fakeNow += 50;
+    if (nextRaf) nextRaf();
+  }
+  drawOps = [];
+  fakeNow += 50;
+  if (nextRaf) nextRaf();
+  const nightStats = office.getStats();
+  assert.strictEqual(nightStats.tod, 'night', '22:00 muss Nacht-Modus aktivieren');
+  assert.strictEqual(nightStats.ghostActive, true, 'Nachts ab Sonnenuntergang muss der Geist aktiv sein');
+  assert(drawOps.some((o) => o.op === 'rect' && typeof o.color === 'string' && o.color.startsWith('rgba(6, 10, 26')), 'Nachts muss ein abgedunkeltes Raum-Overlay gezeichnet werden');
+  const nightMoons = drawOps.filter((o) => o.op === 'rect' && o.w === 7 && o.h === 7 && o.color === '#FEF08A' && o.y < 25);
+  assert.strictEqual(nightMoons.length, 1, 'Nachts darf insgesamt nur ein Mond über alle 3 Fenster erscheinen');
+
+  // Time-of-day simulation cycle (dawn -> day -> evening -> night -> auto)
+  fakeNow = new Date(2026, 10, 17, 13, 0, 0).getTime();
+  assert.strictEqual(office.cycleTimeOfDay(), 'dawn', 'Erster Zyklus muss Sonnenaufgang simulieren');
+  assert.strictEqual(office.cycleTimeOfDay(), 'day', 'Zweiter Zyklus muss Tag simulieren');
+  assert.strictEqual(office.cycleTimeOfDay(), 'evening', 'Dritter Zyklus muss Sonnenuntergang simulieren');
+  assert.strictEqual(office.cycleTimeOfDay(), 'night', 'Vierter Zyklus muss Nacht simulieren');
+  assert.strictEqual(office.getStats().ghostActive, true, 'Simulierte Nacht am Mittag muss den Geist sofort aktivieren');
+  assert.strictEqual(office.cycleTimeOfDay(), null, 'Fünfter Zyklus muss zurück auf Echtzeit (null) schalten');
+  assert.strictEqual(office.getStats().ghostActive, false, 'Zurück in Echtzeit-Tag muss der Geist wieder verschwinden');
+
+  office.setActive(false);
+}
+console.log('✓ Zeitzone, 3 Fenster, Nacht-Geist, Langeweile (PS5/Diskussion), JIRA-Ticket & Bar ohne Leuchte OK');
+
+// 7. BoardPanel & OfficePanel HTML expose office view markers and place inspector above canvas
 const bpHtml = new BoardPanel({}).html();
 assert(bpHtml.includes('data-submode="office"'), 'BoardPanel benötigt Sub-Nav-Button für Büro');
 assert(bpHtml.includes('id="btn-office-popout"'), 'BoardPanel benötigt Popout-Button');

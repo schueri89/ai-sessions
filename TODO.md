@@ -2,9 +2,12 @@
 Hier pflegen wir gemeinsam die anstehenden Aufgaben. Nur Vorhaben – Hintergründe und Entscheidungen stehen in `.agents/plans/` bzw. `.agents/project-context.md`.
 
 ## Offene Aufgaben
-_Zurzeit keine offenen Aufgaben._
+- [ ] Büro: Andere Abteilungen ergänzen über JIRA (quasi zugewiesene Personen, wenn dieser ungleich dem Entwickler des Vorgangs ist).. je mehr Vorgänge bei ihm legen, umso größer wird der Papierstapel
+- [ ] Büro: Filter ausblenden (Freitext, Projekte)
+- [ ] Büro: nach Auswahl einer Sessions -> angezeigte Buttons sollten analog zu Boards dargestellt werden (Icons)
 
 ## Erledigt
+- [x] session-dashboard v0.103.0: Büro-Ansicht: Zeitzonen-abhängiger Sonnenauf-/-untergang (Meeus/NOAA über `Intl.DateTimeFormat().resolvedOptions().timeZone`), 3 Fenster (Variante A: links außen, links & rechts vom Schild) mit genau einer Sonne/einem Mond über alle Fenster (`getCelestialWindowIndex`) und Klick-Simulation der Tageszeiten (`dawn`/`day`/`evening`/`night`/Echtzeit + Toolbar-Reset), abgedunkelte Nacht-Atmosphäre mit Lichtinseln und spukendem Büro-Geist ab Sonnenuntergang, PlayStation-Ecke & Diskussions-Stehtisch für gelangweilte Fertig-Entwickler mit ruhiger Zufallssteuerung (`45–180s` Pause, `35%` Aufbruchchance, `24s` Gang-Cooldown, `60–150s`/`45–110s` Aufenthalt), JIRA-Ticket-Badge direkt am Schreibtisch und im Inspector (inkl. `openJira`/`assignTicket` in `OfficePanel`), sowie Entfernung der blinkenden Bar-Leuchte (`lib/officeView.js`, `lib/officePanel.js`, `lib/boardPanel.js`, `test/check-office-view.js`) *(17.11.2026, [Plan](.agents/plans/2026-11-17_session-dashboard-buero-erweiterungen.md))*
 - [x] session-dashboard v0.102.2: Titel von Copilot-Sessions (Agent Host) aus `chats_v2.metadata.data.summary` in `globalStorage/agent-host.db` statt aus dem letzten Prompt (`readAgentHostTitles` in `lib/providers/copilot.js`, Titel Teil des Cache-Schlüssels) *(17.11.2026)*
 - [x] session-dashboard v0.102.2: Copilot-Sessions (Agent Host) öffnen: CLI-Session-ID ist nur das SDK-Backing, die von VS Code angemeldete Session (`owner_session_uri`) wird über `chats_v2.provider_data.sdkSessionId` in `globalStorage/agent-host.db` ermittelt (`resolveAgentHostSessionUri` in `lib/providers/copilot.js`) *(17.11.2026)*
 - [x] session-dashboard v0.102.1: Copilot-Sessions vom Typ „Copilot“ (Agent Host) öffnen über den Link `agent-host-session://copilotcli/<id>` per `vscode.open` (VS-Code-Opener öffnet direkt im Chat-View) statt `agent-host-copilotcli:/<id>` als Editor + `openInSidebar` *(17.11.2026)*
