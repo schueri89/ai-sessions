@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.103.1] – 17.11.2026
+
+- **Büro-Ansicht: Freitext- und Projekt-Filter ausgeblendet:** Im Unter-Tab „🏢 Büro“ bleiben nur noch Provider-Filter und Ansichts-Navigation sichtbar; Freitextsuche und Projekt-Chips entfallen dort wie zuvor schon die Quota-Kacheln.
+- **Büro-Ansicht: Session-Auswahlleiste wie auf dem Board:** Provider-Icon, klickbares Projekt-Badge (`📁`), JIRA-Pill samt Löschen-Icon (`🗑️`) bzw. `+ JIRA`, Pin-Icon zum Merken sowie `✅ Erledigt` und `👁️ Details` verwenden jetzt dieselben Icons und Buttons wie die Karten im Board.
+
 ## [0.103.0] – 17.11.2026
 
 - **Büro-Ansicht: Dynamische Tageszeit nach Zeitzone:** Sonnenaufgang, Tag, Sonnenuntergang und Nacht werden jetzt automatisch anhand der eigenen Zeitzone und des Datums berechnet statt mit festen Uhrzeiten.

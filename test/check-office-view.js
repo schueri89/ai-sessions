@@ -363,8 +363,14 @@ console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarian
   assert.strictEqual(daySuns.length, 1, 'Tagsüber darf insgesamt nur eine Sonne über alle 3 Fenster erscheinen');
 
   assert(drawOps.some((o) => o.op === 'text' && o.text === 'TVW-4242'), 'JIRA-Nummer muss direkt am Schreibtisch gezeichnet werden');
-  assert(els.get('office-inspector-info').innerHTML.includes('TVW-4242'), 'Inspector-Info muss die JIRA-Nummer enthalten');
-  assert(els.get('office-inspector-actions').innerHTML.includes('data-office-act="openJira"'), 'Inspector muss JIRA-Öffnen-Button anbieten');
+  const inspInfoHtml = els.get('office-inspector-info').innerHTML;
+  const inspActHtml = els.get('office-inspector-actions').innerHTML;
+  assert(inspInfoHtml.includes('office-provider-icon claude'), 'Inspector-Info muss das Provider-Icon analog zum Board zeigen');
+  assert(inspInfoHtml.includes('data-office-act="assignProject"'), 'Inspector-Info muss ein klickbares Projekt-Badge analog zum Board zeigen');
+  assert(inspActHtml.includes('TVW-4242') && inspActHtml.includes('data-office-act="openJira"'), 'Inspector muss JIRA-Pill mit Öffnen-Aktion anbieten');
+  assert(inspActHtml.includes('data-office-act="removeTicket"'), 'Inspector muss JIRA-Löschen-Button (🗑️) analog zum Board anbieten');
+  assert(inspActHtml.includes('office-pin-btn') && inspActHtml.includes('data-office-act="toggleBookmark"'), 'Inspector muss Pin-Icon-Button analog zum Board anbieten');
+  assert(inspActHtml.includes('✅ Erledigt'), 'Inspector muss Erledigt-Button analog zum Board darstellen');
   const barLabelOp = drawOps.find((o) => o.op === 'text' && (o.text === 'BAR' || o.text === 'BAR 16h'));
   assert(barLabelOp, 'BAR-Schriftzug muss gezeichnet werden');
   const blinkingLed = drawOps.find((o) => o.op === 'rect' && o.w === 4 && o.h === 4 && Math.abs(o.y - (barLabelOp.y - 6)) <= 2);
@@ -441,6 +447,9 @@ console.log('✓ Zeitzone, 3 Fenster, Nacht-Geist, Langeweile (PS5/Diskussion), 
 const bpHtml = new BoardPanel({}).html();
 assert(bpHtml.includes('data-submode="office"'), 'BoardPanel benötigt Sub-Nav-Button für Büro');
 assert(bpHtml.includes('id="btn-office-popout"'), 'BoardPanel benötigt Popout-Button');
+assert(bpHtml.includes('id="board-search-row"'), 'BoardPanel benötigt ID am Freitext-Suchbereich zum Ausblenden im Büro');
+assert(bpHtml.includes("boardSearchRow.style.display = currentViewMode === 'board' ? 'flex' : 'none'"), 'Freitext-Suche muss im Büro-Tab ausgeblendet bleiben');
+assert(bpHtml.includes("allEntries.length === 0 || currentViewMode !== 'board'"), 'Projekt-Filter-Chips müssen im Büro-Tab ausgeblendet bleiben');
 assert(bpHtml.includes("currentViewMode !== 'board'"), 'Quota-Leiste muss außerhalb von Board (z. B. im Büro-Tab) ausgeblendet bleiben');
 
 const opHtml = new OfficePanel({}).html();
