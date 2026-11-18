@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.107.0] – 18.11.2026
+
+- **Büro-Ansicht: Standort konfigurierbar (Standard: Frankfurt) & Geist-Zeitraum angepasst:** Über die neue Einstellung `sessionDashboard.office.location` lässt sich der Standort für Sonnenauf- und -untergang frei wählen (Standard: `Frankfurt`, alternativ andere Städte, Koordinaten oder `auto` für die System-Zeitzone). Der Büro-Geist erscheint nun erst 2 Stunden nach Sonnenuntergang (spätestens um 23:00 Uhr) und verschwindet um 02:00 Uhr wieder.
+
 ## [0.106.0] – 18.11.2026
 
 - **Büro-Ansicht: Weihnachtsdeko:** Vom 1. Advent bis zum 6. Januar ersetzt ein Weihnachtsbaum mit Lichtern und Stern die Pflanze, darunter liegt für jede heute erledigte Session ein Geschenk. Dazu kommen eine Lichterkette an der Wand (leuchtet nachts), Schnee in den Fenstern, ein Adventskranz am Stehtisch (je Adventssonntag eine Kerze mehr), Nikolausmützen und Glühwein statt Bier an der Bar. Ein Klick auf Baum bzw. Pflanze schaltet die Deko zur Vorschau an oder aus.

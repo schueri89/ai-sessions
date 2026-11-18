@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.106.0",
+  "version": "0.107.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -446,6 +446,11 @@
             ],
             "default": 25,
             "description": "Standard-Anzahl der Sessions pro Seite in der Historie-Tabelle."
+          },
+          "sessionDashboard.office.location": {
+            "type": "string",
+            "default": "Frankfurt",
+            "markdownDescription": "Standort für die Berechnung von Sonnenauf- und -untergang im Büro-Tab (z. B. `Frankfurt`, `Berlin`, `München`, `Hamburg`, `Köln`, `Wien`, `Zürich` oder Koordinaten wie `50.11, 8.68`). Leer lassen oder `auto` eingeben, um die System-Zeitzone automatisch zu verwenden."
           }
         }
       },

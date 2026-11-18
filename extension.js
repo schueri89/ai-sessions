@@ -829,6 +829,10 @@ function activate(context) {
       if (e.affectsConfiguration('sessionDashboard.jiraBaseUrl')) {
         board.update();
       }
+      if (e.affectsConfiguration('sessionDashboard.office')) {
+        board.update();
+        officePanel.update();
+      }
       if (e.affectsConfiguration('sessionDashboard.jenkins')) {
         board.onJenkinsConfigChanged();
         jenkinsWatcher.restart();

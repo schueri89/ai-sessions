@@ -334,14 +334,35 @@ console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarian
   const [win1, win2, win3] = initStats.windowPositions;
   assert(win1 < win2 && win2 + 58 < 316 && win3 > 480, 'Fenster müssen links außen, links vom Schild und rechts vom Schild liegen');
 
-  // Solar times for Europe/Berlin differ significantly between November and June
+  // Solar times for Europe/Berlin and Frankfurt differ significantly between November and June
+  assert.strictEqual(initStats.officeLocation, 'Frankfurt', 'Standard-Standort für das Büro muss Frankfurt sein');
   const novBerlin = initStats.getSunTimesFor(new Date(2026, 10, 17, 12, 0, 0).getTime(), 'Europe/Berlin');
+  const novFrankfurt = initStats.getSunTimesFor(new Date(2026, 10, 17, 12, 0, 0).getTime(), 'Frankfurt');
   const junBerlin = initStats.getSunTimesFor(new Date(2026, 5, 21, 12, 0, 0).getTime(), 'Europe/Berlin');
+  const junFrankfurt = initStats.getSunTimesFor(new Date(2026, 5, 21, 12, 0, 0).getTime(), 'Frankfurt');
+  const munichCoords = initStats.getSunTimesFor(new Date(2026, 10, 17, 12, 0, 0).getTime(), '48.14, 11.58');
   assert(novBerlin.sunsetMin < 1050, 'November-Sonnenuntergang in Berlin muss vor 17:30 Uhr liegen');
+  assert(novFrankfurt.sunsetMin > novBerlin.sunsetMin + 15, 'November-Sonnenuntergang in Frankfurt muss deutlich später als in Berlin liegen');
+  assert.strictEqual(novFrankfurt.tz, 'Frankfurt', 'Aufgelöster Standortname muss Frankfurt anzeigen');
+  assert.strictEqual(munichCoords.tz, '48.14, 11.58', 'Freie Koordinaten müssen unterstützt werden');
   assert(junBerlin.sunsetMin > 1240, 'Juni-Sonnenuntergang in Berlin muss nach 20:40 Uhr liegen');
+  assert(junFrankfurt.sunsetMin > 1260, 'Juni-Sonnenuntergang in Frankfurt muss nach 21:00 Uhr liegen');
   assert.strictEqual(initStats.getTimeOfDayFor(new Date(2026, 10, 17, 13, 0, 0).getTime(), 'Europe/Berlin'), 'day', '13:00 muss Tag sein');
   assert.strictEqual(initStats.getTimeOfDayFor(new Date(2026, 10, 17, 22, 0, 0).getTime(), 'Europe/Berlin'), 'night', '22:00 muss Nacht sein');
   assert.strictEqual(initStats.ghostActive, false, 'Tagsüber darf kein Geist aktiv sein');
+
+  // Ghost schedule: 2h after sunset (latest 23:00) until 02:00
+  const tsLocal = (...a) => new Date(...a).getTime();
+  assert.strictEqual(initStats.getTimeOfDayFor(tsLocal(2026, 10, 17, 17, 30), 'Frankfurt'), 'night', '17:30 im November in Frankfurt ist bereits Nacht');
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 10, 17, 17, 30), 'Frankfurt'), false, '17:30 ist noch keine 2 Stunden nach Sonnenuntergang -> kein Geist');
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 10, 17, 19, 0), 'Frankfurt'), true, '19:00 (> 2h nach Sonnenuntergang) -> Geist aktiv');
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 10, 18, 1, 30), 'Frankfurt'), true, '01:30 -> Geist noch aktiv');
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 10, 18, 2, 0), 'Frankfurt'), false, 'Um 02:00 geht der Geist wieder');
+  // Summer cap at 23:00 (Frankfurt June sunset ~21:37 -> +2h = 23:37 -> capped to 23:00)
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 5, 21, 22, 30), 'Frankfurt'), false, 'Im Juni um 22:30 noch vor 23:00-Deckel -> kein Geist');
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 5, 21, 23, 5), 'Frankfurt'), true, 'Im Juni um 23:05 (spätestens 23 Uhr) -> Geist aktiv');
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 5, 22, 1, 55), 'Frankfurt'), true, 'Im Juni um 01:55 -> Geist noch aktiv');
+  assert.strictEqual(initStats.isGhostActiveFor(tsLocal(2026, 5, 22, 2, 5), 'Frankfurt'), false, 'Im Juni um 02:05 -> Geist wieder weg');
 
   // JIRA ticket at desk + Inspector, plus no blinking bar LED
   drawOps = [];

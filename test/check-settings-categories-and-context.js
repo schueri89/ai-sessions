@@ -17,7 +17,7 @@ assert(Array.isArray(cfg), 'contributes.configuration must be an array of catego
 assert.strictEqual(cfg.length, 11, 'contributes.configuration must contain exactly 11 categories');
 
 const expectedCategories = [
-  { title: 'Tab: Sessions', order: 1, count: 10 },
+  { title: 'Tab: Sessions', order: 1, count: 11 },
   { title: 'Tab: Tasks', order: 2, count: 7 },
   { title: 'Tab: Audits', order: 3, count: 13 },
   { title: 'Tab: Logs', order: 4, count: 3 },
@@ -49,10 +49,11 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 90, `Total property count across all categories must be exactly 90, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 91, `Total property count across all categories must be exactly 91, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
+assert(cfg[0].properties['sessionDashboard.office.location'], 'office.location must be in Tab: Sessions');
 assert(cfg[0].properties['sessionDashboard.showLastPrompt'], 'showLastPrompt must be in Tab: Sessions');
 assert(cfg[0].properties['sessionDashboard.providers.claude'], 'providers.claude must be in Tab: Sessions');
 assert(cfg[0].properties['sessionDashboard.board.columnCardLimit'], 'board.columnCardLimit must be in Tab: Sessions');
