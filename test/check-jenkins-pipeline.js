@@ -11,7 +11,7 @@ Module.prototype.require = function (id) {
   return origRequire.apply(this, arguments);
 };
 
-const { layoutPipeline, matchPipelineRuns } = require('../lib/jenkins');
+const { layoutPipeline, matchPipelineRuns, applyQueueItems, buildPipelines } = require('../lib/jenkins');
 
 console.log('Testing lib/jenkins.js (pipeline layout & runs)...');
 
@@ -93,6 +93,30 @@ assert.strictEqual(queued[0].queued, true);
 assert.strictEqual(queued[0].cells[0].state, 'queued');
 assert.strictEqual(states(queued[2]).killapps_stage, 'unknown', 'build history too short');
 console.log('✓ runs: queued start build, truncated history -> unknown');
+
+const queueJobs = [{ url: U('rating_test'), queued: false }, { url: U('killapps_stage'), queued: true }];
+applyQueueItems(queueJobs, [
+  { task: { url: U('rating_test') }, actions: [{ causes: [{ upstreamProject: 'rating_build' }, { userId: 'rs' }] }] },
+  { task: { url: U('unknown') }, actions: [] }
+]);
+assert.strictEqual(queueJobs[0].queued, true);
+assert.deepStrictEqual(queueJobs[0].queueUpstreamProjects, ['rating_build']);
+assert.strictEqual(queueJobs[1].queueUpstreamProjects, undefined, 'not in queue response -> no cause info');
+console.log('✓ queue: queued jobs get their triggering upstream project');
+
+const pj = (name, downstream, upstream) => ({ ...job(name, downstream), upstream: (upstream || []).map(U) });
+const plJobs = [
+  pj('a_build', ['a_deploy']), pj('a_deploy', ['killapps'], ['a_build']),
+  pj('b_build', ['b_deploy']), pj('b_deploy', ['killapps'], ['b_build']),
+  pj('killapps', [], ['a_deploy', 'b_deploy', 'c_build']),
+  pj('c_build', ['c_deploy', 'killapps']), pj('c_deploy', [], ['c_build'])
+];
+const view = (name, names) => ({ name, url: 'https://j/view/' + name + '/', jobs: names.map((n) => ({ url: U(n) })) });
+const pipelines = buildPipelines(plJobs, [view('A', ['a_build', 'a_deploy', 'killapps']), view('B', ['b_build', 'b_deploy', 'killapps'])]);
+const chains = pipelines.filter((p) => p.source === 'chain');
+assert.strictEqual(chains.length, 1);
+assert.deepStrictEqual(chains[0].jobUrls, ['c_build', 'c_deploy', 'killapps'].map(U), 'chain must not pull in view jobs via shared killapps');
+console.log('✓ pipelines: chains do not merge view pipelines through shared jobs');
 
 Module.prototype.require = origRequire;
 console.log('All jenkins pipeline checks passed.');

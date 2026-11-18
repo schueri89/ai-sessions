@@ -2,6 +2,11 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.103.2] – 18.11.2026
+
+- **Deploys: Wartende Deploys werden angezeigt:** Pipelines, deren Job in der Jenkins-Warteschlange hängt, erscheinen jetzt mit ⏳ unter „Laufend“ – auch wenn der wartende Job nicht der erste Schritt ist.
+- **Deploys: Keine fremden Jobs mehr in automatisch erkannten Pipelines:** Pipelines ohne Jenkins-View (z. B. `ehoi_cruisebooker_build`) wachsen nicht mehr über gemeinsam genutzte Jobs wie killapps mit anderen Pipelines zusammen und zeigen daher keine fremden laufenden Deploys mehr.
+
 ## [0.103.1] – 17.11.2026
 
 - **Büro-Ansicht: Freitext- und Projekt-Filter ausgeblendet:** Im Unter-Tab „🏢 Büro“ bleiben nur noch Provider-Filter und Ansichts-Navigation sichtbar; Freitextsuche und Projekt-Chips entfallen dort wie zuvor schon die Quota-Kacheln.
