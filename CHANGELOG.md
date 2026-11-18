@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.105.0] – 18.11.2026
+
+- **Deploys: Fehlgeschlagene Schritte erneut starten:** Rote (sowie instabile oder abgebrochene) Schritte im Pipeline-Lauf haben jetzt wie in Jenkins einen ▷-Button. Er startet den Job mit denselben Parametern erneut im selben Pipeline-Lauf (Jenkins `rerunBuild`) – verfügbar für Pipelines, die als Jenkins-View angelegt sind.
+
 ## [0.104.0] – 18.11.2026
 
 - **Projektnamen ohne Präfix:** Über die neue Einstellung `sessionDashboard.projectNamePrefixes` lassen sich Präfixe wie `de-e-hoi-` ausblenden – `de-e-hoi-frontend` erscheint dann überall (Board, Büro, Verlauf, Tasks, Audits, Analyse, Seitenleiste, Transkript-Viewer und Benachrichtigungen) kurz als `frontend`.
