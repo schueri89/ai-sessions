@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.106.0] – 18.11.2026
+
+- **Büro-Ansicht: Weihnachtsdeko:** Vom 1. Advent bis zum 6. Januar ersetzt ein Weihnachtsbaum mit Lichtern und Stern die Pflanze, darunter liegt für jede heute erledigte Session ein Geschenk. Dazu kommen eine Lichterkette an der Wand (leuchtet nachts), Schnee in den Fenstern, ein Adventskranz am Stehtisch (je Adventssonntag eine Kerze mehr), Nikolausmützen und Glühwein statt Bier an der Bar. Ein Klick auf Baum bzw. Pflanze schaltet die Deko zur Vorschau an oder aus.
+
 ## [0.105.0] – 18.11.2026
 
 - **Deploys: Fehlgeschlagene Schritte erneut starten:** Rote (sowie instabile oder abgebrochene) Schritte im Pipeline-Lauf haben jetzt wie in Jenkins einen ▷-Button. Er startet den Job mit denselben Parametern erneut im selben Pipeline-Lauf (Jenkins `rerunBuild`) – verfügbar für Pipelines, die als Jenkins-View angelegt sind.

@@ -491,4 +491,141 @@ assert(
   'Infos des ausgewählten Chats müssen oberhalb des Büro-Canvas stehen'
 );
 
+// 8. Christmas decoration (1st Advent until 6 January): tree with gifts, fairy lights, snow, Advent wreath, Santa hats, mulled wine
+{
+  const noop = () => {};
+  let fakeNow = new Date(2026, 11, 6, 17, 0, 0).getTime();
+  class FakeDate extends Date {
+    constructor(...args) {
+      if (args.length === 0) super(fakeNow);
+      else super(...args);
+    }
+    static now() { return fakeNow; }
+  }
+  let nextRaf = null;
+  let drawOps = [];
+  const makeEl = () => {
+    const ctxObj = {
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'left',
+      fillRect: (x, y, w, h) => drawOps.push({ op: 'rect', x, y, w, h, color: ctxObj.fillStyle }),
+      strokeRect: noop,
+      fillText: (text, x, y) => drawOps.push({ op: 'text', text, x, y }),
+      beginPath: noop, moveTo: noop, lineTo: noop, stroke: noop
+    };
+    return {
+      style: {},
+      classList: { contains: () => false, add: noop, remove: noop, toggle: noop },
+      addEventListener: noop,
+      querySelectorAll: () => [],
+      getBoundingClientRect: () => ({ left: 0, top: 0, width: 796, height: 408 }),
+      getContext: () => ctxObj,
+      parentElement: { getBoundingClientRect: () => ({ left: 0, top: 0, width: 796, height: 408 }) },
+      innerHTML: '', value: 'all', width: 796, height: 408
+    };
+  };
+  const els = new Map();
+  const sandbox = {
+    vscode: { postMessage: noop },
+    window: {},
+    document: {
+      hidden: false,
+      body: { classList: { contains: () => false } },
+      getElementById: (id) => {
+        if (!els.has(id)) els.set(id, makeEl());
+        return els.get(id);
+      },
+      addEventListener: noop
+    },
+    getComputedStyle: () => ({ backgroundColor: 'rgb(30, 30, 30)', getPropertyValue: () => '' }),
+    requestAnimationFrame: (cb) => { nextRaf = cb; return 1; },
+    cancelAnimationFrame: () => { nextRaf = null; },
+    Date: FakeDate,
+    Intl,
+    Math, Map, Set, Array, Number, String, Boolean
+  };
+  vm.runInNewContext(getOfficeClientScript({ isPopout: false }), sandbox);
+  const office = sandbox.window.__aiOffice;
+  office.setActive(true);
+
+  const stats0 = office.getStats();
+  const ts = (...a) => new Date(...a).getTime();
+  assert(!stats0.isChristmasSeasonFor(ts(2026, 10, 28, 23, 0)), 'Vor dem 1. Advent 2026 (29.11.) darf keine Deko erscheinen');
+  assert(stats0.isChristmasSeasonFor(ts(2026, 10, 29, 0, 5)), 'Ab dem 1. Advent 2026 (29.11.) muss die Deko erscheinen');
+  assert(!stats0.isChristmasSeasonFor(ts(2025, 10, 29, 12)) && stats0.isChristmasSeasonFor(ts(2025, 10, 30, 12)), '1. Advent 2025 ist der 30.11.');
+  assert(stats0.isChristmasSeasonFor(ts(2027, 0, 6, 23)), 'Deko bleibt bis einschließlich 6. Januar');
+  assert(!stats0.isChristmasSeasonFor(ts(2027, 0, 7, 0, 5)), 'Ab 7. Januar ist die Deko wieder weg');
+  assert.strictEqual(stats0.adventCandlesFor(ts(2026, 11, 5, 12)), 1, 'Vor dem 2. Advent brennt eine Kerze');
+  assert.strictEqual(stats0.adventCandlesFor(ts(2026, 11, 6, 12)), 2, 'Am 2. Advent brennen zwei Kerzen');
+  assert.strictEqual(stats0.adventCandlesFor(ts(2026, 11, 20, 12)), 4, 'Am 4. Advent brennen vier Kerzen');
+  assert.strictEqual(stats0.xmasActive, true, 'Am 06.12. muss die Weihnachtsdeko aktiv sein');
+
+  // One desk finished today, one yesterday, one busy that finishes now -> 2 gifts and mulled wine at the bar after 16:00
+  office.update({
+    columns: [
+      { state: 'busy', label: 'Arbeitet', sessions: [{ sessionId: 'x1', provider: 'claude', project: 'xmas', statusUpdatedAt: fakeNow }] },
+      { state: 'idle', label: 'Fertig', sessions: [
+        { sessionId: 'x2', provider: 'codex', project: 'xmas', statusUpdatedAt: fakeNow - 3600000 },
+        { sessionId: 'x3', provider: 'codex', project: 'xmas', statusUpdatedAt: ts(2026, 11, 5, 15) }
+      ] }
+    ]
+  });
+  assert.strictEqual(office.getStats().giftCount, 1, 'Nur heute fertig gewordene Sessions zählen als Geschenk');
+  fakeNow += 500;
+  office.update({
+    columns: [
+      { state: 'idle', label: 'Fertig', sessions: [
+        { sessionId: 'x1', provider: 'claude', project: 'xmas', statusUpdatedAt: fakeNow },
+        { sessionId: 'x2', provider: 'codex', project: 'xmas', statusUpdatedAt: fakeNow - 3600000 },
+        { sessionId: 'x3', provider: 'codex', project: 'xmas', statusUpdatedAt: ts(2026, 11, 5, 15) }
+      ] }
+    ],
+    justCompletedSessionIds: ['x1']
+  });
+  for (let i = 0; i < 55; i++) {
+    fakeNow += 50;
+    if (nextRaf) nextRaf();
+  }
+  drawOps = [];
+  fakeNow += 50;
+  if (nextRaf) nextRaf();
+  const xs = office.getStats();
+  assert.strictEqual(xs.giftCount, 2, 'Zwei heute erledigte Sessions ergeben zwei Geschenke');
+  assert.strictEqual(xs.phases.x1.drinkStation, 'bar', 'Auch in der Weihnachtszeit geht es ab 16 Uhr zur Bar');
+  assert.strictEqual(xs.phases.x1.drinkType, 'mulledWine', 'In der Weihnachtszeit gibt es Glühwein statt Bier');
+  assert(drawOps.some((o) => o.op === 'text' && o.text === 'GLÜHWEIN'), 'Bar muss als Glühwein-Stand beschriftet sein');
+  assert(drawOps.some((o) => o.op === 'rect' && o.color === '#FFFFFF' && o.y < 25), 'In den Fenstern muss Schnee fallen');
+  assert(drawOps.some((o) => o.op === 'rect' && o.color === '#DC2626' && o.w === 12 && o.h === 5), 'Entwickler müssen Nikolausmützen tragen');
+  assert(drawOps.some((o) => o.op === 'rect' && o.color === '#166534' && o.w === 28), 'Weihnachtsbaum muss gezeichnet werden');
+  assert(!drawOps.some((o) => o.op === 'rect' && o.color === '#2E8B57'), 'Der Baum ersetzt die Büro-Pflanze');
+  assert(drawOps.some((o) => o.op === 'rect' && o.color === '#14532D' && o.y >= 25 && o.y <= 28 && o.h === 1), 'Lichterkette an der Wand muss gezeichnet werden');
+  assert.strictEqual(drawOps.filter((o) => o.op === 'rect' && o.color === '#2563EB' && o.w === 9 && o.h === 8).length, 1, 'Das zweite Geschenk muss unter dem Baum liegen');
+
+  // Night: lights glow above the dark overlay
+  office.setSimulatedTimeOfDay('night');
+  drawOps = [];
+  fakeNow += 50;
+  if (nextRaf) nextRaf();
+  const overlayIdx = drawOps.findIndex((o) => o.op === 'rect' && typeof o.color === 'string' && o.color.startsWith('rgba(6, 10, 26'));
+  const glowIdx = drawOps.findIndex((o) => o.op === 'rect' && /, 0\.25\)$/.test(String(o.color)) && o.y >= 24 && o.y <= 30);
+  assert(overlayIdx >= 0 && glowIdx > overlayIdx, 'Lichterkette muss nachts über der Abdunklung leuchten');
+  office.setSimulatedTimeOfDay(null);
+
+  // Toggle simulation: switch decoration off in season, on outside season, then back to real time
+  assert.strictEqual(office.toggleChristmasSimulation(), false, 'Klick auf den Baum in der Saison blendet die Deko zur Vorschau aus');
+  drawOps = [];
+  fakeNow += 50;
+  if (nextRaf) nextRaf();
+  assert.strictEqual(office.getStats().xmasActive, false, 'Deko muss ausgeblendet sein');
+  assert(drawOps.some((o) => o.op === 'rect' && o.color === '#2E8B57'), 'Ohne Deko steht wieder die Pflanze da');
+  assert(!drawOps.some((o) => o.op === 'text' && o.text === 'GLÜHWEIN'), 'Ohne Deko heißt die Bar wieder BAR');
+  assert.strictEqual(office.toggleChristmasSimulation(), null, 'Zweiter Klick schaltet zurück auf Echtzeit');
+  fakeNow = ts(2026, 10, 18, 12);
+  assert.strictEqual(office.getStats().xmasActive, false, 'Am 18.11. ist noch keine Weihnachtszeit');
+  assert.strictEqual(office.toggleChristmasSimulation(), true, 'Außerhalb der Saison zeigt der Klick die Deko als Vorschau');
+  assert.strictEqual(office.getStats().xmasActive, true, 'Vorschau muss die Deko aktivieren');
+  office.setSimulatedChristmas(null);
+  office.setActive(false);
+}
+console.log('✓ Weihnachtsdeko (Baum, Geschenke, Lichterkette, Schnee, Adventskranz, Mützen, Glühwein) OK');
+
 console.log('Alle Office-View Unit-Tests bestanden.');
