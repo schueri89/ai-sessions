@@ -7,7 +7,7 @@ const { DoneStore } = require('./lib/doneStore');
 const { BookmarkStore } = require('./lib/bookmarkStore');
 const { TicketStore, detectTicket, buildJiraUrl } = require('./lib/ticketStore');
 const { ProjectStore } = require('./lib/projectStore');
-const { getKnownSubfolders } = require('./lib/project');
+const { getKnownSubfolders, displayProjectName } = require('./lib/project');
 const { resolveAgentHostSessionUri } = require('./lib/providers/copilot');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
@@ -846,7 +846,7 @@ function activate(context) {
         }
         board.update();
       }
-      if (e.affectsConfiguration('sessionDashboard.projectDetection')) {
+      if (e.affectsConfiguration('sessionDashboard.projectDetection') || e.affectsConfiguration('sessionDashboard.projectNamePrefixes')) {
         update(true);
       }
       if (e.affectsConfiguration('sessionDashboard.providers')) {
@@ -935,7 +935,7 @@ function activate(context) {
           filter: 'all'
         },
         ...sortedProjects.map(([proj, cnt]) => ({
-          label: proj === 'Nicht zugewiesen' ? `$(inbox) ${proj}` : `$(folder) ${proj}`,
+          label: proj === 'Nicht zugewiesen' ? `$(inbox) ${proj}` : `$(folder) ${displayProjectName(proj)}`,
           description: `${cnt}`,
           detail: current === proj ? '✓ Aktiver Filter' : '',
           filter: proj
@@ -1067,7 +1067,7 @@ function activate(context) {
         const pick = await vscode.window.showQuickPick(
           visible.map((s) => ({
             label: (s.ticket ? `[${s.ticket}] ` : '') + (s.title || s.sessionId.slice(0, 8)),
-            description: s.project || 'ROOT',
+            description: displayProjectName(s.project || 'ROOT'),
             detail: s.lastPrompt ? s.lastPrompt.slice(0, 80) : s.sessionId,
             sessionId: s.sessionId
           })),
@@ -1171,7 +1171,7 @@ function activate(context) {
         }
         const pick = await vscode.window.showQuickPick(
           visible.map((s) => ({
-            label: `[${s.project}] ` + (s.title || s.sessionId.slice(0, 8)),
+            label: `[${displayProjectName(s.project)}] ` + (s.title || s.sessionId.slice(0, 8)),
             description: s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude Code'))),
             detail: s.lastPrompt ? s.lastPrompt.slice(0, 80) : s.sessionId,
             sessionId: s.sessionId
@@ -1205,8 +1205,8 @@ function activate(context) {
       for (const p of projectList) {
         const isSelected = p.toLowerCase() === currentEffective.toLowerCase();
         items.push({
-          label: isSelected ? `$(check) ${p}` : `$(folder) ${p}`,
-          description: isSelected ? 'Aktuell ausgewählt' : '',
+          label: isSelected ? `$(check) ${displayProjectName(p)}` : `$(folder) ${displayProjectName(p)}`,
+          description: [isSelected ? 'Aktuell ausgewählt' : '', displayProjectName(p) !== p ? p : ''].filter(Boolean).join(' · '),
           project: p,
           action: 'set'
         });
@@ -1406,7 +1406,7 @@ function activate(context) {
         items.push({ label: 'Wartet auf dich', kind: vscode.QuickPickItemKind.Separator });
         for (const s of waitingSessions) {
           const providerLabel = s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude')));
-          const proj = s.project ? `[${s.project}] ` : '';
+          const proj = s.project ? `[${displayProjectName(s.project)}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
             label: `$(bell-dot) ${proj}${s.title}`,
@@ -1422,7 +1422,7 @@ function activate(context) {
         items.push({ label: 'Arbeitet', kind: vscode.QuickPickItemKind.Separator });
         for (const s of busySessions) {
           const providerLabel = s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude')));
-          const proj = s.project ? `[${s.project}] ` : '';
+          const proj = s.project ? `[${displayProjectName(s.project)}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
             label: `$(loading~spin) ${proj}${s.title}`,
@@ -1438,7 +1438,7 @@ function activate(context) {
         items.push({ label: 'Fertig', kind: vscode.QuickPickItemKind.Separator });
         for (const s of idleSessions) {
           const providerLabel = s.provider === 'cline' ? 'Cline' : (s.provider === 'codex' ? 'Codex' : (s.provider === 'copilot' ? 'Copilot' : (s.provider === 'antigravity' ? 'Antigravity' : 'Claude')));
-          const proj = s.project ? `[${s.project}] ` : '';
+          const proj = s.project ? `[${displayProjectName(s.project)}] ` : '';
           const tokenStr = s.tokens ? ` · 🧠 ${formatTokens(s.tokens.context)}` : '';
           items.push({
             label: `$(pass) ${proj}${s.title}`,
@@ -1763,7 +1763,7 @@ function activate(context) {
           }
 
           items.push({
-            label: `${statusIcon} [${t.project}] ${t.label}`,
+            label: `${statusIcon} [${displayProjectName(t.project)}] ${t.label}`,
             description: (t.detail || '') + statusDesc,
             detail: t.dependsOn?.length ? `${t.dependsOn.length} Schritte: ${t.dependsOn.join(' ➔ ')}` : undefined,
             taskId: t.id
@@ -1789,7 +1789,7 @@ function activate(context) {
         }
 
         items.push({
-          label: `${statusIcon} [${t.project}] ${t.label}`,
+          label: `${statusIcon} [${displayProjectName(t.project)}] ${t.label}`,
           description: (t.detail || '') + statusDesc,
           detail: t.dependsOn?.length ? `${t.dependsOn.length} Schritte: ${t.dependsOn.join(' ➔ ')}` : undefined,
           taskId: t.id
@@ -1801,7 +1801,7 @@ function activate(context) {
       items.push({ label: 'Einzelne Teilschritte', kind: vscode.QuickPickItemKind.Separator });
         for (const t of subTasks) {
           items.push({
-            label: `$(terminal) [${t.project}] ${t.label}`,
+            label: `$(terminal) [${displayProjectName(t.project)}] ${t.label}`,
             description: t.detail || '',
             taskId: t.id
           });

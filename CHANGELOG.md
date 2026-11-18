@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.104.0] – 18.11.2026
+
+- **Projektnamen ohne Präfix:** Über die neue Einstellung `sessionDashboard.projectNamePrefixes` lassen sich Präfixe wie `de-e-hoi-` ausblenden – `de-e-hoi-frontend` erscheint dann überall (Board, Büro, Verlauf, Tasks, Audits, Analyse, Seitenleiste, Transkript-Viewer und Benachrichtigungen) kurz als `frontend`.
+- **Büro-Ansicht: Kompaktere Auswahlleiste:** Bei ausgewählter Session entfällt der JIRA-Button (die Ticketnummer bleibt als Info sichtbar), und „Chat öffnen“ heißt jetzt kurz „💬 Chat“.
+- **Büro-Ansicht: Wolken ziehen sauber durch:** Wolken gleiten vollständig aus dem Fenster hinaus, bevor nach einer zufälligen Pause eine neue vom linken Rand hereinzieht.
+
 ## [0.103.2] – 18.11.2026
 
 - **Deploys: Wartende Deploys werden angezeigt:** Pipelines, deren Job in der Jenkins-Warteschlange hängt, erscheinen jetzt mit ⏳ unter „Laufend“ – auch wenn der wartende Job nicht der erste Schritt ist.

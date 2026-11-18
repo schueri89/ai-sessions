@@ -27,7 +27,7 @@ const expectedCategories = [
   { title: 'Statusleiste & Limits', order: 8, count: 4 },
   { title: 'Sounds', order: 9, count: 17 },
   { title: 'Benachrichtigungen', order: 10, count: 8 },
-  { title: 'Allgemein', order: 11, count: 5 }
+  { title: 'Allgemein', order: 11, count: 6 }
 ];
 
 let totalPropsCount = 0;
@@ -49,7 +49,7 @@ expectedCategories.forEach((expected, idx) => {
   });
 });
 
-assert.strictEqual(totalPropsCount, 89, `Total property count across all categories must be exactly 89, got ${totalPropsCount}`);
+assert.strictEqual(totalPropsCount, 90, `Total property count across all categories must be exactly 90, got ${totalPropsCount}`);
 
 // Specific key checks
 assert(cfg[0].properties['sessionDashboard.jiraBaseUrl'], 'jiraBaseUrl must be in Tab: Sessions');
@@ -102,6 +102,7 @@ assert(cfg[8].properties['sessionDashboard.sound.taskFailed.enabled'], 'sound.ta
 assert(cfg[8].properties['sessionDashboard.sound.taskFailed.sound'], 'sound.taskFailed.sound must be in Sounds');
 assert(cfg[10].properties['sessionDashboard.defaultTab'], 'defaultTab must be in Allgemein');
 assert(cfg[10].properties['sessionDashboard.rootDirectory'], 'rootDirectory must be in Allgemein');
+assert(cfg[10].properties['sessionDashboard.projectNamePrefixes'], 'projectNamePrefixes must be in Allgemein');
 assert(cfg[10].properties['sessionDashboard.updateCheck.enabled'], 'updateCheck.enabled must be in Allgemein');
 
 console.log('✓ All 11 categories and 89 properties in package.json verified successfully');

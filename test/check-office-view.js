@@ -347,6 +347,7 @@ console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarian
   drawOps = [];
   office.update({
     jiraEnabled: true,
+    projectPrefixes: ['TVW-'],
     columns: [
       {
         state: 'idle',
@@ -367,8 +368,11 @@ console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarian
   const inspActHtml = els.get('office-inspector-actions').innerHTML;
   assert(inspInfoHtml.includes('office-provider-icon claude'), 'Inspector-Info muss das Provider-Icon analog zum Board zeigen');
   assert(inspInfoHtml.includes('data-office-act="assignProject"'), 'Inspector-Info muss ein klickbares Projekt-Badge analog zum Board zeigen');
-  assert(inspActHtml.includes('TVW-4242') && inspActHtml.includes('data-office-act="openJira"'), 'Inspector muss JIRA-Pill mit Öffnen-Aktion anbieten');
-  assert(inspActHtml.includes('data-office-act="removeTicket"'), 'Inspector muss JIRA-Löschen-Button (🗑️) analog zum Board anbieten');
+  assert(inspInfoHtml.includes('TVW-4242'), 'Inspector-Info muss die JIRA-Nummer weiterhin anzeigen');
+  assert(!/data-office-act="(openJira|removeTicket|assignTicket)"/.test(inspActHtml), 'Inspector-Aktionen dürfen keinen JIRA-Button mehr enthalten');
+  assert(inspActHtml.includes('💬 Chat</button>') && !inspActHtml.includes('Chat öffnen</button>'), 'Chat-Button muss auf „Chat“ + Icon gekürzt sein');
+  assert(drawOps.some((o) => o.op === 'text' && o.text === 'hub'), 'Projekt-Präfix (TVW-) muss am Schreibtisch entfernt werden');
+  assert(inspInfoHtml.includes('📁 hub</button>'), 'Projekt-Präfix muss auch im Inspector entfernt werden');
   assert(inspActHtml.includes('office-pin-btn') && inspActHtml.includes('data-office-act="toggleBookmark"'), 'Inspector muss Pin-Icon-Button analog zum Board anbieten');
   assert(inspActHtml.includes('✅ Erledigt'), 'Inspector muss Erledigt-Button analog zum Board darstellen');
   const barLabelOp = drawOps.find((o) => o.op === 'text' && (o.text === 'BAR' || o.text === 'BAR 16h'));
@@ -439,9 +443,34 @@ console.log('✓ Kaffee-Warteschlange (max. 3), Abschluss-Jubel & Zustandsvarian
   assert.strictEqual(office.cycleTimeOfDay(), null, 'Fünfter Zyklus muss zurück auf Echtzeit (null) schalten');
   assert.strictEqual(office.getStats().ghostActive, false, 'Zurück in Echtzeit-Tag muss der Geist wieder verschwinden');
 
+  // Clouds glide fully out of a window, pause for a random gap, then re-enter from the left edge
+  const skyLeft = win1 + 2;
+  const skyRight = win1 + 56;
+  let sawCloud = false;
+  let sawGapAfterCloud = false;
+  let sawReentry = false;
+  for (let i = 0; i < 1000; i++) {
+    drawOps = [];
+    fakeNow += 16;
+    if (nextRaf) nextRaf();
+    const cloudRects = drawOps.filter((o) => o.op === 'rect' && o.color === '#F8FAFC' && o.y < 25 && o.x >= win1 && o.x < win1 + 58);
+    cloudRects.forEach((o) => assert(o.x >= skyLeft && o.x + o.w <= skyRight, 'Wolken dürfen nicht über den Fensterrahmen hinaus gezeichnet werden'));
+    if (cloudRects.length > 0) {
+      if (sawGapAfterCloud && !sawReentry) {
+        const base = cloudRects.find((o) => o.h === 4);
+        assert(base && base.x === skyLeft && base.w < 14, 'Neue Wolke muss vom linken Fensterrand hereingleiten statt mittig aufzutauchen');
+        sawReentry = true;
+      }
+      sawCloud = true;
+    } else if (sawCloud) {
+      sawGapAfterCloud = true;
+    }
+  }
+  assert(sawCloud && sawGapAfterCloud && sawReentry, 'Wolke muss hinausgleiten, Pause machen und danach neu hereingleiten');
+
   office.setActive(false);
 }
-console.log('✓ Zeitzone, 3 Fenster, Nacht-Geist, Langeweile (PS5/Diskussion), JIRA-Ticket & Bar ohne Leuchte OK');
+console.log('✓ Zeitzone, 3 Fenster, Nacht-Geist, Langeweile (PS5/Diskussion), JIRA-Ticket, Bar ohne Leuchte, Wolken & Projekt-Präfix OK');
 
 // 7. BoardPanel & OfficePanel HTML expose office view markers and place inspector above canvas
 const bpHtml = new BoardPanel({}).html();

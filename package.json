@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.103.2",
+  "version": "0.104.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -1293,6 +1293,14 @@
             "type": "string",
             "default": "",
             "description": "Haupt-Projektverzeichnis für Projekt-Scans, Audits und Tasks; seine Unterordner gelten als Projekte. Bleibt das Feld leer, gelten bei mehreren Workspace-Ordnern diese selbst als Projekte, bei einem einzelnen Workspace-Ordner dessen Unterordner."
+          },
+          "sessionDashboard.projectNamePrefixes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "markdownDescription": "Präfixe, die in der Anzeige vor Projektnamen entfernt werden (Groß-/Kleinschreibung egal), z. B. `de-e-hoi-` zeigt `de-e-hoi-frontend` überall als `frontend` an. Gilt für Board, Büro, Verlauf, Tasks, Audits, Analyse, Seitenleiste und Benachrichtigungen; Filter und Zuordnungen verwenden weiterhin den vollen Namen."
           },
           "sessionDashboard.updateCheck.enabled": {
             "type": "boolean",
