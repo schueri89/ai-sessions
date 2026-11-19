@@ -6,7 +6,7 @@ const Module = require('module');
 const origRequire = Module.prototype.require;
 Module.prototype.require = function (id) {
   if (id === 'vscode') {
-    return { workspace: { getConfiguration: () => ({ get: (key, def) => def }) } };
+    return { workspace: { getConfiguration: () => ({ get: (key, def) => def, inspect: () => undefined }) } };
   }
   return origRequire.apply(this, arguments);
 };

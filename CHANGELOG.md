@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.107.1] – 19.11.2026
+
+- **Releases: Vorgänge nach Status sortiert:** Die Vorgangsliste einer Lösungsversion ist jetzt nach Status geordnet – in derselben Reihenfolge wie im Tab „Meine Vorgänge“. Die Reihenfolge wird zentral über die Einstellung `sessionDashboard.releases.statusOrder` festgelegt und gilt für beide Ansichten (ersetzt `sessionDashboard.myIssues.statusOrder`; ein dort bereits angepasster Wert wird weiter übernommen).
+
 ## [0.107.0] – 18.11.2026
 
 - **Büro-Ansicht: Standort konfigurierbar (Standard: Frankfurt) & Geist-Zeitraum angepasst:** Über die neue Einstellung `sessionDashboard.office.location` lässt sich der Standort für Sonnenauf- und -untergang frei wählen (Standard: `Frankfurt`, alternativ andere Städte, Koordinaten oder `auto` für die System-Zeitzone). Der Büro-Geist erscheint nun erst 2 Stunden nach Sonnenuntergang (spätestens um 23:00 Uhr) und verschwindet um 02:00 Uhr wieder.

@@ -19,8 +19,11 @@ weil dort alle Repos nebeneinanderliegen, und wird nie deployt.
   `2026-10-04_session-dashboard-fix-erledigt-verlust-und-limit-250.md`.
 - **`npm run check`** prüft die Syntax jedes Moduls einzeln. Wer ein Modul unter `lib/` anlegt,
   trägt es dort nach — sonst bleibt es ungeprüft.
-- **Versionierung:** `version` in `package.json` je Änderung hochzählen (Patch für Fixes, Minor für
-  Funktionen); die Version gehört in den Erledigt-Eintrag der `TODO.md` und die Commit-Nachricht.
+- **Versionierung (Pflicht, ausnahmslos):** Jede Änderung bekommt eine neue Version – auch ohne
+  ausdrückliche Aufforderung und auch bei kleinen Änderungen. `version` in `package.json` (und
+  `package-lock.json`, z. B. per `npm version x.y.z --no-git-tag-version`) hochzählen (Patch für Fixes,
+  Minor für Funktionen), bevor committet wird; kein Commit ohne neue Version. Die Version gehört in den
+  Erledigt-Eintrag der `TODO.md` und in die Commit-Nachricht (`… (vX.Y.Z)`).
 - **Changelog:** Jede Version bekommt in derselben Änderung einen Eintrag oben in `CHANGELOG.md`
   (`## [x.y.z] – dd.mm.yyyy`, ein Satz je Änderung aus Nutzersicht, keine Technik). VS Code zeigt
   die Datei im Reiter „Changelog" der Extension-Ansicht. Da hier jede Änderung eine eigene Version

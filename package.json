@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.107.0",
+  "version": "0.107.1",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -829,6 +829,23 @@
             "default": "customfield_10055",
             "markdownDescription": "ID des JIRA-Feldes (Benutzerauswahl), das in der Vorgangsliste einer Lösungsversion als **Entwickler** angezeigt wird, z. B. `customfield_10055`."
           },
+          "sessionDashboard.releases.statusOrder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "Offen",
+              "Ready for Development",
+              "In Development",
+              "Needs Bugfix",
+              "In Review",
+              "Codereview",
+              "Deployed to Staging",
+              "Ready for Live"
+            ],
+            "markdownDescription": "Globale Reihenfolge der JIRA-Status (Groß-/Kleinschreibung egal): Vorgangsliste einer Lösungsversion im Tab **Releases** und Status-Blöcke im Tab **Meine Vorgänge**. Nicht aufgeführte Status folgen danach, sortiert nach Kategorie (Offen, In Arbeit, Erledigt) und Name. Ersetzt `sessionDashboard.myIssues.statusOrder`."
+          },
           "sessionDashboard.releases.reviewPrompt": {
             "type": "string",
             "editPresentation": "multilineText",
@@ -875,7 +892,7 @@
           "sessionDashboard.myIssues.enabled": {
             "type": "boolean",
             "default": false,
-            "markdownDescription": "Tab **📋 Meine Vorgänge** im Session-Dashboard anzeigen: eigene JIRA-Vorgänge als Liste, gruppiert nach Status. Nutzt Zugangsdatei, Entwickler-Feld und Review-Prompt aus **Tab: Releases**."
+            "markdownDescription": "Tab **📋 Meine Vorgänge** im Session-Dashboard anzeigen: eigene JIRA-Vorgänge als Liste, gruppiert nach Status. Nutzt Zugangsdatei, Entwickler-Feld, Status-Reihenfolge und Review-Prompt aus **Tab: Releases**."
           },
           "sessionDashboard.myIssues.user": {
             "type": "string",
@@ -891,23 +908,6 @@
             "type": "string",
             "default": "customfield_10050",
             "markdownDescription": "ID des JIRA-Datumsfeldes für die Spalte **Fälligkeit** (\"Fälligkeit der Entwicklung\"), z. B. `customfield_10050` oder `duedate`."
-          },
-          "sessionDashboard.myIssues.statusOrder": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "default": [
-              "Offen",
-              "Ready for Development",
-              "In Development",
-              "Needs Bugfix",
-              "In Review",
-              "Codereview",
-              "Deployed to Staging",
-              "Ready for Live"
-            ],
-            "description": "Reihenfolge der Status-Blöcke im Tab 'Meine Vorgänge' (Groß-/Kleinschreibung egal). Nicht aufgeführte Status folgen danach, sortiert nach Kategorie (Offen, In Arbeit, Erledigt) und Name."
           }
         }
       },

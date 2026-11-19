@@ -6,12 +6,12 @@ const Module = require('module');
 const origRequire = Module.prototype.require;
 Module.prototype.require = function (id) {
   if (id === 'vscode') {
-    return { workspace: { getConfiguration: () => ({ get: (key, def) => def }) } };
+    return { workspace: { getConfiguration: () => ({ get: (key, def) => def, inspect: () => undefined }) } };
   }
   return origRequire.apply(this, arguments);
 };
 
-const { fetchReleases, isJiraReleaseUrl, normalizeVersion, splitReleases, versionStatus, isoWeek, countIssueProgress } = require('../lib/jiraReleases');
+const { fetchReleases, isJiraReleaseUrl, normalizeVersion, splitReleases, versionStatus, isoWeek, countIssueProgress, normalizeIssue, compareByStatus } = require('../lib/jiraReleases');
 
 console.log('Testing lib/jiraReleases.js (status, progress, ordering)...');
 
@@ -73,6 +73,18 @@ const progress = countIssueProgress([
 assert.deepStrictEqual(progress.get('1'), { toDo: 0, inProgress: 1, done: 3 }, 'ready statuses (case-insensitive) + done count green');
 assert.deepStrictEqual(progress.get('2'), { toDo: 1, inProgress: 0, done: 1 }, 'issue with several fix versions counted in each');
 console.log('✓ countIssueProgress (ready statuses, done category, multiple fix versions)');
+
+const relIssue = (key, name, category) => normalizeIssue({ key, fields: { status: { name, statusCategory: { key: category } } } }, 'https://j', new Set(), 'customfield_10055');
+const sortedIssues = [
+  relIssue('E-1', 'Live', 'done'),
+  relIssue('E-2', 'Codereview', 'indeterminate'),
+  relIssue('E-3', 'Offen', 'new'),
+  relIssue('E-4', 'Exotisch', 'indeterminate'),
+  relIssue('E-5', 'codereview', 'indeterminate'),
+  relIssue('E-6', 'In Development', 'indeterminate')
+].sort(compareByStatus(['Offen', 'In Development', 'Codereview']));
+assert.deepStrictEqual(sortedIssues.map((i) => i.key), ['E-3', 'E-6', 'E-2', 'E-5', 'E-4', 'E-1'], 'configured order, then category; key order kept within a status');
+console.log('✓ compareByStatus (release issues sorted by configured status order)');
 
 fetchReleases().then((data) => {
   assert.strictEqual(data.state, 'unconfigured', 'missing credentials file setting');
