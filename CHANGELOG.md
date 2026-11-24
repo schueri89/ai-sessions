@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.110.0] – 24.11.2026
+
+- **Audits: IONOS Cloud-Modelle im Audits-Tab wählbar:** Im Modell-Dropdown unter „🛡️ Audits“ sowie für den nächtlichen Task stehen nun neben lokalem Ollama auch IONOS-Cloud-Modelle wie `IONOS · Qwen 3 Coder Next (Cloud)` bereit, inklusive passender Fehlererkennung bei API-Timeouts oder Verbindungsfehlern.
+
 ## [0.109.3] – 24.11.2026
 
 - **Audits: Standardmodell wieder richtig vorausgewählt:** Beim Öffnen des Audits-Tabs ist jetzt direkt das eingestellte Standardmodell (`qwen3-coder:30b`) im Dropdown aktiv statt `gemma4:e4b`.

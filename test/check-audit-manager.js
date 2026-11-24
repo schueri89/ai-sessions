@@ -118,6 +118,18 @@ ERROR: Request to Ollama failed: timed out
 `;
 const statusTimeout = manager.parseReportStatus(sampleReportTimeout);
 assert.strictEqual(statusTimeout.status, 'error', 'Timeout report must be error');
+assert.strictEqual(statusTimeout.summary, 'Ollama Timeout (Zeitüberschreitung)', 'Summary must indicate Ollama timeout');
+
+const sampleReportIonosError = `
+# Audit-Report: test-ionos-err
+Modus: \`review\` | Modell: \`ionos:Qwen/Qwen3-Coder-Next\`
+
+## 🔍 2. Code Review
+ERROR: Request to IONOS failed (HTTP 401): Unauthorized
+`;
+const statusIonosErr = manager.parseReportStatus(sampleReportIonosError);
+assert.strictEqual(statusIonosErr.status, 'error', 'IONOS API error report must be error');
+assert.strictEqual(statusIonosErr.summary, 'IONOS API-Fehler', 'Summary must indicate IONOS API error');
 assert.strictEqual(statusTimeout.summary, 'Ollama Timeout (Zeitüberschreitung)', 'Timeout summary must indicate Ollama Timeout');
 console.log('✓ parseReportStatus accurately classifies passed, warning, error, footer-exclusion, and timeout states');
 

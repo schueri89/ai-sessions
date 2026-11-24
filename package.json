@@ -2,7 +2,7 @@
   "name": "ai-sessions",
   "displayName": "AI Sessions",
   "description": "Zeigt alle laufenden Claude-Code-, Antigravity-, GitHub-Copilot-, OpenAI-Codex- und Cline-Sessions mit Zustand: wartet, arbeitet, fertig, erledigt.",
-  "version": "0.109.3",
+  "version": "0.110.0",
   "publisher": "schueri",
   "private": true,
   "license": "UNLICENSED",
@@ -539,12 +539,12 @@
           "sessionDashboard.audits.defaultModel": {
             "type": "string",
             "default": "qwen3-coder:30b",
-            "description": "Standard-KI-Modell für lokale Code-Reviews und Security-Audits via Ollama (z. B. qwen3-coder:30b, gemma4:e4b oder gemma4:26b)."
+            "description": "Standard-KI-Modell für Code-Reviews und Security-Audits (lokales Ollama, z. B. qwen3-coder:30b, gemma4:e4b, gemma4:26b, oder IONOS Cloud wie ionos:Qwen/Qwen3-Coder-Next)."
           },
           "sessionDashboard.audits.nightlyModel": {
             "type": "string",
             "default": "qwen3-coder:30b",
-            "description": "Standard-KI-Modell für den automatisierten nächtlichen Gesamtlauf via Scheduled Task (DevBox-Nightly-Audit). Standard: qwen3-coder:30b."
+            "description": "Standard-KI-Modell für den automatisierten nächtlichen Gesamtlauf via Scheduled Task (lokales Ollama wie qwen3-coder:30b oder IONOS Cloud wie ionos:Qwen/Qwen3-Coder-Next)."
           },
           "sessionDashboard.audits.scheduledTaskName": {
             "type": "string",
