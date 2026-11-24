@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.109.2] – 24.11.2026
+
+- **Spürbar schnellere Aktualisierung bei Claude, Antigravity, Codex, Cline und Audits:** Unveränderte Transkripte und Session-Dateien werden zwischengespeichert statt alle paar Sekunden neu eingelesen, die Audit-Prozesssuche blockiert VS Code nicht mehr beim Start oder Tab-Wechsel, und Limit-Abfragen bei Verbindungsproblemen laufen vollständig im Hintergrund.
+
 ## [0.109.1] – 24.11.2026
 
 - **Deploys: Schrittzähler korrigiert:** Die Anzeige „x/y“ beim letzten Build zählt jetzt die abgeschlossenen Schritte des letzten Laufs. Gemeinsam genutzte Jobs wie killapps werden mitgezählt, und `killapps_stage` steht in der Reihenfolge direkt nach dem Stage-Deploy.

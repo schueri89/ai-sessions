@@ -1,7 +1,7 @@
 # Performance-Analyse AI Sessions
 
 **Stand:** 24.11.2026 · v0.108.0 (`d8c393c`)
-**Status:** Prio 2 + 4 umgesetzt in v0.108.1, übrige Punkte in `TODO.md`
+**Status:** Prio 2 + 4 umgesetzt in v0.108.1, Prio 1 + 3 + 5 + 7 umgesetzt in v0.109.2, übrige Punkte in `TODO.md`
 **Verlauf:** erste Analyse 11.11., Neufassung 19.11., Aktualisierung 24.11.
 
 ---
@@ -23,13 +23,13 @@
 
 | Prio | Maßnahme | Aufwand | Wirkung |
 |---|---|---|---|
-| 1 | Claude-Historie: Cache-Fehler beheben (B1) | 1 Zeile | Claude-Transkripte werden nicht mehr alle 5 s komplett neu gelesen |
+| 1 | ✅ *v0.109.2* Claude-Historie: Cache-Fehler beheben (B1) | 1 Zeile | gemessen (Zuhause, 489 Transkripte): 2.146 ms → 16,6 ms |
 | 2 | ✅ *v0.108.1* Copilot: leere Sessions mitcachen (B4) | wenige Zeilen | gemessen: Durchlauf 75–120 ms → ~10 ms |
-| 3 | Audits: PowerShell-Aufruf asynchron bzw. nur beim Start (B2) | klein | keine ~1,6-s-Hänger mehr beim Audits-Tab |
+| 3 | ✅ *v0.109.2* Audits: PowerShell-Aufruf asynchron bzw. nur beim Start (B2) | klein | gemessen: Start 16,9 ms, Reconcile 0,1 ms (keine ~1,6-s-Hänger) |
 | 4 | ✅ *v0.108.1* Copilot-CLI: beim Start ab dem letzten Prompt lesen (N1) | mittel | gemessen: CLI-Kaltstart 2,5 s → 0,36 s (177 MB) |
-| 5 | Antigravity/Codex/Cline + Antigravity-Quota mit Datei-Cache (B4, B5) | mittel | Last wächst nicht mehr mit der Zahl alter Sessions |
+| 5 | ✅ *v0.109.2* Antigravity/Codex/Cline + Antigravity-Quota mit Datei-Cache (B4, B5) | mittel | gemessen: Antigravity 203,9 ms → 56,2 ms, Quota 46,5 ms → 4,4 ms |
 | 6 | Büro-Ansicht auf 12–15 Bilder/s begrenzen (N2) | klein | Popout auf dem Zweitmonitor rendert nicht mehr dauerhaft mit 60 fps |
-| 7 | `curl.exe`-Fallback asynchron (B6) | klein | keine bis zu 5-s-Hänger, wenn die Quota-API nicht erreichbar ist |
+| 7 | ✅ *v0.109.2* `curl.exe`-Fallback asynchron (B6) | klein | keine bis zu 5-s-Hänger, wenn die Quota-API nicht erreichbar ist |
 
 ---
 
