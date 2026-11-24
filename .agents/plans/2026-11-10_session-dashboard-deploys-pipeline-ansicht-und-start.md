@@ -27,11 +27,16 @@ Verzweigungen, darunter je Lauf eine Zeile farbiger Kacheln.
   Nur für Pipelines aus Jenkins-Views; Ketten ohne View zeigen „Nicht ausgelöst“ ohne Button.
 - CSRF: Stapler prüft bei `@JavaScriptMethod` den Header `Crumb` unabhängig vom API-Token, daher vor jedem POST
   `crumbIssuer/api/json` holen und Session-Cookie mitsenden (Crumb ist an die Session gebunden).
-- Nach dem Auslösen: Watcher-Poll vorziehen (`JenkinsWatcher#nudge`), Webview klappt die Pipeline auf und lädt die Läufe.
+- Nach dem Auslösen: Watcher-Poll vorziehen (`JenkinsWatcher#nudge`, nach 2 s), danach alle 15 s, solange irgendein
+  Build läuft oder in der Queue steht (ohne feste Obergrenze). Die Pipeline wird nicht automatisch aufgeklappt;
+  ist sie bereits offen, werden ihre Läufe nach 2 s neu geladen.
 
 ## Webview
 
-- Aufgeklappte Pipeline = eine Detailzeile mit CSS-Grid (Spalte 1 Lauf-Label mit Parametern, je Baumtiefe eine Spalte).
+- Aufgeklappte Pipeline = eine Detailzeile mit transponiertem CSS-Grid: Kopfzeile = Läufe (neueste links, Label
+  mit Parametern), danach je Job eine Zeile (Baumreihenfolge, Verzweigungen eingerückt mit ↳). Spalten mit
+  `minmax(0, 1fr)` → feste Breite unabhängig von der Pipeline-Länge, kein horizontaler Scroll.
+- Spalte „Letzter Build“: Zeile 1 `#Nr · erreichter Schritt x/y · ⎇ Branch`, Zeile 2 `Start – Ende` (bzw. „läuft…“).
 - Kacheln: Status-Farbe über Theme-Variablen (`--vscode-testing-iconPassed` …), Laufzeit live, Fortschritt aus `estimatedDuration`.
 - Polling alle 5 s, solange ein Schritt läuft oder in der Queue steht; zusätzlich bei jedem Jobliste-Refresh.
 - Suche klappt nur noch bei ≤ 3 Treffern automatisch auf (jede Pipeline kostet mehrere Requests).

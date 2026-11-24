@@ -8,4 +8,3 @@ wieder leer.** Was dauerhaft festzuhalten ist, wandert vorher in `TODO.md` (Erle
 die Commit-Nachricht.
 
 ## Offene Rückmeldungen
-_Zurzeit nichts offen._

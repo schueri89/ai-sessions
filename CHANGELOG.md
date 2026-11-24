@@ -2,6 +2,12 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.108.0] – 20.11.2026
+
+- **Deploys: Pipeline-Ansicht ohne horizontales Scrollen:** Die aufgeklappte Pipeline zeigt die Jobs jetzt als Zeilen und die letzten Läufe als Spalten (neuester links), damit passt sie unabhängig von der Länge der Pipeline in die Breite.
+- **Deploys: „Letzter Build“ mit Phase und Zeitraum:** Die Spalte zeigt in der ersten Zeile Build-Nummer, erreichten Schritt (z. B. 3/5) und Branch, in der zweiten Zeile Start und Ende des Laufs.
+- **Deploys: Aktualisierung nach dem Start:** Nach „Starten“ klappt die Pipeline nicht mehr automatisch auf; die Liste aktualisiert sich nach 2 Sekunden und danach alle 15 Sekunden, solange ein Deploy läuft.
+
 ## [0.107.1] – 19.11.2026
 
 - **Releases: Vorgänge nach Status sortiert:** Die Vorgangsliste einer Lösungsversion ist jetzt nach Status geordnet – in derselben Reihenfolge wie im Tab „Meine Vorgänge“. Die Reihenfolge wird zentral über die Einstellung `sessionDashboard.releases.statusOrder` festgelegt und gilt für beide Ansichten (ersetzt `sessionDashboard.myIssues.statusOrder`; ein dort bereits angepasster Wert wird weiter übernommen).
