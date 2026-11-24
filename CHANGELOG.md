@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.109.1] – 24.11.2026
+
+- **Deploys: Schrittzähler korrigiert:** Die Anzeige „x/y“ beim letzten Build zählt jetzt die abgeschlossenen Schritte des letzten Laufs. Gemeinsam genutzte Jobs wie killapps werden mitgezählt, und `killapps_stage` steht in der Reihenfolge direkt nach dem Stage-Deploy.
+
 ## [0.109.0] – 24.11.2026
 
 - **Releases: Bearbeiter beim Status:** In der Vorgangsliste einer Lösungsversion steht unter dem Status jetzt in einer zweiten Zeile der Vorname der Person, bei der der Vorgang gerade liegt (vollständiger Name beim Darüberfahren).

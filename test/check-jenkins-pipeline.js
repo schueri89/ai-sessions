@@ -118,5 +118,9 @@ assert.strictEqual(chains.length, 1);
 assert.deepStrictEqual(chains[0].jobUrls, ['c_build', 'c_deploy', 'killapps'].map(U), 'chain must not pull in view jobs via shared killapps');
 console.log('✓ pipelines: chains do not merge view pipelines through shared jobs');
 
+const [ratingView] = buildPipelines(jobs, [view('rating', jobs.map((j) => j.name))]);
+assert.deepStrictEqual(ratingView.jobUrls, ['rating_build', 'rating_test', 'rating_stage', 'killapps_stage', 'rating_live', 'killapps_live'].map(U));
+console.log('✓ pipelines: dead-end jobs (killapps_stage) come before the continuing chain');
+
 Module.prototype.require = origRequire;
 console.log('All jenkins pipeline checks passed.');
