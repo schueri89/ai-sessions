@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.109.0] – 24.11.2026
+
+- **Releases: Bearbeiter beim Status:** In der Vorgangsliste einer Lösungsversion steht unter dem Status jetzt in einer zweiten Zeile der Vorname der Person, bei der der Vorgang gerade liegt (vollständiger Name beim Darüberfahren).
+
 ## [0.108.1] – 24.11.2026
 
 - **Schnellere Aktualisierung bei GitHub Copilot:** Die regelmäßige Aktualisierung der Copilot-Sessions belastet VS Code deutlich weniger, und Copilot-CLI-Sessions sind nach dem Start schneller geladen.

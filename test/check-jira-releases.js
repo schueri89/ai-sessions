@@ -86,6 +86,11 @@ const sortedIssues = [
 assert.deepStrictEqual(sortedIssues.map((i) => i.key), ['E-3', 'E-6', 'E-2', 'E-5', 'E-4', 'E-1'], 'configured order, then category; key order kept within a status');
 console.log('✓ compareByStatus (release issues sorted by configured status order)');
 
+const assigned = normalizeIssue({ key: 'E-7', fields: { status: { name: 'Offen' }, assignee: { displayName: 'Anna Beispiel' } } }, 'https://j', new Set(), 'customfield_10055');
+assert.strictEqual(assigned.assignee, 'Anna Beispiel', 'assignee display name taken from Jira');
+assert.strictEqual(relIssue('E-8', 'Offen', 'new').assignee, '', 'unassigned issue -> empty assignee');
+console.log('✓ normalizeIssue (assignee)');
+
 fetchReleases().then((data) => {
   assert.strictEqual(data.state, 'unconfigured', 'missing credentials file setting');
   console.log('✓ fetchReleases without credentials file -> unconfigured');
