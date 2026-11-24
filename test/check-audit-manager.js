@@ -130,8 +130,8 @@ const overview = manager.getAuditOverview();
 assert(overview && typeof overview === 'object', 'overview should be an object');
 assert(Array.isArray(overview.projects), 'overview.projects should be an array');
 assert(Array.isArray(overview.availableModels), 'overview should include availableModels');
-assert.strictEqual(overview.defaultModel, 'gemma4:e4b', 'defaultModel should be gemma4:e4b');
-assert(overview.availableModels.includes('gemma4:e4b'), 'availableModels should include gemma4:e4b');
+assert.strictEqual(overview.defaultModel, 'qwen3-coder:30b', 'defaultModel should be qwen3-coder:30b');
+assert(overview.availableModels.includes('qwen3-coder:30b'), 'availableModels should include qwen3-coder:30b');
 assert(overview.scheduledTask && typeof overview.scheduledTask === 'object', 'scheduledTask should be present');
 assert(typeof overview.scheduledTask.isRegistered === 'boolean', 'isRegistered should be a boolean');
 assert.strictEqual(overview.scheduledTask.taskName, 'DevBox-Nightly-Audit', 'taskName should match');
@@ -393,13 +393,13 @@ manager.dispatchAuditPrompt('antigravity', 'cf-shared', __filename).then((res) =
 
     // 14. Nightly Model & syncAuditConfig
     const nightlyModel = manager.getNightlyModel();
-    assert.strictEqual(nightlyModel, 'gemma4:e4b', 'getNightlyModel should default to gemma4:e4b in tests');
+    assert.strictEqual(nightlyModel, 'qwen3-coder:30b', 'getNightlyModel should default to qwen3-coder:30b in tests');
     manager.syncAuditConfig();
     const syncedState = manager.loadAuditState();
     assert(syncedState.config, 'synced state should contain config object');
-    assert.strictEqual(syncedState.config.nightly_model, 'gemma4:e4b', 'syncedState.config.nightly_model should match');
+    assert.strictEqual(syncedState.config.nightly_model, 'qwen3-coder:30b', 'syncedState.config.nightly_model should match');
     const scheduledTask = manager.getScheduledTask();
-    assert.strictEqual(scheduledTask.nightlyModel, 'gemma4:e4b', 'scheduledTask should include nightlyModel');
+    assert.strictEqual(scheduledTask.nightlyModel, 'qwen3-coder:30b', 'scheduledTask should include nightlyModel');
     console.log(`✓ Nightly Model (${nightlyModel}) and syncAuditConfig verified`);
 
     // 15. Progress Notification & Cancellation Hook

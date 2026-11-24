@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.109.3] – 24.11.2026
+
+- **Audits: Standardmodell wieder richtig vorausgewählt:** Beim Öffnen des Audits-Tabs ist jetzt direkt das eingestellte Standardmodell (`qwen3-coder:30b`) im Dropdown aktiv statt `gemma4:e4b`.
+
 ## [0.109.2] – 24.11.2026
 
 - **Spürbar schnellere Aktualisierung bei Claude, Antigravity, Codex, Cline und Audits:** Unveränderte Transkripte und Session-Dateien werden zwischengespeichert statt alle paar Sekunden neu eingelesen, die Audit-Prozesssuche blockiert VS Code nicht mehr beim Start oder Tab-Wechsel, und Limit-Abfragen bei Verbindungsproblemen laufen vollständig im Hintergrund.

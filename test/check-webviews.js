@@ -33,7 +33,13 @@ function testScriptSyntax(name, html) {
 // 1. BoardPanel
 const { BoardPanel } = require('../lib/boardPanel');
 const boardPanel = new BoardPanel({});
-testScriptSyntax('BoardPanel', boardPanel.html());
+const boardHtml = boardPanel.html();
+testScriptSyntax('BoardPanel', boardHtml);
+
+const assert = require('assert');
+assert(!/let auditsSelectedModel\s*=\s*['"]gemma4:e4b['"]/.test(boardHtml), 'auditsSelectedModel must not hardcode gemma4:e4b on init');
+assert(/<option value="qwen3-coder:30b" selected>/.test(boardHtml), 'audits-model-select initial option must default to qwen3-coder:30b');
+console.log('✓ [BoardPanel] Audits-Modellauswahl startet ohne gemma4:e4b-Vorbelegung');
 
 // 2. TranscriptViewerPanel
 const { TranscriptViewerPanel } = require('../lib/transcriptViewerPanel');
