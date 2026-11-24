@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.110.1] – 24.11.2026
+
+- **Audits: Passende Zusammenfassungen je Prüfbereich:** Kritische und hohe Befunde werden im Audits-Tab nicht mehr pauschal als „Kritische Sicherheitsfunde“ bezeichnet, sondern passend nach Bereich unterschieden (`Kritische Code-Befunde`, `Kritische Sicherheitsfunde`, `Kritische Performance-Bremsen` bzw. `Wichtige Code-Befunde`, `Hohe Sicherheitsrisiken`, `Hoher Optimierungsbedarf`).
+
 ## [0.110.0] – 24.11.2026
 
 - **Audits: IONOS Cloud-Modelle im Audits-Tab wählbar:** Im Modell-Dropdown unter „🛡️ Audits“ sowie für den nächtlichen Task stehen nun neben lokalem Ollama auch IONOS-Cloud-Modelle wie `IONOS · Qwen 3 Coder Next (Cloud)` bereit, inklusive passender Fehlererkennung bei API-Timeouts oder Verbindungsfehlern.

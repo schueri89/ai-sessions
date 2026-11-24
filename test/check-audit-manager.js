@@ -87,6 +87,18 @@ CRITICAL: SQL-Injection without cfqueryparam
 `;
 const statusErr = manager.parseReportStatus(sampleReportError);
 assert.strictEqual(statusErr.status, 'error', 'Status should be error');
+assert.strictEqual(statusErr.summary, 'Kritische Sicherheitsfunde', 'Security critical summary should mention Sicherheitsfunde');
+
+const sampleCodeCritReport = `
+# Code-Review Report: test-cr-crit
+Modus: \`review\` | Modell: \`gemma4:26b\`
+
+## 🔍 Code Review
+#### KRITISCH (ERROR): Stilles Verschlucken einer Exception
+`;
+const statusCodeCrit = manager.parseReportStatus(sampleCodeCritReport);
+assert.strictEqual(statusCodeCrit.status, 'error', 'Code review critical must map to error');
+assert.strictEqual(statusCodeCrit.summary, 'Kritische Code-Befunde', 'Code review critical summary must not say Sicherheitsfunde');
 
 // Test report with Handover Footer containing the word 'Kritisch'
 const sampleReportWithFooter = `
@@ -545,6 +557,7 @@ Modus: \`perf\` | Modell: \`gemma4:e4b\`
 `;
     const perfCritStatus = manager.parseReportStatus(samplePerfCritReport, Date.now());
     assert.strictEqual(perfCritStatus.status, 'error', 'KRITISCHE BREMSE must map to error status');
+    assert.strictEqual(perfCritStatus.summary, 'Kritische Performance-Bremsen', 'Perf critical summary must mention Performance-Bremsen');
     assert.strictEqual(perfCritStatus.mode, 'perf', 'Mode must be parsed as perf');
 
     const samplePerfWarnReport = `
