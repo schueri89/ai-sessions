@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.111.0] – 24.11.2026
+
+- **Logs: Automatisches Live-Nachladen im 1,5-Sekunden-Takt:** Solange der Tab „📜 Logs“ sichtbar geöffnet ist, lädt das Dashboard neue Zeilen des ausgewählten Logs automatisch alle 1,5 Sekunden nach, ohne die Task-Tabelle oder den Scroll-Zustand beim Nachlesen zu stören.
+
 ## [0.110.1] – 24.11.2026
 
 - **Audits: Passende Zusammenfassungen je Prüfbereich:** Kritische und hohe Befunde werden im Audits-Tab nicht mehr pauschal als „Kritische Sicherheitsfunde“ bezeichnet, sondern passend nach Bereich unterschieden (`Kritische Code-Befunde`, `Kritische Sicherheitsfunde`, `Kritische Performance-Bremsen` bzw. `Wichtige Code-Befunde`, `Hohe Sicherheitsrisiken`, `Hoher Optimierungsbedarf`).

@@ -61,12 +61,58 @@ for (const t of overview.tasks) {
   }
 }
 
-// 3. getLogContent test
+// 3. getLogContent & getLogStat test
 const logContent = manager.getLogContent('backup-sync.log');
 assert(logContent && typeof logContent === 'object', 'logContent should be an object');
 assert.strictEqual(logContent.name, 'backup-sync.log', 'Log name should match');
 assert(typeof logContent.content === 'string', 'Content should be a string');
-console.log(`✓ getLogContent returns valid content object for backup-sync.log (exists: ${logContent.exists})`);
+assert(typeof logContent.mtimeMs === 'number', 'mtimeMs should be numeric');
+assert(typeof logContent.sizeBytes === 'number', 'sizeBytes should be numeric');
+const logStat = manager.getLogStat('backup-sync.log');
+assert.strictEqual(logStat.exists, logContent.exists, 'getLogStat.exists should match getLogContent.exists');
+assert.strictEqual(logStat.sizeBytes, logContent.sizeBytes, 'getLogStat.sizeBytes should match getLogContent.sizeBytes');
+console.log(`✓ getLogContent & getLogStat verified for backup-sync.log (exists: ${logContent.exists})`);
+
+// 4. BoardPanel live log polling test (uses getLogStat/getLogContent without calling getOverview)
+const Module = require('module');
+const origRequire = Module.prototype.require;
+Module.prototype.require = function (id) {
+  if (id === 'vscode') {
+    return {
+      Uri: { joinPath: () => ({}) },
+      workspace: { getConfiguration: () => ({ get: () => '' }) }
+    };
+  }
+  return origRequire.apply(this, arguments);
+};
+const { BoardPanel } = require('../lib/boardPanel');
+const fakeModel = { providerFilter: 'all', projectFilter: 'all', sessions: [], quota: {} };
+const board = new BoardPanel(fakeModel);
+const postedMessages = [];
+let overviewCalls = 0;
+let tick = 1;
+board.panel = {
+  visible: true,
+  webview: { postMessage: (msg) => postedMessages.push(msg) }
+};
+board.viewMode = 'logs';
+board.activeLogName = 'live-test.log';
+board.tasksLogManager = {
+  getOverview: () => { overviewCalls++; return { tasks: [], logs: [] }; },
+  getLogStat: () => ({ name: 'live-test.log', exists: true, mtimeMs: tick * 1000, sizeBytes: 100 + tick }),
+  getLogContent: () => ({ name: 'live-test.log', exists: true, mtimeMs: tick * 1000, sizeBytes: 100 + tick, content: `line ${tick}` })
+};
+assert.strictEqual(board.pollActiveLogContent(), true, 'First pollActiveLogContent should emit logContentUpdate');
+assert.strictEqual(board.pollActiveLogContent(), false, 'Second poll with unchanged stat should skip postMessage');
+tick = 2;
+assert.strictEqual(board.pollActiveLogContent(), true, 'Poll after file change should emit logContentUpdate');
+assert.strictEqual(overviewCalls, 0, 'Live log polling must not trigger getOverview / schtasks');
+assert.strictEqual(postedMessages.length, 2, 'Two logContentUpdate messages expected');
+assert.strictEqual(postedMessages[1].type, 'logContentUpdate');
+assert.strictEqual(postedMessages[1].activeLog.content, 'line 2');
+board.viewMode = 'board';
+assert.strictEqual(board.pollActiveLogContent(), false, 'Poll must not run outside logs viewMode');
+console.log('✓ BoardPanel live log polling verified without schtasks overhead');
 
 assert.strictEqual(typeof manager.getFailedCount(), 'number', 'getFailedCount should return a number');
 assert.strictEqual(manager.getFailedCount(), overview.failedTasksCount, 'getFailedCount should match overview.failedTasksCount');
