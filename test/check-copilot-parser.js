@@ -1,7 +1,10 @@
 'use strict';
 
 const assert = require('assert');
-const { parseJsonlChatSession, applyCliEvent, newCliParseState } = require('../lib/providers/copilot');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { parseJsonlChatSession, applyCliEvent, newCliParseState, parseCliEvents, readJsonlSession } = require('../lib/providers/copilot');
 
 console.log('Testing Copilot JSONL chat session parser (splice & retry handling)...');
 
@@ -83,4 +86,57 @@ assert.deepStrictEqual(cli.tokens, { context: 1000, maxContext: 10000, percent: 
 feed('abort', { reason: 'user_initiated' });
 assert.strictEqual(cli.running, false, 'abort must end the request');
 console.log('✓ Copilot CLI events parser tests passed successfully.');
+
+// Test 5: Cold start seeds at the last prompt and matches a full parse
+console.log('Testing Copilot CLI cold-start seeding...');
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aisx-copilot-'));
+const evFile = path.join(tmpDir, 'events.jsonl');
+const ev = (type, data) => JSON.stringify({ type, data, timestamp: '2026-11-24T10:00:00.000Z' }) + '\n';
+const padding = ev('tool.execution_complete', { output: 'x'.repeat(300 * 1024) });
+fs.writeFileSync(evFile, [
+  ev('session.start', { startTime: '2026-11-24T09:00:00.000Z', selectedModel: 'claude-opus-5.5', context: { cwd: 'C:\\repo' } }),
+  ev('user.message', { content: 'first' }),
+  ev('session.usage_record', { usage: { model: 'claude-opus-5.5', inputTokens: 10, outputTokens: 1, maxPromptTokens: 100 } }),
+  padding,
+  ev('assistant.message', { content: 'ok', toolRequests: [] }),
+  ev('assistant.turn_end'),
+  ev('session.model_change', { newModel: 'claude-sonnet-5.5' }),
+  ev('user.message', { content: 'second' }),
+  ev('permission.requested', { requestId: 'r1' }),
+  padding
+].join(''));
+const seeded = parseCliEvents(evFile, fs.statSync(evFile).size);
+assert(seeded.offset > 300 * 1024, 'cold start must skip everything before the last prompt');
+assert.strictEqual(seeded.startedAt, Date.parse('2026-11-24T09:00:00.000Z'), 'start time comes from session.start');
+assert.strictEqual(seeded.contextCwd, 'C:\\repo');
+assert.strictEqual(seeded.model, 'claude-sonnet-5.5', 'model switch before the last prompt must be applied');
+assert.strictEqual(seeded.lastPrompt, 'second');
+assert.strictEqual(seeded.running, true);
+assert.strictEqual(seeded.pending.size, 1, 'open permission after the last prompt must be pending');
+fs.appendFileSync(evFile, ev('permission.completed', { requestId: 'r1' }) + ev('assistant.message', { content: 'done', toolRequests: [] }) + ev('assistant.turn_end'));
+const appended = parseCliEvents(evFile, fs.statSync(evFile).size);
+assert.strictEqual(appended.pending.size, 0, 'appended events are parsed incrementally');
+assert.strictEqual(appended.running, false);
+console.log('✓ Copilot CLI cold-start seeding tests passed successfully.');
+
+// Test 6: Empty chat files are cached and not re-read while unchanged
+console.log('Testing Copilot empty-chat cache...');
+const emptyChat = path.join(tmpDir, 'empty.jsonl');
+fs.writeFileSync(emptyChat, JSON.stringify({ kind: 0, v: { requests: [] } }) + '\n');
+const realRead = fs.readFileSync;
+let reads = 0;
+fs.readFileSync = (...args) => { if (args[0] === emptyChat) reads++; return realRead(...args); };
+try {
+  assert.strictEqual(readJsonlSession(emptyChat, 'empty', ''), null);
+  assert.strictEqual(readJsonlSession(emptyChat, 'empty', ''), null);
+  assert.strictEqual(reads, 1, 'unchanged empty chat must not be read again');
+  fs.appendFileSync(emptyChat, JSON.stringify({ kind: 2, k: ['requests'], v: [{ requestId: 'q', message: { text: 'hello' } }] }) + '\n');
+  const grown = readJsonlSession(emptyChat, 'empty', '');
+  assert.strictEqual(reads, 2, 'changed chat must be read again');
+  assert(grown && grown.lastPrompt === 'hello', 'chat with a prompt must appear after it changed');
+} finally {
+  fs.readFileSync = realRead;
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+}
+console.log('✓ Copilot empty-chat cache tests passed successfully.');
 

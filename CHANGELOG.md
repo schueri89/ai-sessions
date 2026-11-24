@@ -2,6 +2,10 @@
 
 Alle sichtbaren Änderungen an der VS-Code-Extension, neueste Version oben.
 
+## [0.108.1] – 24.11.2026
+
+- **Schnellere Aktualisierung bei GitHub Copilot:** Die regelmäßige Aktualisierung der Copilot-Sessions belastet VS Code deutlich weniger, und Copilot-CLI-Sessions sind nach dem Start schneller geladen.
+
 ## [0.108.0] – 20.11.2026
 
 - **Deploys: Pipeline-Ansicht ohne horizontales Scrollen:** Die aufgeklappte Pipeline zeigt die Jobs jetzt als Zeilen und die letzten Läufe als Spalten (neuester links), damit passt sie unabhängig von der Länge der Pipeline in die Breite.
