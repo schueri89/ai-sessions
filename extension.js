@@ -2,13 +2,14 @@
 
 const vscode = require('vscode');
 const fs = require('fs');
+const path = require('path');
 const { readSessions, watchTargets, getQuotaSummary } = require('./lib/registry');
 const { DoneStore } = require('./lib/doneStore');
 const { BookmarkStore } = require('./lib/bookmarkStore');
 const { TicketStore, detectTicket, buildJiraUrl } = require('./lib/ticketStore');
 const { ProjectStore } = require('./lib/projectStore');
 const { getKnownSubfolders, displayProjectName } = require('./lib/project');
-const { resolveAgentHostSessionUri } = require('./lib/providers/copilot');
+const { resolveAgentHostSessionUri, setChatCacheFile } = require('./lib/providers/copilot');
 const { SessionTreeProvider } = require('./lib/treeView');
 const { BoardPanel } = require('./lib/boardPanel');
 const { OfficePanel } = require('./lib/officePanel');
@@ -641,6 +642,7 @@ async function openSession(info) {
 }
 
 function activate(context) {
+  setChatCacheFile(path.join(context.globalStorageUri.fsPath, 'copilot-chat-cache.json'));
   setCopilotTokenProvider(async () => {
     const auth = resolveGitHubAuth();
     if (auth.error) {

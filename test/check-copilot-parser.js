@@ -140,3 +140,61 @@ try {
 }
 console.log('✓ Copilot empty-chat cache tests passed successfully.');
 
+
+// Test 7: Parsed chats are persisted, so a fresh start does not re-read unchanged chat files
+console.log('Testing Copilot persistent chat cache...');
+const cacheRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'aisx-chatcache-'));
+const csDir = path.join(cacheRoot, 'Code', 'User', 'workspaceStorage', 'h1', 'chatSessions');
+fs.mkdirSync(csDir, { recursive: true });
+const chatFile = path.join(csDir, 'c1.jsonl');
+const cacheFile = path.join(cacheRoot, 'cache.json');
+fs.writeFileSync(chatFile, [
+  { kind: 0, v: { requests: [] } },
+  { kind: 2, k: ['requests'], v: [{ requestId: 'r1', message: { text: 'persist me' }, modelState: { value: 1, completedAt: 1 } }] }
+].map((o) => JSON.stringify(o)).join('\n') + '\n');
+const envBackup = { APPDATA: process.env.APPDATA, USERPROFILE: process.env.USERPROFILE, HOME: process.env.HOME };
+process.env.APPDATA = cacheRoot;
+process.env.USERPROFILE = cacheRoot;
+process.env.HOME = cacheRoot;
+const providerPath = require.resolve('../lib/providers/copilot');
+const freshProvider = () => {
+  delete require.cache[providerPath];
+  const p = require(providerPath);
+  p.setChatCacheFile(cacheFile);
+  return p;
+};
+let chatReads = 0;
+fs.readFileSync = (...args) => { if (args[0] === chatFile) chatReads++; return realRead(...args); };
+(async () => {
+  try {
+    const first = await freshProvider().readSessions({});
+    assert.strictEqual(first.length, 1);
+    assert.strictEqual(chatReads, 1);
+    assert(fs.existsSync(cacheFile), 'cache file must be written');
+
+    const restarted = freshProvider();
+    const second = await restarted.readSessions({});
+    assert.strictEqual(chatReads, 1, 'unchanged chat must come from the persisted cache after a restart');
+    assert.strictEqual(second[0].lastPrompt, 'persist me');
+
+    fs.appendFileSync(chatFile, JSON.stringify({ kind: 2, k: ['requests'], v: [{ requestId: 'r2', message: { text: 'changed' } }] }) + '\n');
+    const third = await restarted.readSessions({});
+    assert.strictEqual(chatReads, 2, 'changed chat must be read again');
+    assert.strictEqual(third[0].lastPrompt, 'changed');
+
+    fs.rmSync(chatFile);
+    await restarted.readSessions({});
+    assert.deepStrictEqual(JSON.parse(realRead(cacheFile, 'utf8')).entries, {}, 'deleted chats must be dropped from the cache');
+    console.log('✓ Copilot persistent chat cache tests passed successfully.');
+  } finally {
+    fs.readFileSync = realRead;
+    for (const [k, v] of Object.entries(envBackup)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+    fs.rmSync(cacheRoot, { recursive: true, force: true });
+  }
+})().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
